@@ -1,0 +1,217 @@
+var express = require('express');
+
+var mdAutenticacion = require('../middlewares/autenticacion');
+
+var app = express();
+
+var Transportista = require('../models/transportista');
+
+// ==========================================
+// Obtener todos los transportistas
+// ==========================================
+app.get('/', (req, res, next) => {
+
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+    var role = 'TRANSPORTISTA_ROLE';
+
+    Transportista.find({ role: role })
+        .skip(desde)
+        .limit(5)
+        .populate('usuarioAlta', 'nombre email')
+        .populate('usuarioMod', 'nombre email')
+        .exec(
+            (err, transportista) => {
+
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al cargar transportistas',
+                        errors: err
+                    });
+                }
+                Transportista.countDocuments({ role: role }, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        transportista: transportista,
+                        total: conteo
+                    });
+                });
+            });
+});
+
+// ==========================================
+// Obtener transportistas por ID
+// ==========================================
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+    Transportista.findById(id)
+        .populate('usuarioAlta', 'nombre img email')
+        .populate('usuarioMod', 'nombre img email')
+        .exec((err, transportista) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar transportista',
+                    errors: err
+                });
+            }
+            if (!transportista) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'La transportista con el id ' + id + 'no existe',
+                    errors: { message: 'No existe un transportista con ese ID' }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                transportista: transportista
+            });
+        });
+});
+
+
+// ==========================================
+// Crear nuevas transportista
+// ==========================================
+app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+
+    var body = req.body;
+
+    var transportista = new Transportista({
+        rfc: body.rfc,
+        razonSocial: body.razonSocial,
+        nombreComercial: body.nombreComercial,
+        calle: body.calle,
+        noExterior: body.noExterior,
+        noInterior: body.noInterior,
+        colonia: body.colonia,
+        municipio: body.municipio,
+        ciudad: body.ciudad,
+        estado: body.estado,
+        cp: body.cp,
+        formatoR1:  body.formatoR1,
+        correo: body.correo,
+        correoFac: body.correoFac,
+        credito: body.credito,
+        usuarioAlta: req.usuario._id
+    });
+
+    transportista.save((err, transportistaGuardado) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al crear Transportista',
+                errors: err
+            });
+        }
+
+        res.status(201).json({
+            ok: true,
+            transportista: transportistaGuardado
+        });
+
+
+    });
+
+});
+
+// ==========================================
+// Actualizar transportista
+// ==========================================
+app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+
+    var id = req.params.id;
+    var body = req.body;
+    Transportista.findById(id, (err, transportista) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar transportista',
+                errors: err
+            });
+        }
+        if (!transportista) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El transportista con el id ' + id + ' no existe',
+                errors: { message: 'No existe transportista con ese ID' }
+            });
+        }
+        transportista.rfc = body.rfc;
+        transportista.razonSocial = body.razonSocial;
+        transportista.nombreComercial = body.nombreComercial;
+        transportista.calle = body.calle;
+        transportista.noExterior = body.noExterior;
+        transportista.noInterior = body.noInterior;
+        transportista.colonia = body.colonia;
+        transportista.municipio = body.municipio;
+        transportista.ciudad = body.ciudad;
+        transportista.estado = body.estado;
+        transportista.cp = body.cp;
+        transportista.formatoR1 = body.formatoR1;
+        transportista.img = body.img;
+        transportista.correo = body.correo;
+        transportista.correoFac = body.correoFac;
+        transportista.credito = body.credito;
+        transportista.usuarioMod = req.usuario._id;
+        transportista.fMod = new Date();
+
+        transportista.save((err, transportistaGuardado) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar transportista',
+                    errors: err
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                transportista: transportistaGuardado
+            });
+
+        });
+
+    });
+
+});
+
+
+
+
+// ============================================
+//   Borrar transportistas por el id
+// ============================================
+app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+
+    var id = req.params.id;
+
+    Transportista.findByIdAndRemove(id, (err, transportistaBorrado) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar transportista',
+                errors: err
+            });
+        }
+        if (!transportistaBorrado) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe transportista con ese id',
+                errors: { message: 'No existe transportista con ese id' }
+            });
+        }
+        res.status(200).json({
+            ok: true,
+            transportista: transportistaBorrado
+        });
+
+    });
+
+});
+
+
+module.exports = app;
