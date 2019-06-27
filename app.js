@@ -72,7 +72,7 @@ mongoose.connection.on('error', (error) => {
 });
 
 const run = async() => {
-    await mongoose.connect('mongodb://myDbAdmin:reim*0348@192.168.2.253:27017/reim', {
+    await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
         autoReconnect: true,
         reconnectTries: 1000000,
         reconnectInterval: 3000,
