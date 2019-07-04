@@ -27,7 +27,7 @@ app.use(bodyParser.json())
 var appRoutes = require('./routes/app');
 var uploadRoutes = require('./routes/upload');
 var dropzoneRoutes = require('./routes/dropzone');
-var usuarioRoutes = require('./routes/usuario');
+var usuariosRoutes = require('./routes/usuarios');
 var loginRoutes = require('./routes/login');
 var imagenesRoutes = require('./routes/imagenes');
 var maniobraRoutes = require('./routes/maniobra');
@@ -111,7 +111,7 @@ app.use('/maniobra', maniobraRoutes);
 app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);
 app.use('/upload', uploadRoutes);
-app.use('/usuario', usuarioRoutes);
+app.use('/usuarios', usuariosRoutes); //ANGELUS
 app.use('/login', loginRoutes);
 app.use('/', appRoutes);
 

@@ -78,7 +78,7 @@ app.post('/', (req, res) => {
                 template: 'forgot-password-email',
                 subject: '¡MyT Restablecimiento de contraseña!',
                 context: {
-                    url: 'http://192.168.2.253:3000/reset_password?token=' + token,
+                    url: 'http://localhost:3000/reset_password?token=' + token,
                     name: user.nombre.split(' ')[0]
                 }
             };

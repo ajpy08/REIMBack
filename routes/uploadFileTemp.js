@@ -11,7 +11,7 @@ var app = express();
 app.use(fileUpload());
 
 app.put('/', (req, res) => {
-
+    console.log(req.files);
     if (!req.files) {
         return res.status(400).json({
             ok: false,
