@@ -19,7 +19,7 @@ app.get('/', (req, res, netx) => {
     Usuario.find({}, 'nombre email img role empresas')
         .skip(desde)
         .populate('empresas', 'razonSocial')
-        .limit(3)
+        .limit(10)
         .exec(
             (err, usuarios) => {
                 if (err) {
@@ -61,8 +61,7 @@ app.get('/:id', (req, res) => {
                 });
             }
             res.status(200).json({
-                ok: true,
-                usuario: usuario
+                usuario
             });
         });
 });
@@ -135,7 +134,8 @@ app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_
         usuario.email = body.email;
         //usuario.role = body.role;
         //usuario.password = body.password;
-        usuario.empresas = body.empresas;
+        if (body.empresas)
+            usuario.empresas = body.empresas;
         usuario.usuarioMod = req.usuario._id;
         usuario.fMod = new Date();
 

@@ -1,5 +1,6 @@
 // Requires
 var express = require('express');
+var mdAutenticacion = require('../middlewares/autenticacion');
 
 // Inicializar variables
 var app = express();
@@ -91,6 +92,46 @@ app.post('/', (req, res, next) => {
         }
     });
 });
+
+app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+    console.log(body);
+    console.log(id);
+    Usuario.findById(id, (err, usuario) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar usuario',
+                errors: err
+            });
+        }
+        if (!usuario) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El usuario con el id ' + id + ' no existe',
+                errors: { message: 'No existe un usuario con ese ID' }
+            });
+        }
+        usuario.password =  bcrypt.hashSync(body.password, 10),
+        usuario.save((err, usuarioGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al cambiar la contraseña',
+                    errors: err
+                });
+            }
+            usuarioGuardado.password = '=)';
+            res.status(200).json({
+                ok: true,
+                mensaje: 'Contraseña Actualizada con éxito',
+                usuario: usuarioGuardado
+            });
+        });
+    });
+});
+
 
 // export
 module.exports = app;
