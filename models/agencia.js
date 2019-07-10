@@ -11,7 +11,7 @@ var rolesValidos = {
 var aaSchema = new Schema({
     razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesario'] },
     nombreComercial: { type: String, requiered: [true, 'EL nombre comercial es necesaria'] },
-    rfc: { type: String, unique: true, required: [true, 'El RFC es muy necesario'] },
+    rfc: { type: String, unique: true, required: [true, 'El RFC es necesario'] },
     calle: { type: String, requiered: [true, 'La calle es necesaria'] },
     noExterior: { type: String, required: [true, 'El numero exterior es necesario'] },
     noInterior: { type: String, required: false },

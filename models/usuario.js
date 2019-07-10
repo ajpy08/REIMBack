@@ -9,7 +9,6 @@ var rolesValidos = {
 };
 
 var usuarioSchema = new Schema({
-
     nombre: { type: String, required: [true, 'El nombre es necesario'] },
     email: { type: String, unique: true, required: [true, 'El correo es necesario'] },
     password: { type: String, required: [true, 'La contraseña es necesario'] },
@@ -19,6 +18,10 @@ var usuarioSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Cliente'
     }],
+    usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fAlta: { type: Date, default: Date.now },
+    usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fMod: { type: Date },
     reset_password_token: { type: String },
     reset_password_expires: { type: Date }
 }, { collection: 'usuarios' });
