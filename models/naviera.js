@@ -23,10 +23,13 @@ var navieraSchema = new Schema({
     correoFac: { type: String, requiered: [true, 'El correo de facturación es necesaria'] },
     credito: { type: String, requiered: [true, 'EL credito es necesaria'] },
     img: { type: String, required: false },
-    patente: { type: String, requiered: [true, 'La patente es necesaria'] },
+    caat: { type: String, requiered: [true, 'El CAAT es necesario'] },
     nombreComercial: { type: String, requiered: [true, 'EL nombre comercial es necesaria'] },
     role: { type: String, required: true, default: 'NAVIERA_ROLE', enum: rolesValidos },
-    usuario: { type: Schema.Types.ObjectId, ref: 'Usuario' }
+    usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fAlta: { type: Date, default: Date.now },
+    usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fMod: { type: Date },
 }, { collection: 'clientes' });
 
 navieraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })

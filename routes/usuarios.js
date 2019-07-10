@@ -1,14 +1,13 @@
 // Requires
 var express = require('express');
+var mdAutenticacion = require('../middlewares/autenticacion');
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var jwt = require('jsonwebtoken');
-var mdAutenticacion = require('../middlewares/autenticacion');
+var Usuario = require('../models/usuario');
 
 // Inicializar variables
 var app = express();
-
-var Usuario = require('../models/usuario');
 
 // =======================================
 // Obtener Usuarios
@@ -32,7 +31,7 @@ app.get('/', (req, res, netx) => {
                 Usuario.countDocuments({}, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        usuarios,
+                        usuarios: usuarios,
                         total: conteo
                     });
                 });
@@ -61,7 +60,7 @@ app.get('/:id', (req, res) => {
                 });
             }
             res.status(200).json({
-                usuario
+                usuario: usuario
             });
         });
 });
@@ -88,8 +87,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         fs.rename('./uploads/temp/' + usuario.img, './uploads/usuarios/' + usuario.img, (err) => {
             if (err) { console.log(err); }
         });
-      }
-
+    }
     usuario.save((err, usuarioGuardado) => {
         if (err) {
             return res.status(400).json({
@@ -139,18 +137,17 @@ app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_
         usuario.usuarioMod = req.usuario._id;
         usuario.fMod = new Date();
 
-        if (usuario.img!=body.img)
-        {
+        if (usuario.img != body.img) {
             if (fs.existsSync('./uploads/temp/' + body.img)) {
-                fs.unlink( './uploads/usuarios/' + usuario.img, (err) => {
-                    if (err) console.log (err);
+                fs.unlink('./uploads/usuarios/' + usuario.img, (err) => {
+                    if (err) console.log(err);
                     else
-                    console.log('path/file.txt was deleted');
-                  });
+                        console.log('path/file.txt was deleted');
+                });
                 fs.rename('./uploads/temp/' + body.img, './uploads/usuarios/' + body.img, (err) => {
                     if (err) { console.log(err); }
                 });
-              }
+            }
             usuario.img = body.img;
         }
         usuario.save((err, usuarioGuardado) => {
