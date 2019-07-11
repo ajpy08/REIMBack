@@ -1,27 +1,23 @@
 var express = require('express');
-
 var mdAutenticacion = require('../middlewares/autenticacion');
-
-var app = express();
-
 var Transportista = require('../models/transportista');
+var fs = require('fs');
+var app = express();
 
 // ==========================================
 // Obtener todos los transportistas
 // ==========================================
 app.get('/', (req, res, next) => {
-
     var desde = req.query.desde || 0;
     desde = Number(desde);
     var role = 'TRANSPORTISTA_ROLE';
-
     Transportista.find({ role: role })
         .skip(desde)
-        .limit(5)
+        .limit(10)
         .populate('usuarioAlta', 'nombre email')
         .populate('usuarioMod', 'nombre email')
         .exec(
-            (err, transportista) => {
+            (err, transportistas) => {
 
                 if (err) {
                     return res.status(500).json({
@@ -33,7 +29,7 @@ app.get('/', (req, res, next) => {
                 Transportista.countDocuments({ role: role }, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        transportista: transportista,
+                        transportistas: transportistas,
                         total: conteo
                     });
                 });
@@ -72,12 +68,10 @@ app.get('/:id', (req, res) => {
 
 
 // ==========================================
-// Crear nuevas transportista
+// Crear nuevo transportista
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
     var body = req.body;
-
     var transportista = new Transportista({
         rfc: body.rfc,
         razonSocial: body.razonSocial,
@@ -90,15 +84,27 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         ciudad: body.ciudad,
         estado: body.estado,
         cp: body.cp,
-        formatoR1:  body.formatoR1,
+        formatoR1: body.formatoR1,
         correo: body.correo,
         correoFac: body.correoFac,
         credito: body.credito,
+        caat: body.caat,
+        img: body.img,
         usuarioAlta: req.usuario._id
     });
 
-    transportista.save((err, transportistaGuardado) => {
+    if (transportista.img!='' && fs.existsSync('./uploads/temp/' + transportista.img)) {
+        fs.rename('./uploads/temp/' + transportista.img, './uploads/clientes/' + transportista.img, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+    if (transportista.formatoR1!='' && fs.existsSync('./uploads/temp/' + transportista.formatoR1)) {
+        fs.rename('./uploads/temp/' + transportista.formatoR1, './uploads/clientes/' + transportista.formatoR1, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
 
+    transportista.save((err, transportistaGuardado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -106,15 +112,12 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         res.status(201).json({
             ok: true,
+            mensaje: 'Transportista Creado Con éxito.',
             transportista: transportistaGuardado
         });
-
-
     });
-
 });
 
 // ==========================================
@@ -150,16 +153,40 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         transportista.ciudad = body.ciudad;
         transportista.estado = body.estado;
         transportista.cp = body.cp;
-        transportista.formatoR1 = body.formatoR1;
-        transportista.img = body.img;
         transportista.correo = body.correo;
         transportista.correoFac = body.correoFac;
         transportista.credito = body.credito;
+        transportista.caat = body.caat;
         transportista.usuarioMod = req.usuario._id;
         transportista.fMod = new Date();
 
+        if (transportista.img != body.img) {
+            if (fs.existsSync('./uploads/temp/' + body.img)) {
+                fs.unlink('./uploads/clientes/' + transportista.img, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            transportista.img = body.img;
+        }
+        if (transportista.formatoR1 != body.formatoR1) {
+            if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
+                fs.unlink('./uploads/clientes/' + transportista.formatoR1, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            transportista.formatoR1 = body.formatoR1;
+        }
         transportista.save((err, transportistaGuardado) => {
-
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -167,28 +194,20 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                     errors: err
                 });
             }
-
             res.status(200).json({
                 ok: true,
                 transportista: transportistaGuardado
             });
-
         });
-
     });
-
 });
-
-
 
 
 // ============================================
 //   Borrar transportistas por el id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
-
     Transportista.findByIdAndRemove(id, (err, transportistaBorrado) => {
         if (err) {
             return res.status(500).json({
