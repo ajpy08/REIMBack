@@ -1,7 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Naviera = require('../models/naviera');
-
+var fs = require('fs');
 var app = express();
 
 
@@ -70,7 +70,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var naviera = new Naviera({
         razonSocial: body.razonSocial,
         rfc: body.rfc,
-        calle: body.calle,
+        calle: body.calle ,
         numeroExterior: body.numeroExterior,
         numeroInterior: body.numeroInterior,
         colonia: body.colonia,
@@ -78,13 +78,27 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         ciudad: body.ciudad,
         estado: body.estado,
         cp: body.cp,
+        formatoR1: body.formatoR1,
         correo: body.correo,
         correoFac: body.correoFac,
         credito: body.credito,
-        caat: body.patente,
+        caat: body.caat,
+        img: body.img,
         nombreComercial: body.nombreComercial,
         usuarioAlta: req.usuario._id
     });
+
+    if (naviera.img!='' && fs.existsSync('./uploads/temp/' + naviera.img)) {
+        fs.rename('./uploads/temp/' + naviera.img, './uploads/clientes/' + naviera.img, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+    if (naviera.formatoR1!='' && fs.existsSync('./uploads/temp/' + naviera.formatoR1)) {
+        fs.rename('./uploads/temp/' + naviera.formatoR1, './uploads/clientes/' + naviera.formatoR1, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+
     naviera.save((err, navieraGuardado) => {
         if (err) {
             return res.status(400).json({
@@ -95,6 +109,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         }
         res.status(201).json({
             ok: true,
+            mensaje: 'Naviera Creada Con éxito.',
             naviera: navieraGuardado
         });
 
@@ -143,11 +158,36 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         naviera.correo = body.correo;
         naviera.correoFac = body.correoFac;
         naviera.credito = body.credito;
-        naviera.caat = body.patente;
+        naviera.caat = body.caat;
         naviera.nombreComercial = body.nombreComercial;
         naviera.usuarioMod = req.usuario._id;
         naviera.fMod = new Date();
-
+        if (naviera.img != body.img) {
+            if (fs.existsSync('./uploads/temp/' + body.img)) {
+                fs.unlink('./uploads/clientes/' + naviera.img, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            naviera.img = body.img;
+        }
+        if (naviera.formatoR1 != body.formatoR1) {
+            if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
+                fs.unlink('./uploads/clientes/' + naviera.formatoR1, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            naviera.formatoR1 = body.formatoR1;
+        }
 
         naviera.save((err, navieraGuardado) => {
 
@@ -171,19 +211,12 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 
-
-
-
-
 // ============================================
 //   Borrar navieras por el id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
-
     Naviera.findByIdAndRemove(id, (err, navieraBorrado) => {
-
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -191,7 +224,6 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         if (!navieraBorrado) {
             return res.status(400).json({
                 ok: false,
@@ -199,14 +231,11 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe naviera con ese id' }
             });
         }
-
         res.status(200).json({
             ok: true,
             naviera: navieraBorrado
         });
-
     });
-
 });
 
 
