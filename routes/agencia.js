@@ -1,26 +1,21 @@
 var express = require('express');
-
 var mdAutenticacion = require('../middlewares/autenticacion');
-
-var app = express();
-
 var Agencia = require('../models/agencia');
+var fs = require('fs');
+var app = express();
 
 // ==========================================
 // Obtener todas las agencias aduanales
 // ==========================================
 app.get('/', (req, res, next) => {
-
     var desde = req.query.desde || 0;
     desde = Number(desde);
     var role = 'AA_ROLE';
     Agencia.find({ role: role })
         .skip(desde)
-        .limit(5)
-        .populate('UsuarioAlta', 'nombre email')
+        .limit(10)
         .exec(
-            (err, agencia) => {
-
+            (err, agencias) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
@@ -28,16 +23,13 @@ app.get('/', (req, res, next) => {
                         errors: err
                     });
                 }
-
                 Agencia.countDocuments({ role: role }, (err, conteo) => {
-
                     res.status(200).json({
                         ok: true,
-                        agencia: agencia,
+                        agencias: agencias,
                         total: conteo
                     });
                 });
-
             });
 });
 
@@ -45,12 +37,10 @@ app.get('/', (req, res, next) => {
 //  Obtener Agencias por ID
 // ==========================================
 app.get('/:id', (req, res) => {
-
     var id = req.params.id;
-
     Agencia.findById(id)
-        .populate('clientes', 'razonSocial')
-        .populate('usuario', 'nombre email')
+        // // .populate('clientes', 'razonSocial')
+        // .populate('usuario', 'nombre email')
         .exec((err, agencia) => {
             if (err) {
                 return res.status(500).json({
@@ -59,7 +49,6 @@ app.get('/:id', (req, res) => {
                     errors: err
                 });
             }
-
             if (!agencia) {
                 return res.status(400).json({
                     ok: false,
@@ -79,11 +68,9 @@ app.get('/:id', (req, res) => {
 //  Obtener Agencias por ID de usuario
 // ==========================================
 app.get('/usuario/:id', (req, res) => {
-
     var id = req.params.id;
-
     Agencia.find({ usuarios: id })
-        .populate('usuario', 'nombre img email')
+        .populate('usuarioAlta', 'nombre img email')
         .exec((err, agencia) => {
             if (err) {
                 return res.status(500).json({
@@ -92,7 +79,6 @@ app.get('/usuario/:id', (req, res) => {
                     errors: err
                 });
             }
-
             if (!agencia) {
                 return res.status(400).json({
                     ok: false,
@@ -107,6 +93,59 @@ app.get('/usuario/:id', (req, res) => {
         });
 });
 
+// ==========================================
+// Crear nueva Agencia
+// ==========================================
+app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+    var body = req.body;
+    var agencia = new Agencia({
+        rfc: body.rfc,
+        razonSocial: body.razonSocial,
+        nombreComercial: body.nombreComercial,
+        calle: body.calle,
+        noExterior: body.noExterior,
+        noInterior: body.noInterior,
+        colonia: body.colonia,
+        municipio: body.municipio,
+        ciudad: body.ciudad,
+        estado: body.estado,
+        cp: body.cp,
+        formatoR1: body.formatoR1,
+        correo: body.correo,
+        correoFac: body.correoFac,
+        credito: body.credito,
+        patente: body.patente,
+        img: body.img,
+        usuarioAlta: req.usuario._id
+    });
+
+    if (agencia.img != '' && fs.existsSync('./uploads/temp/' + agencia.img)) {
+        fs.rename('./uploads/temp/' + agencia.img, './uploads/clientes/' + agencia.img, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+    if (agencia.formatoR1 != '' && fs.existsSync('./uploads/temp/' + agencia.formatoR1)) {
+        fs.rename('./uploads/temp/' + agencia.formatoR1, './uploads/clientes/' + agencia.formatoR1, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+
+    agencia.save((err, agenciaGuardado) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al crear agencia',
+                errors: err
+            });
+        }
+        res.status(201).json({
+            ok: true,
+            mensaje: 'Agencia creada con éxito.',
+            agencia: agenciaGuardado
+        });
+    });
+});
+
 
 // ==========================================
 // Actualizar Agencias
@@ -115,10 +154,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     var id = req.params.id;
     var body = req.body;
-
     Agencia.findById(id, (err, agencia) => {
-
-
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -126,7 +162,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         if (!agencia) {
             return res.status(400).json({
                 ok: false,
@@ -152,8 +187,33 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         agencia.usuarioMod = req.usuario._id;
         agencia.fMod = new Date();
 
+        if (agencia.img != body.img) {
+            if (fs.existsSync('./uploads/temp/' + body.img)) {
+                fs.unlink('./uploads/clientes/' + agencia.img, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            agencia.img = body.img;
+        }
+        if (agencia.formatoR1 != body.formatoR1) {
+            if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
+                fs.unlink('./uploads/clientes/' + agencia.formatoR1, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            agencia.formatoR1 = body.formatoR1;
+        }
         agencia.save((err, agenciaGuardado) => {
-
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -161,76 +221,22 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                     errors: err
                 });
             }
-
             res.status(200).json({
                 ok: true,
+                mensaje: 'Agencia actualizada con exito',
                 agencia: agenciaGuardado
             });
-
         });
-
     });
-
-});
-
-
-
-// ==========================================
-// Crear nuevos clientes
-// ==========================================
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
-    var body = req.body;
-
-    var agencia = new Agencia({
-        rfc: body.rfc,
-        razonSocial: body.razonSocial,
-        nombreComercial: body.nombreComercial,
-        calle: body.calle,
-        noExterior: body.noExterior,
-        noInterior: body.noInterior,
-        colonia: body.colonia,
-        municipio: body.municipio,
-        ciudad: body.ciudad,
-        estado: body.estado,
-        cp: body.cp,
-        correo: body.correo,
-        correoFac: body.correoFac,
-        credito: body.credito,
-        patente: body.patente,
-        usuarioAlta: req.usuario._id
-    });
-
-    agencia.save((err, agenciaGuardado) => {
-
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al crear agencia',
-                errors: err
-            });
-        }
-
-        res.status(201).json({
-            ok: true,
-            agencia: agenciaGuardado
-        });
-
-
-    });
-
 });
 
 
 // ============================================
-//   Borrar agencias por el id
+//   Borrar agencia por id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
-
     Agencia.findByIdAndRemove(id, (err, agenciaBorrado) => {
-
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -238,7 +244,6 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         if (!agenciaBorrado) {
             return res.status(400).json({
                 ok: false,
@@ -246,15 +251,11 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe agencia con ese id' }
             });
         }
-
         res.status(200).json({
             ok: true,
             agencia: agenciaBorrado
         });
-
     });
-
 });
-
 
 module.exports = app;

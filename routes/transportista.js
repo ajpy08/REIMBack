@@ -14,11 +14,8 @@ app.get('/', (req, res, next) => {
     Transportista.find({ role: role })
         .skip(desde)
         .limit(10)
-        .populate('usuarioAlta', 'nombre email')
-        .populate('usuarioMod', 'nombre email')
         .exec(
             (err, transportistas) => {
-
                 if (err) {
                     return res.status(500).json({
                         ok: false,
@@ -93,12 +90,12 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         usuarioAlta: req.usuario._id
     });
 
-    if (transportista.img!='' && fs.existsSync('./uploads/temp/' + transportista.img)) {
+    if (transportista.img != '' && fs.existsSync('./uploads/temp/' + transportista.img)) {
         fs.rename('./uploads/temp/' + transportista.img, './uploads/clientes/' + transportista.img, (err) => {
             if (err) { console.log(err); }
         });
     }
-    if (transportista.formatoR1!='' && fs.existsSync('./uploads/temp/' + transportista.formatoR1)) {
+    if (transportista.formatoR1 != '' && fs.existsSync('./uploads/temp/' + transportista.formatoR1)) {
         fs.rename('./uploads/temp/' + transportista.formatoR1, './uploads/clientes/' + transportista.formatoR1, (err) => {
             if (err) { console.log(err); }
         });
@@ -196,6 +193,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             }
             res.status(200).json({
                 ok: true,
+                mensaje: 'Transportista actualizado con exito',
                 transportista: transportistaGuardado
             });
         });
