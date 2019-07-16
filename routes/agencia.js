@@ -45,7 +45,7 @@ app.get('/:id', (req, res) => {
             if (err) {
                 return res.status(500).json({
                     ok: false,
-                    mensaje: 'Error al buscar agencias',
+                    mensaje: 'Error al buscar agencia',
                     errors: err
                 });
             }
@@ -151,7 +151,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 // Actualizar Agencias
 // ==========================================
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
     var body = req.body;
     Agencia.findById(id, (err, agencia) => {
@@ -253,6 +252,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
         res.status(200).json({
             ok: true,
+            mensaje: 'Agencia borrada con exito',
             agencia: agenciaBorrado
         });
     });

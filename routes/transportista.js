@@ -89,6 +89,9 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         img: body.img,
         usuarioAlta: req.usuario._id
     });
+    
+    console.log(req)
+    //console.log(req.usuario);
 
     if (transportista.img != '' && fs.existsSync('./uploads/temp/' + transportista.img)) {
         fs.rename('./uploads/temp/' + transportista.img, './uploads/clientes/' + transportista.img, (err) => {
