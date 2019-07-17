@@ -42,7 +42,7 @@ app.put('/', mdAutenticacion.verificaToken, (req, res) => {
 
     // Nombre de archivo personalizado
     // 12312312312-123.png
-    var nombreArchivo = `${ new Date().getMilliseconds() }.${ extensionArchivo }`;
+    var nombreArchivo = `${ uuid.v1() }.${ extensionArchivo }`;
 
 
     //files are put into upload folder.
