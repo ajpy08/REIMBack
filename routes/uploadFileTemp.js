@@ -3,6 +3,7 @@ var express = require('express');
 var fileUpload = require('express-fileupload');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
+const uuid = require('uuid/v1');
 
 // Inicializar variables
 var app = express();
@@ -37,7 +38,7 @@ app.put('/', (req, res) => {
 
     // Nombre de archivo personalizado
     // 12312312312-123.png
-    var nombreArchivo = `${ new Date().getMilliseconds() }.${ extensionArchivo }`;
+    var nombreArchivo = `${ uuid() }.${ extensionArchivo }`;
 
     var path = './uploads/temp/' + nombreArchivo;
 

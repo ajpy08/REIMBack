@@ -1,22 +1,21 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
-var mongoose = require('mongoose');
-var app = express();
 var Cliente = require('../models/cliente');
+var mongoose = require('mongoose');
+var fs = require('fs');
+var app = express();
 
 // ==========================================
 // Obtener todos los clientes
 // ==========================================
 app.get('/', (req, res, next) => {
-
     var desde = req.query.desde || 0;
     desde = Number(desde);
     var role = 'CLIENT_ROLE';
-
     Cliente.find({ role: role })
         .skip(desde)
-        .limit(5)
-        .populate('Agencias', 'nombreComercial')
+        .limit(10)
+        .populate('empresas', 'razonSocial')
         .populate('usuarioAlta', 'nombre email')
         .exec(
             (err, cliente) => {
@@ -53,7 +52,6 @@ app.get('/role/:role', (req, res) => {
                     errors: err
                 });
             }
-
             if (!cliente) {
                 return res.status(400).json({
                     ok: false,
@@ -65,7 +63,6 @@ app.get('/role/:role', (req, res) => {
                 ok: true,
                 cliente: cliente
             });
-
         });
 });
 
@@ -73,11 +70,9 @@ app.get('/role/:role', (req, res) => {
 // Obtener Clientes por ID
 // ==========================================
 app.get('/:id', (req, res) => {
-
     var id = req.params.id;
-
     Cliente.findById(id)
-        .populate('usuario', 'nombre email')
+        //.populate('usuario', 'nombre email')
         .exec((err, cliente) => {
             if (err) {
                 return res.status(500).json({
@@ -86,7 +81,6 @@ app.get('/:id', (req, res) => {
                     errors: err
                 });
             }
-
             if (!cliente) {
                 return res.status(400).json({
                     ok: false,
@@ -109,6 +103,7 @@ app.get('/empresa/:id', (req, res) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
     var id = req.params.id;
+
     Cliente.find({ 'empresas': new mongoose.Types.ObjectId(id) })
         .exec(
             (err, cliente) => {
@@ -119,7 +114,6 @@ app.get('/empresa/:id', (req, res) => {
                         errors: err
                     });
                 }
-
                 if (!cliente) {
                     return res.status(400).json({
                         ok: false,
@@ -134,7 +128,6 @@ app.get('/empresa/:id', (req, res) => {
                         total: conteo
                     });
                 })
-
             });
 });
 
@@ -142,13 +135,11 @@ app.get('/empresa/:id', (req, res) => {
 // Alta cliente
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
     var body = req.body;
-
     var cliente = new Cliente({
+        rfc: body.rfc,
         razonSocial: body.razonSocial,
         nombreComercial: body.nombreComercial,
-        rfc: body.rfc,
         calle: body.calle,
         noExterior: body.noExterior,
         noInterior: body.noInterior,
@@ -161,12 +152,23 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         correo: body.correo,
         correoFac: body.correoFac,
         credito: body.credito,
-        agencias: body.agencias,
+        empresas: body.empresas,
+        img: body.img,
         usuarioAlta: req.usuario._id
     });
 
-    cliente.save((err, clienteGuardado) => {
+    if (cliente.img != '' && fs.existsSync('./uploads/temp/' + cliente.img)) {
+        fs.rename('./uploads/temp/' + cliente.img, './uploads/clientes/' + cliente.img, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
+    if (cliente.formatoR1 != '' && fs.existsSync('./uploads/temp/' + cliente.formatoR1)) {
+        fs.rename('./uploads/temp/' + cliente.formatoR1, './uploads/clientes/' + cliente.formatoR1, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
 
+    cliente.save((err, clienteGuardado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -174,15 +176,12 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         res.status(201).json({
             ok: true,
+            mensaje: 'Cliente creado con éxito.',
             cliente: clienteGuardado
         });
-
-
     });
-
 });
 
 
@@ -221,11 +220,38 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         cliente.correo = body.correo;
         cliente.correoFac = body.correoFac;
         cliente.credito = body.credito;
-        cliente.agencias = body.empresas;
+        cliente.empresas = body.empresas;
         cliente.usuarioMod = req.usuario._id;
         cliente.fMod = new Date();
-        cliente.save((err, clienteGuardado) => {
 
+        if (cliente.img != body.img) {
+            if (fs.existsSync('./uploads/temp/' + body.img)) {
+                fs.unlink('./uploads/clientes/' + cliente.img, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            cliente.img = body.img;
+        }
+        if (cliente.formatoR1 != body.formatoR1) {
+            if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
+                fs.unlink('./uploads/clientes/' + cliente.formatoR1, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
+                });
+                fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
+                    if (err) { console.log(err); }
+                });
+            }
+            cliente.formatoR1 = body.formatoR1;
+        }
+
+        cliente.save((err, clienteGuardado) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -235,6 +261,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             }
             res.status(200).json({
                 ok: true,
+                mensaje: 'Cliente actualizado con exito',
                 cliente: clienteGuardado
             });
 
@@ -247,11 +274,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 //   Borrar clientes por el id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
-
     Cliente.findByIdAndRemove(id, (err, clienteBorrado) => {
-
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -259,7 +283,6 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-
         if (!clienteBorrado) {
             return res.status(400).json({
                 ok: false,
@@ -267,14 +290,12 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe cliente con ese id' }
             });
         }
-
         res.status(200).json({
             ok: true,
+            mensaje: 'Cliente borrado con exito',
             cliente: clienteBorrado
         });
-
     });
-
 });
 
 
