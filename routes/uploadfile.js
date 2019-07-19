@@ -4,6 +4,7 @@ var fileUpload = require('express-fileupload');
 var csv = require('fast-csv');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
+const uuid = require('uuid/v1');
 
 // Inicializar variables
 var app = express();
@@ -42,7 +43,7 @@ app.put('/', mdAutenticacion.verificaToken, (req, res) => {
 
     // Nombre de archivo personalizado
     // 12312312312-123.png
-    var nombreArchivo = `${ uuid.v1() }.${ extensionArchivo }`;
+    var nombreArchivo = `${ uuid() }.${ extensionArchivo }`;
 
 
     //files are put into upload folder.
