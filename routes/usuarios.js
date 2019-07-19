@@ -139,11 +139,13 @@ app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_
 
         if (usuario.img != body.img) {
             if (fs.existsSync('./uploads/temp/' + body.img)) {
-                fs.unlink('./uploads/usuarios/' + usuario.img, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('path/file.txt was deleted');
-                });
+                if (usuario.img != undefined || usuario.img != '' && usuario.img != null && fs.existsSync('./uploads/usuarios/' + usuario.img)) {
+                    fs.unlink('./uploads/usuarios/' + usuario.img, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('path/file.txt was deleted');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.img, './uploads/usuarios/' + body.img, (err) => {
                     if (err) { console.log(err); }
                 });

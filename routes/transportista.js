@@ -89,7 +89,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         img: body.img,
         usuarioAlta: req.usuario._id
     });
-    
+
     console.log(req)
     //console.log(req.usuario);
 
@@ -162,29 +162,33 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
         if (transportista.img != body.img) {
             if (fs.existsSync('./uploads/temp/' + body.img)) {
-                fs.unlink('./uploads/clientes/' + transportista.img, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (transportista.img != undefined || transportista.img != '' && transportista.img != null && fs.existsSync('./uploads/clientes/' + transportista.img)) {
+                    fs.unlink('./uploads/clientes/' + transportista.img, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('Imagen anterior fue borrada con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
                     if (err) { console.log(err); }
                 });
+                transportista.img = body.img;
             }
-            transportista.img = body.img;
         }
         if (transportista.formatoR1 != body.formatoR1) {
             if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
-                fs.unlink('./uploads/clientes/' + transportista.formatoR1, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (transportista.formatoR1 != undefined || transportista.formatoR1 != '' && transportista.formatoR1 != null && fs.existsSync('./uploads/clientes/' + transportista.formatoR1)) {
+                    fs.unlink('./uploads/clientes/' + transportista.formatoR1, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('File anterior fue borrado con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
                     if (err) { console.log(err); }
                 });
+                transportista.formatoR1 = body.formatoR1;
             }
-            transportista.formatoR1 = body.formatoR1;
         }
         transportista.save((err, transportistaGuardado) => {
             if (err) {
