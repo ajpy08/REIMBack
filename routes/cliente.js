@@ -18,7 +18,7 @@ app.get('/', (req, res, next) => {
         .populate('empresas', 'razonSocial')
         .populate('usuarioAlta', 'nombre email')
         .exec(
-            (err, cliente) => {
+            (err, clientes) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
@@ -29,7 +29,7 @@ app.get('/', (req, res, next) => {
                 Cliente.countDocuments({ role: role }, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        cliente: cliente,
+                        clientes: clientes,
                         total: conteo
                     });
                 })
@@ -44,7 +44,7 @@ app.get('/role/:role', (req, res) => {
 
     Cliente.find({ role })
         .populate('usuario', 'nombre email')
-        .exec((err, cliente) => {
+        .exec((err, clientes) => {
             if (err) {
                 return res.status(500).json({
                     ok: false,
@@ -52,7 +52,7 @@ app.get('/role/:role', (req, res) => {
                     errors: err
                 });
             }
-            if (!cliente) {
+            if (!clientes) {
                 return res.status(400).json({
                     ok: false,
                     mensaje: 'El cliente con el role' + role + 'no existe',
@@ -61,7 +61,7 @@ app.get('/role/:role', (req, res) => {
             }
             res.status(200).json({
                 ok: true,
-                cliente: cliente
+                clientes: clientes
             });
         });
 });
@@ -226,29 +226,33 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
         if (cliente.img != body.img) {
             if (fs.existsSync('./uploads/temp/' + body.img)) {
-                fs.unlink('./uploads/clientes/' + cliente.img, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (cliente.img != undefined || cliente.img != '' && cliente.img != null && fs.existsSync('./uploads/clientes/' + cliente.img)) {
+                    fs.unlink('./uploads/clientes/' + cliente.img, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('Imagen anterior fue borrada con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
                     if (err) { console.log(err); }
                 });
+                cliente.img = body.img;
             }
-            cliente.img = body.img;
         }
         if (cliente.formatoR1 != body.formatoR1) {
             if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
-                fs.unlink('./uploads/clientes/' + cliente.formatoR1, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (cliente.formatoR1 != undefined || cliente.formatoR1 != '' && cliente.formatoR1 != null && fs.existsSync('./uploads/clientes/' + cliente.formatoR1)) {
+                    fs.unlink('./uploads/clientes/' + cliente.formatoR1, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('Imagen anterior fue borrada con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
                     if (err) { console.log(err); }
                 });
+                cliente.formatoR1 = body.formatoR1;
             }
-            cliente.formatoR1 = body.formatoR1;
         }
 
         cliente.save((err, clienteGuardado) => {

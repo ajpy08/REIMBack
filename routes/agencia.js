@@ -146,7 +146,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     });
 });
 
-
 // ==========================================
 // Actualizar Agencias
 // ==========================================
@@ -188,29 +187,33 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
         if (agencia.img != body.img) {
             if (fs.existsSync('./uploads/temp/' + body.img)) {
-                fs.unlink('./uploads/clientes/' + agencia.img, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (agencia.img != undefined || agencia.img != '' && agencia.img != null && fs.existsSync('./uploads/camiones/' + agencia.img)) {
+                    fs.unlink('./uploads/clientes/' + agencia.img, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('Imagen anterior fue borrada con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.img, './uploads/clientes/' + body.img, (err) => {
                     if (err) { console.log(err); }
                 });
+                agencia.img = body.img;
             }
-            agencia.img = body.img;
         }
         if (agencia.formatoR1 != body.formatoR1) {
             if (fs.existsSync('./uploads/temp/' + body.formatoR1)) {
-                fs.unlink('./uploads/clientes/' + agencia.formatoR1, (err) => {
-                    if (err) console.log(err);
-                    else
-                        console.log('Imagen anterior fue borrada con éxito');
-                });
+                if (agencia.formatoR1 != undefined || agencia.formatoR1 != '' && agencia.formatoR1 != null && fs.existsSync('./uploads/camiones/' + agencia.formatoR1)) {
+                    fs.unlink('./uploads/clientes/' + agencia.formatoR1, (err) => {
+                        if (err) console.log(err);
+                        else
+                            console.log('File anterior fue borrado con éxito');
+                    });
+                }
                 fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
                     if (err) { console.log(err); }
                 });
+                agencia.formatoR1 = body.formatoR1;
             }
-            agencia.formatoR1 = body.formatoR1;
         }
         agencia.save((err, agenciaGuardado) => {
             if (err) {
