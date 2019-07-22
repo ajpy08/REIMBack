@@ -91,7 +91,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     });
 
     console.log(req)
-    //console.log(req.usuario);
+        //console.log(req.usuario);
 
     if (transportista.img != '' && fs.existsSync('./uploads/temp/' + transportista.img)) {
         fs.rename('./uploads/temp/' + transportista.img, './uploads/clientes/' + transportista.img, (err) => {
@@ -232,9 +232,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             ok: true,
             transportista: transportistaBorrado
         });
-
     });
-
 });
 
 
