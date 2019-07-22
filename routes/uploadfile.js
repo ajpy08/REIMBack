@@ -10,7 +10,7 @@ const uuid = require('uuid/v1');
 var app = express();
 
 // Models
-var Viaje = require('../models/viajes');
+var Viaje = require('../models/viaje');
 
 // default options
 app.use(fileUpload());
