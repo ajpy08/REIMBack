@@ -62,7 +62,6 @@ app.get('/:id', (req, res) => {
         });
 });
 
-
 // ==========================================
 // Crear nuevo Camión
 // ==========================================
@@ -122,7 +121,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
         camion.transportista = body.transportista,
-            camion.placa = body.placa;
+        camion.placa = body.placa;
         camion.noEconomico = body.noEconomico;
         camion.vigenciaSeguro = body.vigenciaSeguro;
         camion.usuarioMod = req.usuario._id;
