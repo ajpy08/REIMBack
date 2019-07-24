@@ -1,21 +1,35 @@
 exports.ParamsToJSON = function ParamsToJSON(req) {
+    var json;
     var filtro = '{';
-
-    for (var param in req.params) {
-        if (req.params.hasOwnProperty(param)) {
-            if (req.params[param] != '' && req.params[param] != null && req.params[param] != 'undefined') {
-                filtro += '\"' + param + '\"' + ':' + '\"' + req.params[param] + '\"' + ',';
+    if (req.params) {
+        for (var param in req.params) {
+            if (req.params.hasOwnProperty(param)) {
                 //console.log(param, req.params[param]);
+                if (req.params[param] != '' && req.params[param] != null && req.params[param] != 'undefined') {
+                    filtro += '\"' + param + '\"' + ':' + '\"' + req.params[param] + '\"' + ',';                    
+                } else {
+                    console.log('No se pudo agregar el param ' + param + ' al JSON');
+                }
+            } else {
+                console.log('No se pudo el hasOwnProperty');
+                return;
             }
         }
+
+        if(filtro != '{'){
+            filtro = filtro.slice(0, -1);
+            filtro = filtro + '}';
+        }else{
+            return;
+        }
+
+        var json = JSON.parse(filtro);
+        //console.log(json)
+        //console.log(req.params);
+    } else {
+        console.log('La URL no tiene parametros');
+        return;
     }
-    //filtro = filtro.replace('undefined', '')
-    filtro = filtro.slice(0, -1);
-    filtro = filtro + '}';
 
-    var o = JSON.parse(filtro);
-
-    //console.log(req.params);
-
-    return o;
+    return json;
 }
