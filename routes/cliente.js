@@ -106,7 +106,7 @@ app.get('/empresa/:id', (req, res) => {
 
     Cliente.find({ 'empresas': new mongoose.Types.ObjectId(id) })
         .exec(
-            (err, cliente) => {
+            (err, clientes) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
@@ -114,17 +114,18 @@ app.get('/empresa/:id', (req, res) => {
                         errors: err
                     });
                 }
-                if (!cliente) {
+                if (!clientes) {
                     return res.status(400).json({
                         ok: false,
                         mensaje: 'El cliente con el id ' + id + 'no existe',
                         errors: { message: 'No existe un cliente con ese ID' }
                     });
                 }
+                
                 Cliente.countDocuments({ 'empresas': new mongoose.Types.ObjectId(id) }, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        cliente: cliente,
+                        clientes: clientes,
                         total: conteo
                     });
                 })
