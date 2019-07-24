@@ -188,6 +188,11 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         usuarioAlta: req.usuario._id
     });
 
+    if (solicitud.pdf != '' && fs.existsSync('./uploads/temp/' + camion.pdfSeguro)) {
+        fs.rename('./uploads/temp/' + camion.pdfSeguro, './uploads/camiones/' + camion.pdfSeguro, (err) => {
+            if (err) { console.log(err); }
+        });
+    }
     solicitud.save((err, solicitudGuardado) => {
 
         if (err) {
