@@ -40,6 +40,7 @@ app.get('/', (req, res, next) => {
 app.get('/:id', (req, res) => {
     var id = req.params.id;
     Camion.findById(id)
+        // .populate('transportista', '_id')
         .exec((err, camion) => {
             if (err) {
                 return res.status(500).json({
@@ -62,7 +63,6 @@ app.get('/:id', (req, res) => {
         });
 });
 
-
 // ==========================================
 // Crear nuevo Camión
 // ==========================================
@@ -70,6 +70,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
     var camion = new Camion({
         transportista: body.transportista,
+        operador : body.operador,
         placa: body.placa,
         noEconomico: body.noEconomico,
         vigenciaSeguro: body.vigenciaSeguro,
@@ -122,7 +123,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
         camion.transportista = body.transportista,
-            camion.placa = body.placa;
+        camion.operador = body.operador,
+        camion.placa = body.placa;
         camion.noEconomico = body.noEconomico;
         camion.vigenciaSeguro = body.vigenciaSeguro;
         camion.usuarioMod = req.usuario._id;
