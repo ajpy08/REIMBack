@@ -39,7 +39,7 @@ app.put('/', (req, res) => {
     // Nombre de archivo personalizado
     // 12312312312-123.png
     var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-    //console.log(nombreArchivo)
+    
     var path = './uploads/temp/' + nombreArchivo;
 
     archivo.mv(path, err => {
