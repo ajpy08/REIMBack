@@ -8,7 +8,7 @@ var solicitudScheme = new Schema({
     naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
     transportista: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
     cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
-    facturarA: { type: String },
+    facturarA: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
     buque: { type: Schema.Types.ObjectId, ref: 'Buque', required: true },
     viaje: { type: String },
     observaciones: { type: String },
