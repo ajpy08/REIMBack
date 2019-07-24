@@ -3,6 +3,7 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 var Operador = require('../models/operador');
 var fs = require('fs');
 var app = express();
+var ParamsToJSON = require('../public/varias');
 
 // ==========================================
 // Obtener todos los Operador
@@ -21,9 +22,10 @@ app.get('/', (req, res, next) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando operador',
+                        mensaje: 'Error cargando operadores',
                         errors: err
-                    });                }
+                    });
+                }
                 Operador.countDocuments({}, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
@@ -64,6 +66,40 @@ app.get('/:id', (req, res) => {
 });
 
 // ==========================================
+// Obtener todas los operadores por transportista
+// ==========================================
+app.get('/transportista/:transportista&:activo?', (req, res) => {
+    var filtro = ParamsToJSON.ParamsToJSON(req);
+    Operador.find(filtro)
+        .populate('usuarioAlta', 'nombre email')
+        .populate('usuarioMod', 'nombre email')
+        .populate('transportista', 'rfc razonSocial')
+        .exec((err, operadores) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando operadores',
+                    errors: err
+                });
+            }
+            if (!operadores) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El operador del transportista ' + transportista + 'no existe',
+                    errors: { message: "No existe un operador con ese transportista" }
+                });
+            }
+            Operador.countDocuments({}, (err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    operadores: operadores,
+                    totalRegistros: conteo
+                });
+            });
+        });
+});
+
+// ==========================================
 // Crear un nuevo operador
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
@@ -71,8 +107,8 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var operador = new Operador({
         transportista: body.transportista,
         nombre: body.nombre,
-        foto : body.foto,
-        licencia : body.licencia,
+        foto: body.foto,
+        licencia: body.licencia,
         vigenciaLicencia: body.vigenciaLicencia,
         fotoLicencia: body.fotoLicencia,
         activo: body.activo,
@@ -84,7 +120,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             if (err) { console.log(err); }
         });
     }
-    
+
     if (operador.fotoLicencia != '' && fs.existsSync('./uploads/temp/' + operador.fotoLicencia)) {
         fs.rename('./uploads/temp/' + operador.fotoLicencia, './uploads/operadores/' + operador.fotoLicencia, (err) => {
             if (err) { console.log(err); }
@@ -129,12 +165,12 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe un operador con ese ID' }
             });
         }
-        operador.transportista =  body.transportista;
+        operador.transportista = body.transportista;
         operador.nombre = body.nombre;
         operador.usuario = req.usuario._id;
         operador.foto = body.foto;
         operador.licencia = body.licencia;
-        operador.vigenciaLicencia =  body.vigenciaLicencia;
+        operador.vigenciaLicencia = body.vigenciaLicencia;
         operador.fotoLicencia = body.fotoLicencia;
         operador.activo = body.activo;
         operador.usuarioMod = req.usuario._id;
@@ -156,7 +192,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
                 operador.foto = body.foto;
             }
-        } 
+        }
 
         if (operador.fotoLicencia != body.fotoLicencia) {
             if (fs.existsSync('./uploads/temp/' + body.fotoLicencia)) {
@@ -172,7 +208,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
                 operador.fotoLicencia = body.fotoLicencia;
             }
-        } 
+        }
 
         operador.save((err, operadorGuardado) => {
             if (err) {
