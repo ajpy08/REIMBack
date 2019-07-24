@@ -22,7 +22,7 @@ var clienteSchema = new Schema({
     formatoR1: { type: String, required: false },
     correo: { type: String, requiered: [true, 'El correo es necesario'] },
     correoFac: { type: String, requiered: [true, 'El correo de facturación es necesario'] },
-    credito: { type: String, requiered: [true, 'El credito es necesario'] },
+    credito: { type: Boolean, requiered: [true, 'EL credito es necesario'], default: false },
     img: { type: String, required: false },
     empresas: [{
         type: Schema.Types.ObjectId,
