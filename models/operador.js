@@ -16,6 +16,7 @@ var operadorSchema = new Schema({
     fMod: { type: Date }
 }, { collection: 'operadores' });
 
+operadorSchema.index({transportista: 1, nombre: 1}, {unique: true});
 operadorSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
 
 module.exports = mongoose.model('Operador', operadorSchema);
