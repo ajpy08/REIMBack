@@ -68,6 +68,7 @@ app.get('/:id', (req, res) => {
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
+    // console.log(body)
     var camion = new Camion({
         transportista: body.transportista,
         operador : body.operador,

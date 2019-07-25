@@ -2,12 +2,16 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
-
 var buqueSchema = new Schema({
-    buque: { type: String, unique: true, required: false },
-    naviera: { type: Schema.Types.ObjectId, ref: 'Naviera', unique: true, required: false },
-    usuario: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true }
+    nombre: { type: String, required: true },
+    naviera: { type: Schema.Types.ObjectId, ref: 'Naviera', required: true },
+    usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fAlta: { type: Date, default: Date.now },
+    usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fMod: { type: Date }
 }, { collection: 'buques' });
+
+buqueSchema.index({nombre: 1, naviera: 1}, {unique: true});
 
 buqueSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
