@@ -4,6 +4,7 @@ var Cliente = require('../models/cliente');
 var mongoose = require('mongoose');
 var fs = require('fs');
 var app = express();
+var ParamsToJSON = require('../public/varias');
 
 // ==========================================
 // Obtener todos los clientes
@@ -39,11 +40,11 @@ app.get('/', (req, res, next) => {
 // ==========================================
 // Obtener todas los clientes por role
 // ==========================================
-app.get('/role/:role', (req, res) => {
-    var role = req.params.role;
-
-    Cliente.find({ role })
-        .populate('usuario', 'nombre email')
+app.get('/role/:role?', (req, res) => {
+    var filtro = ParamsToJSON.ParamsToJSON(req);
+    //console.log({filtro})
+    Cliente.find(filtro)
+        .populate('cliente', 'role')
         .exec((err, clientes) => {
             if (err) {
                 return res.status(500).json({
