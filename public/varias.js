@@ -8,11 +8,11 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
                 if (req.params[param] != '' && req.params[param] != null && req.params[param] != 'undefined') {
                     filtro += '\"' + param + '\"' + ':' + '\"' + req.params[param] + '\"' + ',';                    
                 } else {
-                    console.log('No se pudo agregar el param ' + param + ' al JSON');
+                    console.log('No se agrego el param ' + param + ' al JSON');
                 }
             } else {
                 console.log('No se pudo el hasOwnProperty');
-                return;
+                // return;
             }
         }
 
@@ -20,7 +20,8 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
             filtro = filtro.slice(0, -1);
             filtro = filtro + '}';
         }else{
-            return;
+            filtro = filtro + '}';
+            //return;
         }
 
         var json = JSON.parse(filtro);
