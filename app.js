@@ -47,7 +47,7 @@ var UploadFile = require('./routes/uploadfile');
 var prealta = require('./routes/prealtamaniobra');
 var exceltojson = require('./routes/exceltojson');
 var uploadFileTemp = require('./routes/uploadFileTemp');
-var solicitudD = require('./routes/solicitudD');
+var solicitudRoute = require('./routes/solicitud');
 
 
 // Conexión a la base de datos Mongoose
@@ -90,7 +90,7 @@ run().catch(error => console.error(error));
 
 
 // Rutas
-app.use('/solicitudD', solicitudD);
+
 app.use('/uploadFileTemp', uploadFileTemp);
 app.use('/exceltojson', exceltojson);
 app.use('/prealta', prealta);
@@ -108,6 +108,7 @@ app.use('/contenedor', contenedorRoutes);
 app.use('/camion', camionRoutes);
 app.use('/operador', operadorRoutes);
 app.use('/maniobra', maniobraRoutes);
+app.use('/solicitud', solicitudRoute);
 app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);
 app.use('/upload', uploadRoutes);
