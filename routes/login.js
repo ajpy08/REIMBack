@@ -75,7 +75,7 @@ app.post('/', (req, res) => {
 
 function obtenerMenu(ROLE) {
 
-    console.log('ROLE', ROLE);
+    //console.log('ROLE', ROLE);
 
     if (ROLE === 'ADMIN_ROLE') {
         let menu = [{
