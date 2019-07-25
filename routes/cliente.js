@@ -42,8 +42,8 @@ app.get('/', (req, res, next) => {
 // ==========================================
 app.get('/role/:role?', (req, res) => {
     var filtro = ParamsToJSON.ParamsToJSON(req);
-    console.log(filtro)
-    Cliente.find({ filtro })
+    //console.log({filtro})
+    Cliente.find(filtro)
         .populate('cliente', 'role')
         .exec((err, clientes) => {
             if (err) {
@@ -64,7 +64,6 @@ app.get('/role/:role?', (req, res) => {
                 ok: true,
                 clientes: clientes
             });
-            console.log(clientes)
         });
 });
 
