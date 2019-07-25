@@ -98,13 +98,10 @@ app.get('/transito', (req, res, netx) => {
 // ============================================
 // Obtener Maniobras por contenedor buque viaje
 // ============================================
-app.get('/obtener', (req, res, netx) => {
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
+app.get('/buscaxcontenedorviaje', (req, res, netx) => {
     var contenedor = req.query.contenedor;
     var viaje = req.query.viaje;
     var buque = req.query.buque;
-    console.log (contenedor);
     Maniobra.aggregate([{
                 $lookup: {
                     from: "viajes",
@@ -131,6 +128,7 @@ app.get('/obtener', (req, res, netx) => {
                         errors: err
                     });
                 }
+                console.log(maniobra);
                 res.status(200).json({
                     ok: true,
                     maniobra: maniobra
