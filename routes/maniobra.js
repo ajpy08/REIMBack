@@ -9,6 +9,51 @@ var app = express();
 
 var Maniobra = require('../models/maniobra');
 
+
+// ============================================
+// Obtener Maniobras por contenedor buque viaje
+// ============================================
+app.get('/buscaxcontenedorviaje', (req, res, netx) => {
+    var contenedor = req.query.contenedor.trim();
+    var viaje = req.query.viaje.trim();
+    var buque = req.query.buque.trim();
+    Maniobra.aggregate([{
+                $lookup: {
+                    from: "viajes",
+                    localField: "viaje",
+                    foreignField: "_id",
+                    as: "match"
+                }
+            },
+            {
+                $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    contenedor: 1
+                }
+            }
+        ])
+        .exec(
+            (err, maniobra) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando maniobras',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    maniobra: maniobra
+                });
+
+            });
+});
+
+
+
 // =======================================
 // Obtener Maniobras
 // =======================================
@@ -95,47 +140,6 @@ app.get('/transito', (req, res, netx) => {
             });
 });
 
-// ============================================
-// Obtener Maniobras por contenedor buque viaje
-// ============================================
-app.get('/buscaxcontenedorviaje', (req, res, netx) => {
-    var contenedor = req.query.contenedor;
-    var viaje = req.query.viaje;
-    var buque = req.query.buque;
-    Maniobra.aggregate([{
-                $lookup: {
-                    from: "viajes",
-                    localField: "viaje",
-                    foreignField: "_id",
-                    as: "match"
-                }
-            },
-            {
-                $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
-            },
-            {
-                $project: {
-                    _id: 1
-                }
-            }
-        ])
-        .exec(
-            (err, maniobra) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando maniobras',
-                        errors: err
-                    });
-                }
-                console.log(maniobra);
-                res.status(200).json({
-                    ok: true,
-                    maniobra: maniobra
-                });
-
-            });
-});
 
 // =======================================
 // Obtener Maniobra de hoy

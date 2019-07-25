@@ -13,7 +13,7 @@ app.get('/', (req, res, next) => {
         .skip(desde)
         .limit(10)
         .populate('naviera', 'razonSocial')
-        .populate('usuario', 'nombre email')
+        .populate('usuarioAlta', 'nombre email')
         .exec(
             (err, buques) => {
                 if (err) {
