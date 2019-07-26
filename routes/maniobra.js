@@ -3,11 +3,36 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var moment = require('moment');
 var mongoose = require('mongoose');
-
-// Inicializar variables
 var app = express();
-
 var Maniobra = require('../models/maniobra');
+
+// ==========================================
+//  Obtener Maniobra por ID
+// ==========================================
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+    Maniobra.findById(id)
+        .exec((err, maniobra) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar la maniobra',
+                    errors: err
+                });
+            }
+            if (!maniobra) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'La maniobra con el id ' + id + 'no existe',
+                    errors: { message: 'No existe maniobra con ese ID' }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                maniobra: maniobra
+            });
+        });
+});
 
 
 // ============================================
@@ -102,11 +127,12 @@ app.get('/', (req, res, netx) => {
 
 app.get('/transito', (req, res, netx) => {
     var desde = req.query.desde || 0;
-    var contenedor = new RegExp(req.query.contenedor, 'i'); 
+    var contenedor = new RegExp(req.query.contenedor, 'i');
     desde = Number(desde);
-    Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-        // .skip(desde)
-        // .limit(300)
+    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+    Maniobra.find({ "estatus": "APROBADO" })
+        .skip(desde)
+        .limit(100)
         .populate('cliente', 'rfc razonSocial')
         .populate('agencia', 'rfc razonSocial')
         .populate('transportista', 'rfc razonSocial')
@@ -115,30 +141,30 @@ app.get('/transito', (req, res, netx) => {
             select: 'viaje fechaArribo',
             populate: {
                 path: "buque",
-                select: 'buque'
+                select: 'nombre'
             }
         })
         .populate('usuarioAlta', 'nombre email')
-        .exec(
-            (err, maniobras) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando maniobras',
-                        errors: err
-                    });
-                }
-                Maniobra.countDocuments({}, (err, conteo) => {
-                    res.status(200).json({
-                        ok: true,
-                        maniobras,
-                        total: conteo
-                    });
-
+        .exec((err, maniobras) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando maniobras',
+                    errors: err
                 });
-
+            }
+            Maniobra.countDocuments({}, (err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    maniobras: maniobras,
+                    total: conteo
+                });
             });
+        });
 });
+
+
+
 
 
 // =======================================
@@ -250,51 +276,6 @@ app.get('/rangofecha', (req, res, netx) => {
 });
 
 
-// ==========================================
-//  Obtener Maniobra por ID
-// ==========================================
-app.get('/:id', (req, res) => {
-
-    var id = req.params.id;
-
-    Maniobra.findById(id)
-        .populate('operador', 'operador')
-        .populate({
-            path: "camiones",
-            select: 'placa numbereconomico',
-            populate: {
-                path: "transportista",
-                select: 'nombre'
-            }
-        })
-        .populate('contenedor', 'contenedor tipo')
-        .populate('cliente', 'cliente')
-        .populate('agencia', 'nombre')
-        .populate('transportista', 'nombre')
-        .populate('viaje', 'viaje')
-        .populate('usuario', 'nombre email')
-        .exec((err, maniobras) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar la maniobra',
-                    errors: err
-                });
-            }
-
-            if (!maniobras) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'La maniobra con el id ' + id + 'no existe',
-                    errors: { message: 'No existe maniobra con ese ID' }
-                });
-            }
-            res.status(200).json({
-                ok: true,
-                maniobras: maniobras
-            });
-        });
-});
 
 // =======================================
 // Crear Maniobra
@@ -367,21 +348,21 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
 
         maniobra.entrada = body.entrada,
-        maniobra.salida = body.salida,
-        maniobra.inicio = body.inicio,
-        maniobra.fin = body.fin,
-        maniobra.transporte = body.transporte,
-        maniobra.lavado = body.lavado,
-        maniobra.rep = body.rep,
-        maniobra.grado = body.grado,
-        maniobra.fechaModificado = Date.now(),
-        maniobra.operador = body.operador,
-        maniobra.placas = body.placas,
-        maniobra.contenedor = body.contenedor,
-        maniobra.cliente = body.cliente,
-        maniobra.agencia = body.agencia,
-        maniobra.viaje = body.viaje,
-        maniobra.usuario = req.usuario._id;
+            maniobra.salida = body.salida,
+            maniobra.inicio = body.inicio,
+            maniobra.fin = body.fin,
+            maniobra.transporte = body.transporte,
+            maniobra.lavado = body.lavado,
+            maniobra.rep = body.rep,
+            maniobra.grado = body.grado,
+            maniobra.fechaModificado = Date.now(),
+            maniobra.operador = body.operador,
+            maniobra.placas = body.placas,
+            maniobra.contenedor = body.contenedor,
+            maniobra.cliente = body.cliente,
+            maniobra.agencia = body.agencia,
+            maniobra.viaje = body.viaje,
+            maniobra.usuario = req.usuario._id;
 
 
         maniobra.save((err, maniobraGuardado) => {
