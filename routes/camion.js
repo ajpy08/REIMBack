@@ -63,6 +63,32 @@ app.get('/:id', (req, res) => {
         });
 });
 
+
+// ==========================================
+// Obtener todos los camiones por transportista
+// ==========================================
+app.get('/transportista/:id', (req, res, next) => {
+    var id = req.params.id;
+    Camion.find({ transportista: id })
+    .exec((err, camiones) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al cargar los camiones',
+                errors: err
+            });
+        }
+        Camion.countDocuments({}, (err, conteo) => {
+            res.status(200).json({
+                ok: true,
+                camiones,camiones,
+                total: conteo
+            });
+        });
+    });
+});
+
+
 // ==========================================
 // Crear nuevo Camión
 // ==========================================
