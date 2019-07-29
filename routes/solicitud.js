@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
         .populate('naviera', 'razonSocial')
         .populate('transportista', 'razonSocial')
         .populate('cliente', 'razonSocial')
-        .populate('buque', 'buque')
+        .populate('buque', 'nombre')
         .populate('usuarioAlta', 'nombre email')
         .limit(10)
         .exec(
@@ -102,6 +102,7 @@ app.get('/:id/includes', (req, res) => {
         });
     });
 });
+
 // =======================================
 // Crear Solicitudes
 // =======================================
@@ -244,6 +245,57 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
 });
 
+// ==========================================
+// Aprobar Solicitud con maniobra
+// ==========================================
+app.put('/aprueba/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+    Solicitud.findById(id, (err, solicitud) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar viaje',
+                errors: err
+            });
+        }
+        if (!solicitud) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La solicitud con el id ' + id + ' no existe',
+                errors: { message: 'No existe solicitud con ese ID' }
+            });
+        }
+        solicitud.contenedores = body.contenedores;
+        solicitud.estatus = "APROBADA";
+        solicitud.fAprobacion = Date.now();
+        solicitud.usuarioAprobo = req.usuario._id;
+        solicitud.save((err, solicitudGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar la solicitud',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                solicitud: solicitudGuardado
+            });
+             solicitud.contenedores.forEach((element) => {
+                 Maniobra.findById(element.maniobra, (err, maniobra) => {
+                     maniobra.estatus = "APROBADO";
+                     maniobra.solicitudD = id;
+                     maniobra.agencia = solicitud.agencia;
+                     maniobra.transportista = solicitud.transportista;
+                     maniobra.cliente = solicitud.cliente;
+                     maniobra.save((err, maniobraGuardado) => {
+                     });
+                 });
+             });
+        });
+    });
+});
 
 
 // =======================================
@@ -325,71 +377,6 @@ app.get('/agencia/:agencias', (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-// ==========================================
-// Actualizar Solicitud con maniobra
-// ==========================================
-app.put('/solicitudmaniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
-
-    var id = req.params.id;
-    var body = req.body;
-
-    SolicitudD.findById(id, (err, solicitud) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al buscar viaje',
-                errors: err
-            });
-        }
-        if (!solicitud) {
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'La solicitud con el id ' + id + ' no existe',
-                errors: { message: 'No existe solicitud con ese ID' }
-            });
-        }
-        solicitud.contenedores = body.contenedores;
-        solicitud.estatus = "AS";
-        solicitud.fAprobacion = Date.now();
-        solicitud.usuarioAprobo = req.usuario._id;
-        solicitud.fMod = Date.now();
-        solicitud.usuarioMod = req.usuario._id;
-        solicitud.save((err, solicitudGuardado) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al actualizar viaje',
-                    errors: err
-                });
-            }
-            res.status(200).json({
-                ok: true,
-                solicitud: solicitudGuardado
-            });
-             solicitud.contenedores.forEach((element) => {
-                 Maniobra.findById(element.Maniobra, (err, maniobra) => {
-                     maniobra.estatus = "APROBADO";
-                     maniobra.solicitudD = id;
-                     maniobra.agencia = solicitud.agencia;
-                     maniobra.transportista = solicitud.transportista;
-                     maniobra.cliente = solicitud.cliente;
-                     maniobra.save((err, maniobraGuardado) => {
-                     });
-                 });
-             });
-        });
-    });
-});
 
 
 // =======================================
