@@ -34,11 +34,6 @@ app.get('/:id', (req, res) => {
         });
 });
 
-
-
-
-
-
 // =======================================
 // Crear Maniobra
 // =======================================
@@ -82,6 +77,48 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
     });
 
+});
+// =======================================
+// Registra LLegada Contendor
+// =======================================
+app.put('/registra_llegada/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+    Maniobra.findById(id, (err, maniobra) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar maniobra',
+                errors: err
+            });
+        }
+        if (!maniobra) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La maniobra con el id ' + id + ' no existe',
+                errors: { message: 'No existe una maniobra con ese ID' }
+            });
+        }
+        maniobra.transportista = body.transportista;
+        maniobra.camion = body.camion;
+        maniobra.operador = body.operador;
+        maniobra.fLlegada = body.fLlegada;
+        maniobra.hLlegada = body.hLlegada;
+        maniobra.estatus = "ESPERA";
+        maniobra.save((err, maniobraGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar la maniobra',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                maniobra: maniobraGuardado
+            });
+        });
+    });
 });
 
 // =======================================
