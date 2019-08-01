@@ -148,7 +148,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
                     contenedor: element.contenedor,
                     tipo: element.tipo,
                     estado: element.estado,
-                    estatus: 'APROBADO',
+                    estatus: 'TRANSITO',
                     destinatario: element.destinatario,
                     usuarioAlta: req.usuario._id
                 });
