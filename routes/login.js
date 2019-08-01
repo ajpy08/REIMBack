@@ -127,6 +127,7 @@ function obtenerMenu(ROLE) {
         menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
         menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
         menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+        menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
 
 
         menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/aacarga' });
