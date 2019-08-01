@@ -133,9 +133,81 @@ app.get('/transito/', (req, res, netx) => {
       });
 });
 
+app.get('/espera/', (req, res, netx) => {
+    var desde = req.query.desde || 0;
+    var contenedor = new RegExp(req.query.contenedor, 'i');
+    desde = Number(desde);
+    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+    Maniobra.find({ "estatus": "ESPERA" })
+        .skip(desde)
+        .limit(100)
+        .populate('cliente', 'rfc razonSocial')
+        .populate('agencia', 'rfc razonSocial')
+        .populate('transportista', 'rfc razonSocial')
+        .populate({
+            path: "viaje",
+            select: 'viaje fechaArribo',
+            populate: {
+                path: "buque",
+                select: 'nombre'
+            }
+        })
+        .populate('usuarioAlta', 'nombre email')
+        .exec((err, maniobras) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando maniobras',
+                    errors: err
+                });
+            }
+            Maniobra.countDocuments({}, (err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    maniobras: maniobras,
+                    total: conteo
+                });
+            });
+        });
+  });
 
-
-
+  app.get('/revision/', (req, res, netx) => {
+    var desde = req.query.desde || 0;
+    var contenedor = new RegExp(req.query.contenedor, 'i');
+    desde = Number(desde);
+    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+    Maniobra.find({ "estatus": "REVISION" })
+        .skip(desde)
+        .limit(100)
+        .populate('cliente', 'rfc razonSocial')
+        .populate('agencia', 'rfc razonSocial')
+        .populate('transportista', 'rfc razonSocial')
+        .populate({
+            path: "viaje",
+            select: 'viaje fechaArribo',
+            populate: {
+                path: "buque",
+                select: 'nombre'
+            }
+        })
+        .populate('usuarioAlta', 'nombre email')
+        .exec((err, maniobras) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando maniobras',
+                    errors: err
+                });
+            }
+            Maniobra.countDocuments({}, (err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    maniobras: maniobras,
+                    total: conteo
+                });
+            });
+        });
+  });
 
 
 
