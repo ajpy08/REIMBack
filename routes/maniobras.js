@@ -100,7 +100,7 @@ app.get('/transito/', (req, res, netx) => {
   var contenedor = new RegExp(req.query.contenedor, 'i');
   desde = Number(desde);
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-  Maniobra.find({ "estatus": "APROBADO" })
+  Maniobra.find({ "estatus": "TRANSITO" })
       .skip(desde)
       .limit(100)
       .populate('cliente', 'rfc razonSocial')
