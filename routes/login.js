@@ -114,6 +114,8 @@ function obtenerMenu(ROLE) {
             },
         ];
         menu[0].submenu.unshift({ titulo: 'Transito', url: '/transito' });
+        menu[0].submenu.unshift({ titulo: 'Espera', url: '/espera' });
+        menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
         menu[0].submenu.unshift({ titulo: 'Solicitudes de descargas', url: '/solicitudes_aprobaciones' });
         menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
         menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
