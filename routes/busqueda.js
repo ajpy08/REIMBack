@@ -11,6 +11,7 @@ var Maniobra = require('../models/maniobra');
 var Transportista = require('../models/transportista');
 var Agencia = require('../models/agencia');
 var Buque = require('../models/buque');
+var Reparacion = require('../models/reparacion');
 
 // ==============================
 // Busqueda por colección
@@ -19,7 +20,7 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
     var busqueda = req.params.busqueda;
     var tabla = req.params.tabla;
     var regex = new RegExp(busqueda, 'i');
-    console.log('busqueda: ' + busqueda + ' Y regex : ' + regex)
+    console.log('busqueda: ' + busqueda + ' en tabla: ' + tabla + ' Y regex : ' + regex)
     var promesa;
     switch (tabla) {
         case 'usuarios':
@@ -52,6 +53,9 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
         case 'buques':
             promesa = buscarBuques(busqueda, regex);
             break;
+        case 'reparaciones':
+            promesa = buscarReparaciones(busqueda, regex);
+            break;
         default:
             return res.status(400).json({
                 ok: false,
@@ -83,7 +87,8 @@ app.get('/todo/:busqueda', (req, res, next) => {
         buscarTransportistas(busqueda, regex),
         buscarManiobras(busqueda, regex),
         buscarUsuarios(busqueda, regex),
-        buscarBuques(busqueda, regex)
+        buscarBuques(busqueda, regex),
+        buscarReparaciones(busqueda, regex)
     ]).then(respuestas => {
         res.status(200).json({
             ok: true,
@@ -231,7 +236,7 @@ function buscarUsuarios(busqueda, regex) {
     });
 }
 
-function buscarBuques(busqueda, regex) {    
+function buscarBuques(busqueda, regex) {
     return new Promise((resolve, reject) => {
         Buque.find({ nombre: regex })
             .populate('usuario', 'nombre email img')
@@ -240,6 +245,20 @@ function buscarBuques(busqueda, regex) {
                     reject('Error al cargar operadores', err);
                 } else {
                     resolve(buque);
+                }
+            });
+    });
+}
+
+function buscarReparaciones(busqueda, regex) {
+    return new Promise((resolve, reject) => {
+        Reparacion.find({ descripcion: regex })
+            .populate('usuario', 'nombre email img')
+            .exec((err, reparacion) => {
+                if (err) {
+                    reject('Error al cargar operadores', err);
+                } else {
+                    resolve(reparacion);
                 }
             });
     });
