@@ -105,6 +105,12 @@ app.put('/registra_llegada/:id', mdAutenticacion.verificaToken, (req, res) => {
         maniobra.fLlegada = body.fLlegada;
         maniobra.hLlegada = body.hLlegada;
         maniobra.estatus = "ESPERA";
+        if (body.hEntrada){
+            maniobra.hEntrada = body.hEntrada;
+            maniobra.estatus = "REVISION";
+        }
+
+        
         maniobra.save((err, maniobraGuardado) => {
             if (err) {
                 return res.status(400).json({
