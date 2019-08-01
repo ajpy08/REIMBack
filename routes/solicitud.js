@@ -284,7 +284,7 @@ app.put('/aprueba/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
              solicitud.contenedores.forEach((element) => {
                  Maniobra.findById(element.maniobra, (err, maniobra) => {
-                     maniobra.estatus = "APROBADO";
+                     maniobra.estatus = "TRANSITO";
                      maniobra.solicitudD = id;
                      maniobra.agencia = solicitud.agencia;
                      maniobra.transportista = solicitud.transportista;
