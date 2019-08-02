@@ -119,6 +119,7 @@ function obtenerMenu(ROLE) {
         menu[0].submenu.unshift({ titulo: 'Solicitudes de descargas', url: '/solicitudes_aprobaciones' });
         menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
         menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
+        menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
 
         menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
         menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
