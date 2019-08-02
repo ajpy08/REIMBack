@@ -3,6 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var maniobraSchema = new Schema({
+    cargaDescarga: { type: String, required: true, default: 'D'},
     viaje: { type: Schema.Types.ObjectId, ref: 'Viaje', required: [true, 'El id Viaje es un campo obligatorio '] },
     agencia: { type: Schema.Types.ObjectId, ref: 'Cliente' },
     cliente: { type: Schema.Types.ObjectId, ref: 'Cliente' },
@@ -18,13 +19,19 @@ var maniobraSchema = new Schema({
     fLlegada: { type: String },
     hLlegada: { type: String },
     hEntrada: { type: String },
-    hSalida: { type: String },
-    lavado: { type: String },
-    rep: { type: String },
     facturarA: { type: String },
     correoFac: { type: String },
     correoOp: { type: String },
     solicitudD: { type: Schema.Types.ObjectId, ref: 'Solicitud' },
+    hSalida: { type: String },
+    lavado: { type: String },
+    lavadoObservacion: { type: String },
+    reparaciones: [{
+        id: { type: Schema.Types.ObjectId, ref: 'reparacion' },
+        reparacion: { type: String, required: [true, 'La reparacion es necesaria'] },
+        costo: { type: String },
+    }],
+    reparacionesObservacion: { type: String },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
     fAlta: { type: Date, default: Date.now },
     usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
