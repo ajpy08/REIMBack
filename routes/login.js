@@ -22,7 +22,7 @@ app.get('/renuevatoken', mdAutenticacion.verificaToken, (req, res) => {
         token: token
     });
 
-});  
+});
 
 // ==========================================
 //  Autenticación normal
@@ -88,8 +88,7 @@ function obtenerMenu(ROLE) {
             {
                 titulo: 'Catálogos',
                 icono: 'mdi mdi-folder-lock-open',
-                submenu: [
-                ]
+                submenu: []
             },
             {
                 titulo: 'Agencia',
@@ -116,6 +115,7 @@ function obtenerMenu(ROLE) {
         menu[0].submenu.unshift({ titulo: 'Transito', url: '/transito' });
         menu[0].submenu.unshift({ titulo: 'Espera', url: '/espera' });
         menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
+        menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/lavado_reparacion' });
         menu[0].submenu.unshift({ titulo: 'Solicitudes de descargas', url: '/solicitudes_aprobaciones' });
         menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
         menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
