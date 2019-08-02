@@ -34,6 +34,43 @@ app.get('/:id', (req, res) => {
         });
 });
 
+
+// ==========================================
+//  Obtener Maniobra por ID CON INCLUDES
+// ==========================================
+app.get('/:id/includes', (req, res) => {
+    var id = req.params.id;
+    Maniobra.findById(id)
+        .populate('operador', 'nombre foto')
+        .populate('camion', 'placa')
+        .populate('cliente', 'razonSocial')
+        .populate('agencia', 'razonSocial')
+        .populate('transportista', 'razonSocial')
+        .populate('viaje', 'viaje')
+
+    .exec((err, maniobra) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar la maniobra',
+                errors: err
+            });
+        }
+        if (!maniobra) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La maniobra con el id ' + id + 'no existe',
+                errors: { message: 'No existe maniobra con ese ID' }
+            });
+        }
+        res.status(200).json({
+            ok: true,
+            maniobra: maniobra
+        });
+    });
+});
+
+
 // =======================================
 // Crear Maniobra
 // =======================================
@@ -105,12 +142,60 @@ app.put('/registra_llegada/:id', mdAutenticacion.verificaToken, (req, res) => {
         maniobra.fLlegada = body.fLlegada;
         maniobra.hLlegada = body.hLlegada;
         maniobra.estatus = "ESPERA";
-        if (body.hEntrada){
+        if (body.hEntrada) {
             maniobra.hEntrada = body.hEntrada;
             maniobra.estatus = "REVISION";
         }
 
-        
+
+        maniobra.save((err, maniobraGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar la maniobra',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                maniobra: maniobraGuardado
+            });
+        });
+    });
+});
+
+// =======================================
+// Registra Lavado, reparaciones y descarga
+// =======================================
+app.put('/registra_descarga/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+    Maniobra.findById(id, (err, maniobra) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar maniobra',
+                errors: err
+            });
+        }
+        if (!maniobra) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La maniobra con el id ' + id + ' no existe',
+                errors: { message: 'No existe una maniobra con ese ID' }
+            });
+        }
+        maniobra.lavado = body.lavado;
+        maniobra.lavadoObservacion = body.lavadoObservacion;
+        maniobra.reparacionesObservacion = body.reparacionesObservacion;
+        maniobra.reparaciones = body.reparaciones;
+        if (body.hSalida) {
+            maniobra.hSalida = body.hSalida;
+            maniobra.estatus = "LAVADO_REPARACION";
+        }
+        console.log(body.lavado);
+        console.log(maniobra);
+
         maniobra.save((err, maniobraGuardado) => {
             if (err) {
                 return res.status(400).json({
