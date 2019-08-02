@@ -3,6 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var maniobraSchema = new Schema({
+    cargaDescarga: { type: String, required: true, default: 'D'},
     viaje: { type: Schema.Types.ObjectId, ref: 'Viaje', required: [true, 'El id Viaje es un campo obligatorio '] },
     agencia: { type: Schema.Types.ObjectId, ref: 'Cliente' },
     cliente: { type: Schema.Types.ObjectId, ref: 'Cliente' },
