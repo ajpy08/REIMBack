@@ -5,6 +5,7 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
+var ParamsToJSON = require('../public/varias');
 
 
 // =======================================
@@ -59,23 +60,23 @@ app.get('/buscaxcontenedorviaje', (req, res, netx) => {
     var viaje = req.query.viaje.trim();
     var buque = req.query.buque.trim();
     Maniobra.aggregate([{
-                $lookup: {
-                    from: "viajes",
-                    localField: "viaje",
-                    foreignField: "_id",
-                    as: "match"
-                }
-            },
-            {
-                $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    contenedor: 1
-                }
-            }
-        ])
+        $lookup: {
+            from: "viajes",
+            localField: "viaje",
+            foreignField: "_id",
+            as: "match"
+        }
+    },
+    {
+        $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
+    },
+    {
+        $project: {
+            _id: 1,
+            contenedor: 1
+        }
+    }
+    ])
         .exec(
             (err, maniobra) => {
                 if (err) {
@@ -209,6 +210,7 @@ app.get('/revision/', (req, res, netx) => {
         });
 });
 
+
 app.get('/lavado_reparacion/', (req, res, netx) => {
 
     Maniobra.find({ "estatus": "LAVADO_REPARACION" })
@@ -240,7 +242,7 @@ app.get('/lavado_reparacion/', (req, res, netx) => {
                 });
             });
         });
-});
+
 
 
 
@@ -316,7 +318,6 @@ app.get('/rangofecha', (req, res, netx) => {
     // fechaaFin = new Date(fechaFin).toISOString();
     var finDate = fechaFin + "T23:59:59.999Z";
     fechaaFin = new Date(finDate);
-
     Maniobra.find({ "fechaCreado": { "$gte": fechaaInicio, "$lte": fechaaFin } })
         .populate('operador', 'operador')
         .populate({
@@ -351,5 +352,50 @@ app.get('/rangofecha', (req, res, netx) => {
                 });
 
             });
+});
+
+// ==========================================
+// Obtener todas las maniobras de vacio
+// ==========================================
+app.get('/vacio/:viaje?&:estado?', (req, res) => {
+    var filtro = ParamsToJSON.ParamsToJSON(req);
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+    //console.log({filtro})
+    Maniobra.find(filtro)
+        .skip(desde)
+        // .populate('cliente', 'rfc razonSocial')
+        // .populate('agencia', 'rfc razonSocial')
+        // .populate('transportista', 'rfc razonSocial')
+        // .populate({
+        //     path: "viaje",
+        //     select: 'viaje fechaArribo',
+        //     populate: {
+        //         path: "buque",
+        //         select: 'nombre'
+        //     }
+        // })
+        // .populate('usuarioAlta', 'nombre email')
+        .exec((err, vacios) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar vacios',
+                    errors: err
+                });
+            }
+            if (!vacios) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existen maniobras de vacio para el viaje: ' + viaje,
+                    errors: { message: "No existen maniobras de vacio" }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                vacios: vacios,
+                total: vacios.length
+            });
+        });
 });
 module.exports = app;
