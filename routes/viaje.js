@@ -119,8 +119,8 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var viaje = new Viaje({
         viaje: body.viaje,
         buque: body.buque,
-        fArribo: body.fechaArribo,
-        fVigenciaTemporal: body.fechaVigenciaTemporal,
+        fArribo: body.fArribo,
+        fVigenciaTemporal: body.fVigenciaTemporal,
         pdfTemporal: body.pdfTemporal,
         usuarioAlta: req.usuario._id
     });
@@ -207,8 +207,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
         viaje.viaje = body.viaje;
         viaje.buque = body.buque;
-        viaje.fArribo = body.fechaArribo;
-        viaje.fVigenciaTemporal = body.fechaVigenciaTemporal;
+        viaje.fArribo = body.fArribo;
+        viaje.fVigenciaTemporal = body.fVigenciaTemporal;
         viaje.usuarioMod = req.usuario._id;
         viaje.fMod = new Date();
 

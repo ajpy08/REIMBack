@@ -210,7 +210,6 @@ app.get('/revision/', (req, res, netx) => {
 });
 
 app.get('/lavado_reparacion/', (req, res, netx) => {
-
     Maniobra.find({ "estatus": "LAVADO_REPARACION" })
         .populate('cliente', 'rfc razonSocial')
         .populate('agencia', 'rfc razonSocial')
@@ -232,21 +231,46 @@ app.get('/lavado_reparacion/', (req, res, netx) => {
                     errors: err
                 });
             }
-            Maniobra.countDocuments({}, (err, conteo) => {
-                res.status(200).json({
-                    ok: true,
-                    maniobras: maniobras,
-                    total: conteo
-                });
+            res.status(200).json({
+                ok: true,
+                maniobras: maniobras,
+                total: maniobras.length
             });
         });
 });
 
+app.get('/contenedores/disponibles/', (req, res, netx) => {
+    Maniobra.find({ "estatus": "DISPONIBLE" })
+        .populate('cliente', 'rfc razonSocial')
+        .populate('agencia', 'rfc razonSocial')
+        .populate('transportista', 'rfc razonSocial')
+        .populate({
+            path: "viaje",
+            select: 'viaje fVigenciaTemporal pdfTemporal',
+            populate: {
+                path: "buque",
+                select: 'nombre'
+            }
+        })
+        .populate('usuarioAlta', 'nombre email')
+        .exec((err, maniobras) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando maniobras',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                maniobras: maniobras,
+                total: maniobras.length
+            });
+        });
 
+    });
 
-
-
-// =======================================
+    // =======================================
 // Obtener Maniobra de hoy
 // =======================================
 app.get('/hoy', (req, res, netx) => {
