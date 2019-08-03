@@ -189,6 +189,7 @@ app.put('/registra_descarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         maniobra.lavadoObservacion = body.lavadoObservacion;
         maniobra.reparacionesObservacion = body.reparacionesObservacion;
         maniobra.reparaciones = body.reparaciones;
+        maniobra.grado = body.grado;
         if (body.hSalida) {
             maniobra.hSalida = body.hSalida;
             maniobra.estatus = "LAVADO_REPARACION";
