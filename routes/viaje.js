@@ -143,6 +143,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             if (element.estado == 'VACIO') {
                 maniobra = new Maniobra({
                     viaje: viaje._id,
+                    cliente: "5c49e55b6b427b166466c9b3",
                     facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
                     correoFac: 'aqui iria correo del datos que hay en clientes',
                     contenedor: element.contenedor,
