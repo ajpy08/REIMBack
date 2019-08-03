@@ -112,6 +112,7 @@ function obtenerMenu(ROLE) {
                 ]
             },
         ];
+        menu[0].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/disponibles' });
         menu[0].submenu.unshift({ titulo: 'Transito', url: '/transito' });
         menu[0].submenu.unshift({ titulo: 'Espera', url: '/espera' });
         menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
@@ -132,11 +133,10 @@ function obtenerMenu(ROLE) {
         menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
 
 
-        menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/aacarga' });
-        menu[2].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descargas' });
+        menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/solicitudes_carga' });
+        menu[2].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descarga' });
         menu[2].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
         menu[2].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
-        menu[2].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/contenedoresDisponibles' });
 
         return menu;
 
