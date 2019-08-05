@@ -405,7 +405,7 @@ app.get('/xcargar/', (req, res, netx) => {
 
                 });
     });
-});
+
 
 // ==========================================
 // Obtener todas las maniobras de vacio
