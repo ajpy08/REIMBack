@@ -12,238 +12,290 @@ var ParamsToJSON = require('../public/varias');
 // Obtener Maniobras
 // =======================================
 app.get('/', (req, res, netx) => {
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
+  var desde = req.query.desde || 0;
+  desde = Number(desde);
 
-    Maniobra.find({})
-        .skip(desde)
-        .limit(5)
-        .populate('operador', 'operador')
-        .populate({
-            path: "camiones",
-            select: 'placa numbereconomico',
-            populate: {
-                path: "transportista",
-                select: 'nombre'
-            }
-        })
-        .populate('cliente', 'cliente')
-        .populate('agencia', 'nombre')
-        .populate('transportista', 'nombre')
-        .populate('viaje', 'viaje')
-        .exec(
-            (err, maniobras) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando maniobras',
-                        errors: err
-                    });
-                }
-                Maniobra.countDocuments({}, (err, conteo) => {
-                    res.status(200).json({
-                        ok: true,
-                        maniobras,
-                        total: conteo
-                    });
+  Maniobra.find({})
+    .skip(desde)
+    .limit(5)
+    .populate('operador', 'operador')
+    .populate({
+      path: "camiones",
+      select: 'placa numbereconomico',
+      populate: {
+        path: "transportista",
+        select: 'nombre'
+      }
+    })
+    .populate('cliente', 'cliente')
+    .populate('agencia', 'nombre')
+    .populate('transportista', 'nombre')
+    .populate('viaje', 'viaje')
+    .exec(
+      (err, maniobras) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error cargando maniobras',
+            errors: err
+          });
+        }
+        Maniobra.countDocuments({}, (err, conteo) => {
+          res.status(200).json({
+            ok: true,
+            maniobras,
+            total: conteo
+          });
 
-                });
+        });
 
-            });
+      });
 });
 
 // ============================================
 // Obtener Maniobras por contenedor buque viaje
 // ============================================
 app.get('/buscaxcontenedorviaje', (req, res, netx) => {
-    var contenedor = req.query.contenedor.trim();
-    var viaje = req.query.viaje.trim();
-    var buque = req.query.buque.trim();
-    Maniobra.aggregate([{
-        $lookup: {
-            from: "viajes",
-            localField: "viaje",
-            foreignField: "_id",
-            as: "match"
-        }
-    },
-    {
-        $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
-    },
-    {
-        $project: {
-            _id: 1,
-            contenedor: 1
-        }
-    }
-    ])
-        .exec(
-            (err, maniobra) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando maniobras',
-                        errors: err
-                    });
-                }
-                res.status(200).json({
-                    ok: true,
-                    maniobra: maniobra
-                });
 
-            });
+  var contenedor = req.query.contenedor.trim();
+  var viaje = req.query.viaje.trim();
+  var buque = req.query.buque.trim();
+  Maniobra.aggregate([{
+        $lookup: {
+          from: "viajes",
+          localField: "viaje",
+          foreignField: "_id",
+          as: "match"
+        }
+      },
+      {
+        $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
+      },
+      {
+        $project: {
+          _id: 1,
+          contenedor: 1
+        }
+      }
+    ])
+    .exec(
+      (err, maniobra) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error cargando maniobras',
+            errors: err
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          maniobra: maniobra
+        });
+
+
+      });
 });
 
-
-
 app.get('/transito/', (req, res, netx) => {
-    var desde = req.query.desde || 0;
-    var contenedor = new RegExp(req.query.contenedor, 'i');
-    desde = Number(desde);
-    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-    Maniobra.find({ "estatus": "TRANSITO" })
-        .skip(desde)
-        .limit(100)
-        .populate('cliente', 'rfc razonSocial')
-        .populate('agencia', 'rfc razonSocial')
-        .populate('transportista', 'rfc razonSocial')
-        .populate({
-            path: "viaje",
-            select: 'viaje fechaArribo',
-            populate: {
-                path: "buque",
-                select: 'nombre'
-            }
-        })
-        .populate('usuarioAlta', 'nombre email')
-        .exec((err, maniobras) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando maniobras',
-                    errors: err
-                });
-            }
-            Maniobra.countDocuments({}, (err, conteo) => {
-                res.status(200).json({
-                    ok: true,
-                    maniobras: maniobras,
-                    total: conteo
-                });
-            });
+  var desde = req.query.desde || 0;
+  var contenedor = new RegExp(req.query.contenedor, 'i');
+  desde = Number(desde);
+  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+  Maniobra.find({ "estatus": "TRANSITO" })
+    .skip(desde)
+    .limit(100)
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
         });
+      }
+
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+
+    });
 });
 
 app.get('/espera/', (req, res, netx) => {
-    var desde = req.query.desde || 0;
-    var contenedor = new RegExp(req.query.contenedor, 'i');
-    desde = Number(desde);
-    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-    Maniobra.find({ "estatus": "ESPERA" })
-        .skip(desde)
-        .limit(100)
-        .populate('cliente', 'rfc razonSocial')
-        .populate('agencia', 'rfc razonSocial')
-        .populate('transportista', 'rfc razonSocial')
-        .populate({
-            path: "viaje",
-            select: 'viaje fechaArribo',
-            populate: {
-                path: "buque",
-                select: 'nombre'
-            }
-        })
-        .populate('usuarioAlta', 'nombre email')
-        .exec((err, maniobras) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando maniobras',
-                    errors: err
-                });
-            }
-            Maniobra.countDocuments({}, (err, conteo) => {
-                res.status(200).json({
-                    ok: true,
-                    maniobras: maniobras,
-                    total: conteo
-                });
-            });
+  var desde = req.query.desde || 0;
+  var contenedor = new RegExp(req.query.contenedor, 'i');
+  desde = Number(desde);
+  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+  Maniobra.find({ "estatus": "ESPERA" })
+    .skip(desde)
+    .limit(100)
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
         });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+
+    });
 });
 
 app.get('/revision/', (req, res, netx) => {
-    var desde = req.query.desde || 0;
-    var contenedor = new RegExp(req.query.contenedor, 'i');
-    desde = Number(desde);
-    //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-    Maniobra.find({ "estatus": "REVISION" })
-        .skip(desde)
-        .limit(100)
-        .populate('cliente', 'rfc razonSocial')
-        .populate('agencia', 'rfc razonSocial')
-        .populate('transportista', 'rfc razonSocial')
-        .populate({
-            path: "viaje",
-            select: 'viaje fechaArribo',
-            populate: {
-                path: "buque",
-                select: 'nombre'
-            }
-        })
-        .populate('usuarioAlta', 'nombre email')
-        .exec((err, maniobras) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando maniobras',
-                    errors: err
-                });
-            }
-            Maniobra.countDocuments({}, (err, conteo) => {
-                res.status(200).json({
-                    ok: true,
-                    maniobras: maniobras,
-                    total: conteo
-                });
-            });
+  var desde = req.query.desde || 0;
+  var contenedor = new RegExp(req.query.contenedor, 'i');
+  desde = Number(desde);
+  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+  Maniobra.find({ "estatus": "REVISION" })
+    .skip(desde)
+    .limit(100)
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
         });
+      }
+
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+
+    });
 });
 
 
 app.get('/lavado_reparacion/', (req, res, netx) => {
-
-    Maniobra.find({ "estatus": "LAVADO_REPARACION" })
-        .populate('cliente', 'rfc razonSocial')
-        .populate('agencia', 'rfc razonSocial')
-        .populate('transportista', 'rfc razonSocial')
-        .populate({
-            path: "viaje",
-            select: 'viaje fechaArribo',
-            populate: {
-                path: "buque",
-                select: 'nombre'
-            }
-        })
-        .populate('usuarioAlta', 'nombre email')
-        .exec((err, maniobras) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando maniobras',
-                    errors: err
-                });
-            }
-            Maniobra.countDocuments({}, (err, conteo) => {
-                res.status(200).json({
-                    ok: true,
-                    maniobras: maniobras,
-                    total: conteo
-                });
-            });
+  Maniobra.find({ "estatus": "LAVADO_REPARACION" })
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
         });
 
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
+});
 
+
+app.get('/contenedores/disponibles/', (req, res, netx) => {
+  Maniobra.find({ "estatus": "DISPONIBLE" })
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fVigenciaTemporal pdfTemporal',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
+
+});
+
+
+app.get('/xcargar/', (req, res, netx) => {
+  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+  Maniobra.find({ "estatus": "XCARGAR" })
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
+});
 
 
 
@@ -399,5 +451,6 @@ app.get('/:viaje?&:estado?&:cargaDescarga?', (req, res) => {
                 total: vacios.length
             });
         });
+
 });
 module.exports = app;

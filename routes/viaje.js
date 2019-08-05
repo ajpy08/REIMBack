@@ -119,8 +119,8 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var viaje = new Viaje({
         viaje: body.viaje,
         buque: body.buque,
-        fArribo: body.fechaArribo,
-        fVigenciaTemporal: body.fechaVigenciaTemporal,
+        fArribo: body.fArribo,
+        fVigenciaTemporal: body.fVigenciaTemporal,
         pdfTemporal: body.pdfTemporal,
         usuarioAlta: req.usuario._id
     });
@@ -143,6 +143,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             if (element.estado == 'VACIO') {
                 maniobra = new Maniobra({
                     viaje: viaje._id,
+                    cliente: "5c49e55b6b427b166466c9b3",
                     facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
                     correoFac: 'aqui iria correo del datos que hay en clientes',
                     contenedor: element.contenedor,
@@ -206,8 +207,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
         viaje.viaje = body.viaje;
         viaje.buque = body.buque;
-        viaje.fArribo = body.fechaArribo;
-        viaje.fVigenciaTemporal = body.fechaVigenciaTemporal;
+        viaje.fArribo = body.fArribo;
+        viaje.fVigenciaTemporal = body.fVigenciaTemporal;
         viaje.usuarioMod = req.usuario._id;
         viaje.fMod = new Date();
 
