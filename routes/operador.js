@@ -176,9 +176,9 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         operador.usuarioMod = req.usuario._id;
         operador.fMod = new Date();
 
-        if (operador.foto != body.foto) {
-            console.log(operador.foto)
-            console.log(body.foto)
+        console.log(operador.foto)
+        console.log(body.foto)
+        // if (operador.foto != body.foto) {
             if (fs.existsSync('./uploads/temp/' + body.foto)) {
                 if (operador.foto != undefined || operador.foto != '' && operador.foto != null && fs.existsSync('./uploads/operadores/' + operador.foto)) {
                     fs.unlink('./uploads/operadores/' + operador.foto, (err) => {
@@ -192,9 +192,9 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
                 operador.foto = body.foto;
             }
-        }
+        // }
 
-        if (operador.fotoLicencia != body.fotoLicencia) {
+        // if (operador.fotoLicencia != body.fotoLicencia) {
             if (fs.existsSync('./uploads/temp/' + body.fotoLicencia)) {
                 if (operador.fotoLicencia != undefined || operador.fotoLicencia != '' && operador.fotoLicencia != null && fs.existsSync('./uploads/operadores/' + operador.fotoLicencia)) {
                     fs.unlink('./uploads/operadores/' + operador.fotoLicencia, (err) => {
@@ -208,7 +208,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
                 operador.fotoLicencia = body.fotoLicencia;
             }
-        }
+        // }
 
         operador.save((err, operadorGuardado) => {
             if (err) {

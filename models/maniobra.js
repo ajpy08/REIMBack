@@ -32,6 +32,7 @@ var maniobraSchema = new Schema({
         costo: { type: String },
     }],
     reparacionesObservacion: { type: String },
+    facturaManiobra: {type: String},
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
     fAlta: { type: Date, default: Date.now },
     usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
