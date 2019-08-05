@@ -4,8 +4,8 @@ var fileUpload = require('express-fileupload');
 var fs = require('fs');
 var app = express();
 var Viaje = require('../models/viaje');
-
 var Maniobra = require('../models/maniobra');
+var ParamsToJSON = require('../public/varias');
 
 // default options
 app.use(fileUpload());
@@ -138,7 +138,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
                 errors: err
             });
         }
-        body.contenedores.forEach(function(element) {
+        body.contenedores.forEach(function (element) {
             var maniobra;
             if (element.estado == 'VACIO') {
                 maniobra = new Maniobra({
@@ -375,6 +375,47 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             viaje: viajeBorrado
         });
     });
+});
+
+// ==========================================
+// Obtener los ultimos N viajes JAVI
+// ==========================================
+app.get('/anio/:anio', (req, res, next) => {
+    var fechaFin = req.params.anio;
+    //var fechaInicio = req.params.anio;
+    //console.log("fechaInicio: " + fechaInicio + "y fechaFin: " + fechaFin)
+
+
+    fechaFin = new Date(fechaFin);
+    fFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), fechaFin.getDate(),23,59,59);
+    //console.log("fechaFin: " + fechaFin + "y fFin: " + fFin)
+
+    //fechaInicio = new Date(fechaInicio);
+    // fechaInicio.setFullYear(2018);
+    fIni = new Date(fechaFin.getFullYear() -1, fechaFin.getMonth(), fechaFin.getDate(),0,0,0);
+    //console.log("fechaInicio: " + fechaInicio + "y fIni: " + fIni)
+
+    // console.log("fIni: " + fIni);
+    // console.log("fFin: " + fFin);
+    // console.log('"anio": { "$gte":' + fIni + ', "$lte": ' + fFin + '}')
+
+    Viaje.find({ "anio": { "$gte": fIni, "$lt": fFin } })
+        .populate('buque', 'nombre')
+        .exec(
+            (err, viajes) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al cargar viajes',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    viajes: viajes,
+                    total: viajes.length
+                });
+            });
 });
 
 
