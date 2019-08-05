@@ -12,7 +12,6 @@ var app = express();
 app.use(fileUpload());
 
 app.put('/', (req, res) => {
-    //console.log(req.files);
     if (!req.files) {
         return res.status(400).json({
             ok: false,
@@ -39,7 +38,7 @@ app.put('/', (req, res) => {
     // Nombre de archivo personalizado
     // 12312312312-123.png
     var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-    
+
     var path = './uploads/temp/' + nombreArchivo;
 
     archivo.mv(path, err => {
