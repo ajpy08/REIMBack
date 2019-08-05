@@ -75,6 +75,7 @@ app.post('/', (req, res) => {
 
 function obtenerMenu(ROLE) {
 
+
   //console.log('ROLE', ROLE);
 
   if (ROLE === 'ADMIN_ROLE') {
@@ -112,7 +113,7 @@ function obtenerMenu(ROLE) {
         ]
       },
     ];
-
+    menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
     menu[0].submenu.unshift({ titulo: 'Cont. X Cargar', url: '/xcargar' });
     menu[0].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/disponibles' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/lavado_reparacion' });
@@ -132,6 +133,7 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
     menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    
 
     menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/solicitudes_carga' });
     menu[2].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descarga' });
@@ -209,6 +211,7 @@ function obtenerMenu(ROLE) {
 
     return menu;
   }
+
 
 }
 
