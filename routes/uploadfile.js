@@ -73,7 +73,8 @@ app.put('/', mdAutenticacion.verificaToken, (req, res) => {
                         'contenedor',
                         'tipo',
                         'peso',
-                        'cliente'
+                        'cliente',
+                        'operador'
                     ]
                 }).on("data", function(data) {
                     var viaje = new Viaje();

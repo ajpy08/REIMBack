@@ -3,6 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var maniobraSchema = new Schema({
+
   cargaDescarga: { type: String, required: true, default: 'D' },
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente' },
@@ -37,10 +38,13 @@ var maniobraSchema = new Schema({
   fTerminacionReparacion: { type: String },
   hTerminacionReparacion: { type: String },
   maniobraAsociada: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
+  facturaManiobra: {type: String},
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
+
+    
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })

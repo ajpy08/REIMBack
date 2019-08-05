@@ -492,6 +492,7 @@ app.put('/removeimgr/:id&:img', mdAutenticacion.verificaToken, (req, res) => {
 
 });
 
+
 // ==========================================
 // Subir fotos lavado de la maniobra
 // ==========================================
@@ -531,5 +532,48 @@ app.put('/addimg/:id', (req, res, next) => {
   });
 
 });
+
+// =======================================
+// Asigna Factura Maniobra
+// =======================================
+app.put('/asigna_factura/:id&:facturaManiobra', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var facturaManiobra = req.params.facturaManiobra;
+    console.log("El id es:" + id)
+    console.log("La factura es :" + facturaManiobra)
+    Maniobra.findById(id, (err, maniobra) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar maniobra',
+                errors: err
+            });
+        }
+        if (!maniobra) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La maniobra con el id ' + id + ' no existe',
+                errors: { message: 'No existe una maniobra con ese ID' }
+            });
+        }
+        maniobra.facturaManiobra = facturaManiobra;
+
+        maniobra.save((err, maniobraGuardada) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar la maniobra',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                maniobra: maniobraGuardada
+            });
+        });
+    });
+});
+
+
 // export
 module.exports = app;

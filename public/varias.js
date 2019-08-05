@@ -23,7 +23,7 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
             filtro = filtro + '}';
             //return;
         }
-
+        //console.log(filtro)
         var json = JSON.parse(filtro);
         //console.log(json)
         //console.log(req.params);
