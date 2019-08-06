@@ -14,7 +14,7 @@ var maniobraSchema = new Schema({
   contenedor: { type: String },
   tipo: { type: String },
   grado: { type: String },
-  estado: { type: String },
+  peso: { type: String },
   destinatario: { type: String, required: false },
   estatus: { type: String, default: 'APROBACIÓN' },
   fLlegada: { type: String },
