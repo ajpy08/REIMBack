@@ -14,8 +14,8 @@ var mongoose = require('mongoose'),
     crypto = require('crypto'),
     _ = require('lodash'),
     hbs = require('nodemailer-express-handlebars'),
-    email = process.env.MAILER_EMAIL_ID || 'emirpalm@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'boryitbsckzmaczr',
+    email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
+    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
     nodemailer = require('nodemailer');
 
 
@@ -96,8 +96,8 @@ app.post('/', (req, res, next) => {
 app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
     var id = req.params.id;
     var body = req.body;
-    console.log(body);
-    console.log(id);
+    // console.log(body);
+    // console.log(id);
     Usuario.findById(id, (err, usuario) => {
         if (err) {
             return res.status(500).json({
