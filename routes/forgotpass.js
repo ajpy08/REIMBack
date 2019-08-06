@@ -1,5 +1,6 @@
 // Requires
 var express = require('express');
+// var URL_SERVICIOS = require('../config/config').URL_SERVICIOS;
 
 // Inicializar variables
 var app = express();
@@ -13,8 +14,8 @@ var mongoose = require('mongoose'),
     crypto = require('crypto'),
     _ = require('lodash'),
     hbs = require('nodemailer-express-handlebars'),
-    email = process.env.MAILER_EMAIL_ID || 'emirpalm@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'boryitbsckzmaczr',
+    email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
+    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
     nodemailer = require('nodemailer');
 
 
@@ -72,11 +73,12 @@ app.post('/', (req, res) => {
             });
         },
         (token, user, done) => {
+            // var url = URL_SERVICIOS + 'reset_password?token=' + token;
             var data = {
                 to: user.email,
                 from: email,
                 template: 'forgot-password-email',
-                subject: '¡MyT Restablecimiento de contraseña!',
+                subject: '¡REIM Container Park Restablecimiento de contraseña!',
                 context: {
                     url: 'http://localhost:3000/reset_password?token=' + token,
                     name: user.nombre.split(' ')[0]
