@@ -7,7 +7,7 @@ var Viaje = require('../models/viaje');
 var Maniobra = require('../models/maniobra');
 var ParamsToJSON = require('../public/varias');
 var mongoose = require('mongoose');
-const moment = require('moment');
+var moment = require('moment');
 
 app.use(fileUpload());
 
@@ -35,7 +35,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
   }
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
-  filtro = filtro + 'a}';
+  filtro = filtro + '}';
 
   var json = JSON.parse(filtro);
   //  console.log(json);
@@ -98,38 +98,6 @@ app.get('/viaje/:id', (req, res) => {
     });
 });
 
-
-// ==========================================
-//  Obtener viajes por numero
-// ==========================================
-app.get('/numero/:viaje', (req, res) => {
-
-  var viaje = req.params.viaje;
-
-  Viaje.find({ 'viaje': viaje })
-    .populate('buque', 'buque')
-    .exec((err, viaje) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar viaje',
-          errors: err
-        });
-      }
-
-      if (!viaje) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'El viaje con el numero' + viaje + 'no existe',
-          errors: { message: 'No existe un viaje con ese Numero' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        viaje: viaje
-      });
-    });
-});
 
 // ==========================================
 // Crear nuevo viaje
@@ -268,6 +236,56 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 // ==========================================
+// Agregar Contenedor al viaje
+// ==========================================
+
+app.put('/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var contenedor = req.params.contenedor;
+  var tipo = req.params.tipo;
+  var peso = req.params.peso;
+  var destinatario = req.params.destinatario;
+  if (peso == 'VACIO') {
+    maniobra = new Maniobra({
+      viaje: id,
+      facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
+      correoFac: 'aqui iria correo del datos que hay en clientes',
+      contenedor: contenedor,
+      tipo: tipo,
+      peso: peso,
+      estatus: 'APROBADO',
+      destinatario: destinatario,
+      usuarioAlta: req.usuario._id
+    });
+  } else {
+    maniobra = new Maniobra({
+      viaje: id,
+      contenedor: contenedor,
+      tipo: tipo,
+      peso: peso,
+      estatus: 'APROBACION',
+      destinatario: destinatario,
+      usuarioAlta: req.usuario._id
+    });
+  }
+  maniobra.save((err, maniobraGuardado) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({
+        ok: false,
+        mensaje: "Error al cargar la maniobra",
+        errors: err
+      });
+    }
+    res.status(201).json({
+      ok: true,
+      mensaje: 'Contenedor Agregado con éxito.',
+      contenedor: maniobraGuardado
+    });
+  });
+});
+
+// ==========================================
 // Remover contenedores del viaje
 // ==========================================
 
@@ -321,55 +339,8 @@ app.put('/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken, (req
     });
 });
 
-// ==========================================
-// Agregar Contenedor al viaje
-// ==========================================
 
-app.put('/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  var contenedor = req.params.contenedor;
-  var tipo = req.params.tipo;
-  var peso = req.params.peso;
-  var destinatario = req.params.destinatario;
-  if (peso == 'VACIO') {
-    maniobra = new Maniobra({
-      viaje: id,
-      facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
-      correoFac: 'aqui iria correo del datos que hay en clientes',
-      contenedor: contenedor,
-      tipo: tipo,
-      peso: peso,
-      estatus: 'APROBADO',
-      destinatario: destinatario,
-      usuarioAlta: req.usuario._id
-    });
-  } else {
-    maniobra = new Maniobra({
-      viaje: id,
-      contenedor: contenedor,
-      tipo: tipo,
-      peso: peso,
-      estatus: 'APROBACION',
-      destinatario: destinatario,
-      usuarioAlta: req.usuario._id
-    });
-  }
-  maniobra.save((err, maniobraGuardado) => {
-    if (err) {
-      console.log(err);
-      return res.status(400).json({
-        ok: false,
-        mensaje: "Error al cargar la maniobra",
-        errors: err
-      });
-    }
-    res.status(201).json({
-      ok: true,
-      mensaje: 'Contenedor Agregado con éxito.',
-      contenedor: maniobraGuardado
-    });
-  });
-});
+
 
 // ============================================
 // Borrar viaje por el id
@@ -397,6 +368,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
   });
 });
+
 
 // ==========================================
 // Obtener los ultimos N viajes JAVI
