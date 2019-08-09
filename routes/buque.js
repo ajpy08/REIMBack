@@ -11,7 +11,7 @@ app.get('/', (req, res, next) => {
     desde = Number(desde);
     Buque.find({})
         .skip(desde)
-        .limit(10)
+        // .limit(10)
         .populate('naviera', 'razonSocial')
         .populate('usuarioAlta', 'nombre email')
         .exec(
