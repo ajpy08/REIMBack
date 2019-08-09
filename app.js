@@ -8,11 +8,11 @@ var cors = require('cors');
 var app = express();
 
 var corsOptions = {
-    origin: '*',
-    methods: ['POST, GET, PUT, DELETE, OPTIONS'],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'contentType', 'Content-Type', 'Accept', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
+  origin: '*',
+  methods: ['POST, GET, PUT, DELETE, OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'contentType', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions));
 
@@ -38,7 +38,7 @@ var contenedorRoutes = require('./routes/contenedor');
 var clienteRoutes = require('./routes/cliente');
 var agenciaRoutes = require('./routes/agencia');
 var transportistaRoutes = require('./routes/transportista');
-var viajesRoutes = require('./routes/viaje');
+var viajesRoutes = require('./routes/viajes');
 var buqueRoutes = require('./routes/buque');
 var navieraRoutes = require('./routes/naviera');
 var reparacionRoutes = require('./routes/reparacion');
@@ -55,32 +55,32 @@ var solicitudRoute = require('./routes/solicitud');
 // Conexión a la base de datos Mongoose
 mongoose.Promise = Promise;
 mongoose.connection.on('connected', () => {
-    console.log('Base de datos Mongoose: \x1b[32m%s\x1b[0m', 'online');
+  console.log('Base de datos Mongoose: \x1b[32m%s\x1b[0m', 'online');
 });
 mongoose.connection.on('reconnected', () => {
-    console.log('Connection Reestablished');
+  console.log('Connection Reestablished');
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('Connection Disconnected');
+  console.log('Connection Disconnected');
 });
 
 mongoose.connection.on('close', () => {
-    console.log('Connection Closed');
+  console.log('Connection Closed');
 });
 
 mongoose.connection.on('error', (error) => {
-    console.log('ERROR: ' + error);
+  console.log('ERROR: ' + error);
 });
 
 const run = async() => {
-    await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
-        autoReconnect: true,
-        reconnectTries: 1000000,
-        reconnectInterval: 3000,
-        useCreateIndex: true,
-        useNewUrlParser: true
-    });
+  await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
+    autoReconnect: true,
+    reconnectTries: 1000000,
+    reconnectInterval: 3000,
+    useCreateIndex: true,
+    useNewUrlParser: true
+  });
 }
 
 
@@ -103,7 +103,7 @@ app.use('/busqueda', buesquedaRoutes);
 app.use('/naviera', navieraRoutes);
 app.use('/buque', buqueRoutes);
 app.use('/reparacion', reparacionRoutes);
-app.use('/viaje', viajesRoutes);
+app.use('/viajes', viajesRoutes);
 app.use('/transportista', transportistaRoutes);
 app.use('/agencia', agenciaRoutes);
 app.use('/cliente', clienteRoutes);
@@ -122,5 +122,5 @@ app.use('/', appRoutes);
 
 // Escuchar peticiones
 app.listen(3000, () => {
-    console.log('Express server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
+  console.log('Express server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
 })

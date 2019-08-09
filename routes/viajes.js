@@ -12,7 +12,8 @@ const moment = require('moment');
 app.use(fileUpload());
 
 // ==========================================
-// Obtener todas los viajes
+// Obtener todas los viajes, de acuerdo a los filtros solicitados.
+// las fechas deben ir en formato DD-MM-YYYY
 // ==========================================
 app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 
@@ -21,24 +22,23 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
   var finiarribo = req.query.finiarribo || '';
   var ffinarribo = req.query.ffinarribo || '';
   var filtro = '{';
-  if (viaje != '') {
+  if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
-  }
-  if (buque != '') {
+
+  if (buque != 'undefined' && buque != '')
     filtro += '\"buque\":' + '\"' + buque + '\",';
-  }
+
   if (finiarribo != '' && ffinarribo) {
-    console.log(finiarribo);
     fIni = moment(finiarribo, 'DD-MM-YYYY').utc().startOf('day').format();
     fFin = moment(ffinarribo, 'DD-MM-YYYY').utc().endOf('day').format();
     filtro += '\"fArribo\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lt\":' + '\"' + fFin + '\"' + '},';
   }
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
-  filtro = filtro + '}';
+  filtro = filtro + 'a}';
 
   var json = JSON.parse(filtro);
-  console.log(json);
+  //  console.log(json);
 
   Viaje.find(json)
     .populate('buque', 'buque')
@@ -62,7 +62,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 // ==========================================
 //  Obtener viaje por ID
 // ==========================================
-app.get('/:id', (req, res) => {
+app.get('/viaje/:id', (req, res) => {
   var id = req.params.id;
   Viaje.findById(id)
     .exec((err, viaje) => {
