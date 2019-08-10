@@ -5,8 +5,7 @@ var fs = require('fs');
 var app = express();
 var Viaje = require('../models/viaje');
 var Maniobra = require('../models/maniobra');
-var ParamsToJSON = require('../public/varias');
-var mongoose = require('mongoose');
+var varias = require('../public/varias');
 var moment = require('moment');
 
 app.use(fileUpload());
@@ -23,25 +22,21 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
   var ffinarribo = req.query.ffinarribo || '';
   var filtro = '{';
   if (viaje != 'undefined' && viaje != '')
-    filtro += '\"viaje\":' + '\"' + viaje + '\",';
-
+    filtro += '\"viaje\":{ \"$regex\":' + '\".*' + viaje + '\",\"$options\":\"i\"},';
   if (buque != 'undefined' && buque != '')
     filtro += '\"buque\":' + '\"' + buque + '\",';
-
   if (finiarribo != '' && ffinarribo) {
-    fIni = moment(finiarribo, 'DD-MM-YYYY').utc().startOf('day').format();
-    fFin = moment(ffinarribo, 'DD-MM-YYYY').utc().endOf('day').format();
-    filtro += '\"fArribo\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lt\":' + '\"' + fFin + '\"' + '},';
+    fIni = moment(finiarribo, 'DD-MM-YYYY', true).utc().startOf('day').format();
+    fFin = moment(ffinarribo, 'DD-MM-YYYY', true).utc().endOf('day').format();
+    filtro += '\"fArribo\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
   }
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
-
   var json = JSON.parse(filtro);
   //  console.log(json);
-
   Viaje.find(json)
-    .populate('buque', 'buque')
+    .populate('buque', 'nombre')
     .exec(
       (err, viajes) => {
         if (err) {
@@ -65,6 +60,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 app.get('/viaje/:id', (req, res) => {
   var id = req.params.id;
   Viaje.findById(id)
+    .populate('buque', 'nombre')
     .exec((err, viaje) => {
       if (err) {
         return res.status(500).json({
@@ -80,7 +76,7 @@ app.get('/viaje/:id', (req, res) => {
           errors: { message: 'No existe un viaje con ese ID' }
         });
       }
-      Maniobra.find({}).exec(
+      Maniobra.find({ "viaje": id }).exec(
         (err, maniobras) => {
           if (err) {
             return res.status(500).json({
@@ -98,6 +94,44 @@ app.get('/viaje/:id', (req, res) => {
     });
 });
 
+// ==========================================
+//  Obtener viaje por ID
+// ==========================================
+app.get('/viaje/:id/includes/', (req, res) => {
+  var id = req.params.id;
+  Viaje.findById(id)
+    .exec((err, viaje) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar viaje',
+          errors: err
+        });
+      }
+      if (!viaje) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El viaje con el id ' + id + 'no existe',
+          errors: { message: 'No existe un viaje con ese ID' }
+        });
+      }
+      Maniobra.find({ "viaje": id }).exec(
+        (err, maniobras) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error cargando maniobras',
+              errors: err
+            });
+          }
+          viaje.contenedores = maniobras;
+          res.status(200).json({
+            ok: true,
+            viaje: viaje
+          });
+        });
+    });
+});
 
 // ==========================================
 // Crear nuevo viaje
@@ -105,6 +139,8 @@ app.get('/viaje/:id', (req, res) => {
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var viaje = new Viaje({
+    anio: body.anio,
+    naviera: body.naviera,
     viaje: body.viaje,
     buque: body.buque,
     fArribo: body.fArribo,
@@ -113,11 +149,12 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  if (viaje.pdfTemporal != '' && fs.existsSync('./uploads/temp/' + viaje.pdfTemporal)) {
-    fs.rename('./uploads/temp/' + viaje.pdfTemporal, './uploads/viajes/' + viaje.pdfTemporal, (err) => {
-      if (err) { console.log(err); }
-    });
-  }
+  varias.MoverArchivoFromTemp('./uploads/temp/', viaje.pdfTemporal, './uploads/viajes/', viaje.pdfTemporal);
+  // if (viaje.pdfTemporal != '' && fs.existsSync('./uploads/temp/' + viaje.pdfTemporal)) {
+  //   fs.rename('./uploads/temp/' + viaje.pdfTemporal, './uploads/viajes/' + viaje.pdfTemporal, (err) => {
+  //     if (err) { console.log(err); }
+  //   });
+  // }
   viaje.save((err, viajeGuardado) => {
     if (err) {
       return res.status(400).json({
@@ -193,7 +230,9 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe viaje con ese ID' }
       });
     }
+    viaje.anio = body.anio;
     viaje.viaje = body.viaje;
+    viaje.naviera = body.naviera;
     viaje.buque = body.buque;
     viaje.fArribo = body.fArribo;
     viaje.fVigenciaTemporal = body.fVigenciaTemporal;
@@ -201,19 +240,24 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     viaje.fMod = new Date();
 
     if (viaje.pdfTemporal != body.pdfTemporal) {
-      if (fs.existsSync('./uploads/temp/' + body.pdfTemporal)) {
-        if (viaje.pdfTemporal != undefined || viaje.pdfTemporal != '' && viaje.pdfTemporal != null && fs.existsSync('./uploads/viajes/' + viaje.pdfTemporal)) {
-          fs.unlink('./uploads/viajes/' + viaje.pdfTemporal, (err) => {
-            if (err) console.log(err);
-            else
-              console.log('File anterior fue borrado con éxito');
-          });
-        }
-        fs.rename('./uploads/temp/' + body.pdfTemporal, './uploads/viajes/' + body.pdfTemporal, (err) => {
-          if (err) { console.log(err); }
-        });
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.pdfTemporal, './uploads/viajes/', viaje.pdfTemporal)) {
+        console.log('entro');
         viaje.pdfTemporal = body.pdfTemporal;
       }
+
+      // if (fs.existsSync('./uploads/temp/' + body.pdfTemporal)) {
+      //   if (viaje.pdfTemporal != undefined || viaje.pdfTemporal != '' && viaje.pdfTemporal != null && fs.existsSync('./uploads/viajes/' + viaje.pdfTemporal)) {
+      //     fs.unlink('./uploads/viajes/' + viaje.pdfTemporal, (err) => {
+      //       if (err) console.log(err);
+      //       else
+      //         console.log('File anterior fue borrado con éxito');
+      //     });
+      //   }
+      //   fs.rename('./uploads/temp/' + body.pdfTemporal, './uploads/viajes/' + body.pdfTemporal, (err) => {
+      //     if (err) { console.log(err); }
+      //   });
+      //   viaje.pdfTemporal = body.pdfTemporal;
+      // }
     }
     viaje.save((err, viajeGuardado) => {
       if (err) {
@@ -235,11 +279,65 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
 });
 
+// ============================================
+// Borrar viaje por el id
+// ============================================
+app.delete('/viaje/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  Maniobra.find({
+      $or: [
+        { "viaje": id, "peso": "VACIO", "estatus": { $ne: "TRANSITO" } },
+        { "viaje": id, "peso": { $ne: "VACIO" }, "estatus": { $ne: "APROBACION" } }
+      ]
+    })
+    .exec(
+      (err, maniobras) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al intentar cargar maniobras asociadas.',
+            errors: err
+          });
+        }
+        if (maniobras && maniobras.length > 0) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'Existen ' + maniobras.length + ' maniobras asociadas que cuentan movimientos, por lo tanto no se permite eliminar el viaje.',
+            errors: { message: 'Existen ' + maniobras.length + ' maniobras asociadas que cuentan con movimientos, por lo tanto no se permite eliminar el viaje..' }
+          });
+        } else {
+          Viaje.findById(id, (err, viajeBorrado) => {
+            if (err) {
+              return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al intentar borrar el viaje',
+                errors: err
+              });
+            }
+            if (!viajeBorrado) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe viaje con ese id',
+                errors: { message: 'No existe viaje con ese id' }
+              });
+            }
+            varias.BorrarArchivo('./uploads/viajes/', viajeBorrado.pdfTemporal);
+            viajeBorrado.remove();
+            res.status(200).json({
+              ok: true,
+              viaje: viajeBorrado
+            });
+          });
+        }
+      });
+});
+
+
 // ==========================================
 // Agregar Contenedor al viaje
 // ==========================================
 
-app.put('/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/viaje/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var contenedor = req.params.contenedor;
   var tipo = req.params.tipo;
@@ -249,7 +347,6 @@ app.put('/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticac
     maniobra = new Maniobra({
       viaje: id,
       facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
-      correoFac: 'aqui iria correo del datos que hay en clientes',
       contenedor: contenedor,
       tipo: tipo,
       peso: peso,
@@ -289,12 +386,11 @@ app.put('/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticac
 // Remover contenedores del viaje
 // ==========================================
 
-app.put('/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/viaje/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
   var contenedor = req.params.contenedor;
-
-  Maniobra.find({ 'viaje': id, 'contenedor': contenedor })
+  Maniobra.findOne({ 'viaje': id, 'contenedor': contenedor })
     .exec((err, conte) => {
       if (err) {
         return res.status(500).json({
@@ -309,65 +405,24 @@ app.put('/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken, (req
           mensaje: 'El contenedor ' + contenedor + ' no existe',
           errors: { message: 'No existe un contendor con ese Numero' }
         });
-      }
-      console.log(contenedor);
-      Maniobra.findOneAndDelete({ 'viaje': id, 'contenedor': contenedor }, (err, contBorrado) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al borrar el contenedor',
-            errors: err
-          });
-        }
-        if (!contBorrado) {
-          return res.status(400).json({
-            ok: false,
-            mensaje: 'El contenedor ' + conte.contenedor + ' no existe',
-            errors: { message: 'No existe un contendor con ese Numero' }
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          contenedor: contBorrado
+      } else if ((conte.peso != 'VACIO' && conte.estatus != "APROBACION") || (conte.peso == 'VACIO' && conte.estatus != "TRANSITO")) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus,
+          errors: { message: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus }
         });
+      }
+      conte.remove();
+      res.status(200).json({
+        ok: true,
+        contenedor: conte.contenedor
       });
-
-      // res.status(200).json({
-      //     ok: true,
-      //     viaje: viaje
-      // });
     });
 });
 
 
 
 
-// ============================================
-// Borrar viaje por el id
-// ============================================
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  Viaje.findByIdAndRemove(id, (err, viajeBorrado) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al borrar viaje',
-        errors: err
-      });
-    }
-    if (!viajeBorrado) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'No existe viaje con ese id',
-        errors: { message: 'No existe viaje con ese id' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      viaje: viajeBorrado
-    });
-  });
-});
 
 
 // ==========================================
