@@ -47,11 +47,21 @@ app.get('/:id/includes', (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .populate('operador', 'nombre foto')
-    .populate('camion', 'placa')
+    .populate('camion', 'placa noEconomico')
+    .populate('operador', 'nombre')
     .populate('cliente', 'razonSocial')
     .populate('agencia', 'razonSocial')
     .populate('transportista', 'razonSocial')
-    .populate('viaje', 'viaje')
+    .populate('viaje', 'viaje ')
+    .populate({
+      path: 'viaje',
+      select: 'viaje',
+      populate: {
+        path: 'buque',
+        select: 'nombre'
+      }
+    })
+    
 
   .exec((err, maniobra) => {
     if (err) {
