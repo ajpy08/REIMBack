@@ -48,6 +48,9 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
         }
       });
     }
+    if (!fs.existsSync(rutaDestino)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+      fs.mkdirSync(rutaDestino);
+    }
     fs.rename(rutaTmp + nametmp, rutaDestino + nametmp, (err) => {
       if (err) { console.log(err); throw err; }
     });
@@ -58,7 +61,7 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
 
 exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
   if (nameFile != null && nameFile != undefined && nameFile != '' && fs.existsSync(ruta + nameFile)) {
-    fs.unlink(ruta, (err) => {
+    fs.unlink(ruta + nameFile, (err) => {
       if (err) {
         console.log(err);
       } else {
