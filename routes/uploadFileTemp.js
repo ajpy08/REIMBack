@@ -19,15 +19,12 @@ app.put('/', (req, res) => {
       errors: { message: 'Debe de seleccionar un archivo' }
     });
   }
-
   // Obtener nombre del archivo
   var archivo = req.files.file;
   var nombreCortado = archivo.name.split('.');
   var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-
   // Sólo estas extensiones aceptamos
   var extensionesValidas = ['pdf', 'png', 'jpg', 'gif', 'jpeg'];
-
   if (extensionesValidas.indexOf(extensionArchivo) < 0) {
     return res.status(400).json({
       ok: false,
@@ -35,13 +32,12 @@ app.put('/', (req, res) => {
       errors: { message: 'Las extensiones válidas son ' + extensionesValidas.join(', ') }
     });
   }
-
-  // Nombre de archivo personalizado
-  // 12312312312-123.png
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-
   var path = './uploads/temp/' + nombreArchivo;
 
+  if (!fs.existsSync('./uploads/temp/')) { // CHECAMOS SI EXISTE LA CARPETA TEMPORAL.. SI NO, LO CREAMOS.
+    fs.mkdirSync('./uploads/temp/');
+  }
   archivo.mv(path, err => {
 
     if (err) {

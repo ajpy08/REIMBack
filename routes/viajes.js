@@ -60,7 +60,6 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 app.get('/viaje/:id', (req, res) => {
   var id = req.params.id;
   Viaje.findById(id)
-    .populate('buque', 'nombre')
     .exec((err, viaje) => {
       if (err) {
         return res.status(500).json({
