@@ -217,6 +217,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       cliente: body.cliente,
       facturarA: body.facturarA,
       buque: body.buque,
+      blBooking: body.blBooking,
       viaje: body.viaje,
       observaciones: body.observaciones,
       rutaBL: body.rutaBL,
@@ -243,6 +244,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       contenedores: body.contenedores,
       tipo: body.tipo,
       estatus: body.estatus,
+      blBooking: body.blBooking,
       usuarioAlta: req.usuario._id
     });
   }
@@ -298,9 +300,10 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
     if (solicitud.tipo == 'D') {
       solicitud.naviera = body.naviera;
-      solicitud.buque = body.buque;
+      solicitud.buque = body.buque;      
       solicitud.viaje = body.viaje;
     }
+    solicitud.blBooking = body.blBooking;
     solicitud.agencia = body.agencia;
     solicitud.transportista = body.transportista;
     solicitud.cliente = body.cliente;
