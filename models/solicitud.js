@@ -10,6 +10,7 @@ var solicitudScheme = new Schema({
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
   facturarA: { type: Schema.Types.ObjectId, ref: 'Cliente', required: false },
   buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
+  blBooking: { type: String, requiered: [true, 'EL BL/Booking es necesario'] },
   viaje: { type: String },
   observaciones: { type: String },
   rutaBL: { type: String },
