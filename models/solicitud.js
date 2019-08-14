@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
-
 var solicitudScheme = new Schema({
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente' },
@@ -23,12 +22,12 @@ var solicitudScheme = new Schema({
     tipo: { type: String },
     estado: { type: String },
     maniobra: { type: String },
-    grado: { type: String }
+    grado: { type: String },
+    usuarioAprobo: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    fAprobacion: { type: Date }
   }],
   tipo: { type: String, default: 'D' },
   estatus: { type: String, default: 'NA' },
-  usuarioAprobo: { type: Schema.Types.ObjectId, ref: 'Usuario' },
-  fAprobacion: { type: Date },
   usuario: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
