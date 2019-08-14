@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
+var mongoose = require('mongoose');
 
 
 var Solicitud = require('../models/solicitud');
@@ -300,7 +301,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
     if (solicitud.tipo == 'D') {
       solicitud.naviera = body.naviera;
-      solicitud.buque = body.buque;      
+      solicitud.buque = body.buque;
       solicitud.viaje = body.viaje;
     }
     solicitud.blBooking = body.blBooking;
@@ -418,6 +419,34 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+
+// ==========================================
+// Aprobar Solicitud descarga 
+// ==========================================
+app.put('/apruebadescarga/:idsol/contenedor/:idcont', mdAutenticacion.verificaToken, (req, res) => {
+  var idSolicitud = req.params.idsol;
+  var idCont = req.params.idcont;
+  var body = req.body;
+  Solicitud.updateOne({ "_id": new mongoose.Types.ObjectId(idSolicitud), "contenedores._id": new mongoose.Types.ObjectId(idCont) }, {
+    $set: { "contenedores.$.usuarioAprobo": new mongoose.Types.ObjectId(req.usuario._id), "contenedores.$.maniobra": "3333", "contenedores.$.fAprobacion": Date.now() }
+  }, (err, cont) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al actualizar la solicitud',
+        errors: err
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      contenedor: cont
+    });
+  });
+
+});
+
+
+
 // ==========================================
 // Aprobar Solicitud con maniobra
 // ==========================================
@@ -484,20 +513,6 @@ app.put('/apruebacarga/:id', mdAutenticacion.verificaToken, (req, res) => {
           }
         });
       });
-
-      // solicitud.contenedores.forEach((element) => {
-      //   Maniobra.findById(element.maniobra, (err, maniobra) => {
-      //     maniobra.estatus = "TRANSITO";
-      //     maniobra.solicitud = id;
-      //     maniobra.agencia = solicitud.agencia;
-      //     maniobra.transportista = solicitud.transportista;
-      //     maniobra.cliente = solicitud.cliente;
-      //     maniobra.save((err, maniobraGuardado) => {});
-      //   });
-      // });
-
-
-
     });
   });
 });
