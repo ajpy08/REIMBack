@@ -2,9 +2,12 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
+var Contador = require('./contador');
+
 var maniobraSchema = new Schema({
 
   cargaDescarga: { type: String, required: true, default: 'D' },
+  folio: { type: Number },
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente' },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente' },
@@ -38,14 +41,28 @@ var maniobraSchema = new Schema({
   fTerminacionReparacion: { type: String },
   hTerminacionReparacion: { type: String },
   maniobraAsociada: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
-  facturaManiobra: {type: String},
+  facturaManiobra: { type: String },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
 
-    
+
 }, { collection: 'maniobras' });
 
-maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
+maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
+maniobraSchema.pre('save', function(next) {
+  var doc = this;
+  if (this.peso != 'VACIO') {
+    Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function(error, cont) {
+      if (error)
+        return next(error);
+      doc.folio = cont.seq;
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
 module.exports = mongoose.model('Maniobra', maniobraSchema);

@@ -19,7 +19,8 @@ var viajeSchema = new Schema({
   fMod: { type: Date },
 }, { collection: 'viajes' });
 
-viajeSchema.pre(['remove'], function(next) {
+//viajeSchema.pre(['remove'], function(next) {
+viajeSchema.pre('remove', function(next) {
   Maniobra.remove({ 'viaje': this._id }).exec();
   next();
 });
