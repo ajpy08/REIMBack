@@ -19,7 +19,7 @@ var agenciaSchema = new Schema({
     ciudad: { type: String, requiered: false },
     estado: { type: String, requiered: [true, 'El estado es necesario'] },
     cp: { type: String, requiered: [true, 'El codigo postal es necesario'] },
-    formatoR1: { type: String, required: false },
+    formatoR1: { type: String, requiered: [true, 'El formato R1 es necesario'] },
     correo: { type: String, requiered: false },
     correoFac: { type: String, requiered: false },
     credito: { type: Boolean, requiered: [true, 'EL credito es necesario'], default: false },
