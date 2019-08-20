@@ -8,8 +8,8 @@ var rolesValidos = {
 };
 
 var navieraSchema = new Schema({
-    rfc: { type: String, unique: true, required: [true, 'El RFC es necesario'] },
     razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesario'] },
+    rfc: { type: String, unique: true, required: [true, 'El RFC es necesario'] },
     nombreComercial: { type: String, requiered: false },
     calle: { type: String, requiered: false },
     noExterior: { type: String, required: false },
@@ -24,7 +24,7 @@ var navieraSchema = new Schema({
     correoFac: { type: String, requiered: false },
     credito: { type: Boolean, requiered: [true, 'EL credito es necesaria'], default: false },
     img: { type: String, required: false },
-    caat: { type: String, requiered: false },
+    caat: { type: String, requiered: [true, 'El CAAT es necesario'] },
     role: { type: String, required: true, default: 'NAVIERA_ROLE', enum: rolesValidos },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
