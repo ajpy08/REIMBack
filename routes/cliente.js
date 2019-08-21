@@ -15,7 +15,7 @@ app.get('/', (req, res, next) => {
     var role = 'CLIENT_ROLE';
     Cliente.find({ role: role })
         .skip(desde)
-        .limit(10)
+        // .limit(10)
         .populate('empresas', 'razonSocial')
         .populate('usuarioAlta', 'nombre email')
         .exec(
@@ -73,6 +73,7 @@ app.get('/role/:role?', (req, res) => {
 app.get('/:id', (req, res) => {
     var id = req.params.id;
     Cliente.findById(id)
+        // .populate('empresas', 'razonSocial')
         //.populate('usuario', 'nombre email')
         .exec((err, cliente) => {
             if (err) {
@@ -122,7 +123,7 @@ app.get('/empresa/:id', (req, res) => {
                         errors: { message: 'No existe un cliente con ese ID' }
                     });
                 }
-                
+
                 Cliente.countDocuments({ 'empresas': new mongoose.Types.ObjectId(id) }, (err, conteo) => {
                     res.status(200).json({
                         ok: true,

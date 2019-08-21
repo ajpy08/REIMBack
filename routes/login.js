@@ -188,6 +188,7 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
     menu[1].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/contenedoresDisponibles' });
     menu[1].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
+    menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
 
     return menu;
   }
