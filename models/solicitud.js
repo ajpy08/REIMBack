@@ -3,6 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var solicitudScheme = new Schema({
+
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Agencia Aduanal es necesaria'] },
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Naviera es necesaria'] },
   //transportista: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
@@ -10,6 +11,7 @@ var solicitudScheme = new Schema({
   buque: { type: Schema.Types.ObjectId, ref: 'Buque', requiered: [true, 'El Buque es necesaria'] },
   blBooking: { type: String },
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje', requiered: [true, 'El Viaje es necesario'] },
+
   observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },

@@ -81,7 +81,7 @@ app.get('/transportista/:id', (req, res, next) => {
         Camion.countDocuments({}, (err, conteo) => {
             res.status(200).json({
                 ok: true,
-                camiones,camiones,
+                camiones: camiones,
                 total: conteo
             });
         });
