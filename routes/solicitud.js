@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
+var mongoose = require('mongoose');
 
 
 var Solicitud = require('../models/solicitud');
@@ -14,14 +15,13 @@ app.get('/', (req, res) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   Solicitud.find({})
-    .skip(desde)
     .populate('agencia', 'razonSocial')
     .populate('naviera', 'razonSocial')
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre')
     .populate('usuarioAlta', 'nombre email')
-    .limit(10)
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
     .exec(
       (err, solicitudes) => {
         if (err) {
@@ -52,14 +52,12 @@ app.get('/NA/', (req, res) => {
   var estatus = 'NA';
 
   Solicitud.find({ 'estatus': estatus })
-    .skip(desde)
     .populate('agencia', 'razonSocial')
     .populate('naviera', 'razonSocial')
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'buque')
     .populate('usuarioAlta', 'nombre email')
-    .limit(5)
     .exec(
       (err, solicitudesD) => {
         if (err) {
@@ -82,47 +80,17 @@ app.get('/NA/', (req, res) => {
 });
 
 // =======================================
-// Obtener solicitudes de Carga
-// =======================================
-app.get('/cargas/', (req, res) => {
-
-  Solicitud.find({ 'tipo': 'C' })
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
-    .populate('cliente', 'razonSocial')
-    .populate('buque', 'buque')
-    .populate('usuarioAlta', 'nombre email')
-    .limit(5)
-    .exec(
-      (err, solicitudes) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando solicitudes',
-            errors: err
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          solicitudes: solicitudes,
-          total: solicitudes.length
-        });
-      });
-});
-
-// =======================================
 // Obtener solicitudes de Descarga
 // =======================================
 app.get('/descargas/', (req, res) => {
   Solicitud.find({ 'tipo': 'D' })
     .populate('agencia', 'razonSocial')
     .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
-    .populate('buque', 'buque')
+    .populate('buque', 'nombre')
+    .populate('viaje', 'viaje')
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
     .populate('usuarioAlta', 'nombre email')
-    .limit(5)
     .exec(
       (err, solicitudes) => {
         if (err) {
@@ -146,6 +114,8 @@ app.get('/descargas/', (req, res) => {
 app.get('/:id', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+    .populate('contenedores.transportista', 'razonSocial')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -178,6 +148,7 @@ app.get('/:id/includes', (req, res) => {
     .populate('buque', 'nombre _id')
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioAprobo', 'nombre email')
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -200,6 +171,41 @@ app.get('/:id/includes', (req, res) => {
     });
 });
 
+
+
+// =======================================
+// Obtener solicitudes de Carga
+// =======================================
+app.get('/cargas/', (req, res) => {
+
+  Solicitud.find({ 'tipo': 'C' })
+    .populate('agencia', 'razonSocial')
+    .populate('naviera', 'razonSocial')
+    .populate('transportista', 'razonSocial')
+    .populate('cliente', 'razonSocial')
+    .populate('buque', 'buque')
+    .populate('usuarioAlta', 'nombre email')
+    .limit(5)
+    .exec(
+      (err, solicitudes) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error cargando solicitudes',
+            errors: err
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          solicitudes: solicitudes,
+          total: solicitudes.length
+        });
+      });
+});
+
+
+
+
 // =======================================
 // Crear Solicitudes
 // =======================================
@@ -215,7 +221,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       naviera: body.naviera,
       transportista: body.transportista,
       cliente: body.cliente,
-      facturarA: body.facturarA,
       buque: body.buque,
       blBooking: body.blBooking,
       viaje: body.viaje,
@@ -224,10 +229,21 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       credito: body.credito,
       rutaComprobante: body.rutaComprobante,
       correo: body.correo,
-      correoFac: body.correoFac,
       contenedores: body.contenedores,
       tipo: body.tipo,
       estatus: body.estatus,
+      facturarA: body.facturarA,
+      rfc: body.rfc,
+      razonSocial: body.razonSocial,
+      calle: body.razonSocial,
+      noExterior: body.noExterior,
+      noInterior: body.noInterior,
+      colonia: body.colonia,
+      municipio: body.municipio,
+      ciudad: body.ciudad,
+      estado: body.estado,
+      cp: body.cp,
+      correoFac: body.correoFac,
       usuarioAlta: req.usuario._id
     });
   } else {
@@ -235,7 +251,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       agencia: body.agencia,
       transportista: body.transportista,
       cliente: body.cliente,
-      facturarA: body.facturarA,
       observaciones: body.observaciones,
       credito: body.credito,
       rutaComprobante: body.rutaComprobante,
@@ -245,6 +260,18 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       tipo: body.tipo,
       estatus: body.estatus,
       blBooking: body.blBooking,
+      facturarA: body.facturarA,
+      rfc: body.rfc,
+      razonSocial: body.razonSocial,
+      calle: body.razonSocial,
+      noExterior: body.noExterior,
+      noInterior: body.noInterior,
+      colonia: body.colonia,
+      municipio: body.municipio,
+      ciudad: body.ciudad,
+      estado: body.estado,
+      cp: body.cp,
+      correoFac: body.correoFac,
       usuarioAlta: req.usuario._id
     });
   }
@@ -300,7 +327,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
     if (solicitud.tipo == 'D') {
       solicitud.naviera = body.naviera;
-      solicitud.buque = body.buque;      
+      solicitud.buque = body.buque;
       solicitud.viaje = body.viaje;
     }
     solicitud.blBooking = body.blBooking;
@@ -311,9 +338,20 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     solicitud.observaciones = body.observaciones;
     solicitud.credito = body.credito;
     solicitud.correo = body.correo;
-    solicitud.correoFac = body.correoFac;
     solicitud.contenedores = body.contenedores;
-    solicitud.fMod = Date.now();
+    solicitud.facturarA = body.facturarA,
+      solicitud.rfc = body.rfc,
+      solicitud.razonSocial = body.razonSocial,
+      solicitud.calle = body.razonSocial,
+      solicitud.noExterior = body.noExterior,
+      solicitud.noInterior = body.noInterior,
+      solicitud.colonia = body.colonia,
+      solicitud.municipio = body.municipio,
+      solicitud.ciudad = body.ciudad,
+      solicitud.estado = body.estado,
+      solicitud.cp = body.cp,
+      correoFac = body.correoFac,
+      solicitud.fMod = Date.now();
     solicitud.usuarioMod = req.usuario._id;
 
 
@@ -418,6 +456,34 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+
+// ==========================================
+// Aprobar Solicitud descarga 
+// ==========================================
+app.put('/apruebadescarga/:idsol/contenedor/:idcont', mdAutenticacion.verificaToken, (req, res) => {
+  var idSolicitud = req.params.idsol;
+  var idCont = req.params.idcont;
+  var body = req.body;
+  Solicitud.updateOne({ "_id": new mongoose.Types.ObjectId(idSolicitud), "contenedores._id": new mongoose.Types.ObjectId(idCont) }, {
+    $set: { "contenedores.$.usuarioAprobo": new mongoose.Types.ObjectId(req.usuario._id), "contenedores.$.maniobra": "3333", "contenedores.$.fAprobacion": Date.now() }
+  }, (err, cont) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al actualizar la solicitud',
+        errors: err
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      contenedor: cont
+    });
+  });
+
+});
+
+
+
 // ==========================================
 // Aprobar Solicitud con maniobra
 // ==========================================
@@ -484,20 +550,6 @@ app.put('/apruebacarga/:id', mdAutenticacion.verificaToken, (req, res) => {
           }
         });
       });
-
-      // solicitud.contenedores.forEach((element) => {
-      //   Maniobra.findById(element.maniobra, (err, maniobra) => {
-      //     maniobra.estatus = "TRANSITO";
-      //     maniobra.solicitud = id;
-      //     maniobra.agencia = solicitud.agencia;
-      //     maniobra.transportista = solicitud.transportista;
-      //     maniobra.cliente = solicitud.cliente;
-      //     maniobra.save((err, maniobraGuardado) => {});
-      //   });
-      // });
-
-
-
     });
   });
 });
