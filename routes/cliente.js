@@ -15,7 +15,7 @@ app.get('/', (req, res, next) => {
     var role = 'CLIENT_ROLE';
     Cliente.find({ role: role })
         .skip(desde)
-        .limit(10)
+        // .limit(10)
         .populate('empresas', 'razonSocial')
         .populate('usuarioAlta', 'nombre email')
         .exec(
@@ -73,6 +73,7 @@ app.get('/role/:role?', (req, res) => {
 app.get('/:id', (req, res) => {
     var id = req.params.id;
     Cliente.findById(id)
+        // .populate('empresas', 'razonSocial')
         //.populate('usuario', 'nombre email')
         .exec((err, cliente) => {
             if (err) {
@@ -97,14 +98,13 @@ app.get('/:id', (req, res) => {
 })
 
 // ==========================================
-// Obtener todas los clientes por id empresas
+// Obtener todas los clientes por id empresas (deben estar separados por ",")
 // ==========================================
 
 app.get('/empresa/:id', (req, res) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
     var id = req.params.id;
-
     Cliente.find({ 'empresas': new mongoose.Types.ObjectId(id) })
         .exec(
             (err, clientes) => {
@@ -122,14 +122,55 @@ app.get('/empresa/:id', (req, res) => {
                         errors: { message: 'No existe un cliente con ese ID' }
                     });
                 }
-                
-                Cliente.countDocuments({ 'empresas': new mongoose.Types.ObjectId(id) }, (err, conteo) => {
-                    res.status(200).json({
-                        ok: true,
-                        clientes: clientes,
-                        total: conteo
+                res.status(200).json({
+                    ok: true,
+                    clientes: clientes,
+                    total: clientes.length
+                });
+            });
+});
+
+// ==========================================
+// Obtener todas los clientes por id empresas
+// ==========================================
+
+app.get('/empresas/:idsEmpresa', (req, res) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+    var arrayIdsEmpresa = req.params.idsEmpresa.split(',');
+
+    var filtro = '{\"$or\": [';
+
+    arrayIdsEmpresa.forEach(id => {
+        filtro += '{\"empresas\"' + ':' + '\"' + new mongoose.Types.ObjectId(id) + '\" },'
+    });
+
+    filtro = filtro.substring(0, filtro.length - 1)
+    filtro += ']}';
+
+    var json = JSON.parse(filtro);
+    Cliente.find(json)
+        .exec(
+            (err, clientes) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al cargar clientes',
+                        errors: err
                     });
-                })
+                }
+                if (!clientes) {
+                    return res.status(400).json({
+                        ok: false,
+                        mensaje: 'El cliente con el id ' + id + 'no existe',
+                        errors: { message: 'No existe un cliente con ese ID' }
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    clientes: clientes,
+                    total: clientes.length
+                });
             });
 });
 
