@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 
 exports.ParamsToJSON = function ParamsToJSON(req) {
   var json;
@@ -69,5 +70,19 @@ exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
       }
     });
   }
+}
 
+
+exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_reparacion) {
+  var pathFotos = "";
+  if (lavado_reparacion === 'L') {
+    pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_lavado/`);
+    return pathFotos;
+  } else {
+    if (lavado_reparacion === 'R') {
+      pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_reparacion/`);
+      return pathFotos;
+    }
+    return pathFotos;
+  }
 }
