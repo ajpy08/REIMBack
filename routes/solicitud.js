@@ -139,6 +139,7 @@ app.get('/:id', (req, res) => {
     });
 });
 
+
 app.get('/:id/includes', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
@@ -147,9 +148,11 @@ app.get('/:id/includes', (req, res) => {
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre _id')
+    .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioAprobo', 'nombre email')
-    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado folio solicitud')
+    .populate('contenedores.transportista', 'razonSocial')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -253,7 +256,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       cliente: body.cliente,
       observaciones: body.observaciones,
       correo: body.correo,
-      correoFac: body.correoFac,
       contenedores: body.contenedores,
       tipo: body.tipo,
       estatus: body.estatus,
