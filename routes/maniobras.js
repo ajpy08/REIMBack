@@ -299,10 +299,10 @@ app.get('/xcargar/', (req, res, netx) => {
 
 
 
-app.get('/xviaje/:idviaje/VACIOS', (req, res, netx) => {
+app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   var idViaje = req.params.idviaje;
-  Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' } })
+  Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')

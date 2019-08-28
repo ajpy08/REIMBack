@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre')
+    .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
     .exec(
@@ -449,7 +450,7 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe solicitud con ese ID' }
       });
     }
-    solicitud.contenedores = body.contenedores;
+    //solicitud.contenedores = body.contenedores;
     solicitud.estatus = "APROBADA";
     solicitud.fAprobacion = Date.now();
     solicitud.usuarioAprobo = req.usuario._id;
@@ -465,16 +466,16 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         ok: true,
         solicitud: solicitudGuardado
       });
-      solicitud.contenedores.forEach((element) => {
-        Maniobra.findById(element.maniobra, (err, maniobra) => {
-          maniobra.estatus = "TRANSITO";
-          maniobra.solicitud = id;
-          maniobra.agencia = solicitud.agencia;
-          maniobra.transportista = solicitud.transportista;
-          maniobra.cliente = solicitud.cliente;
-          maniobra.save((err, maniobraGuardado) => {});
-        });
-      });
+      // solicitud.contenedores.forEach((element) => {
+      //   Maniobra.findById(element.maniobra, (err, maniobra) => {
+      //     maniobra.estatus = "TRANSITO";
+      //     maniobra.solicitud = id;
+      //     maniobra.agencia = solicitud.agencia;
+      //     maniobra.transportista = solicitud.transportista;
+      //     maniobra.cliente = solicitud.cliente;
+      //     maniobra.save((err, maniobraGuardado) => {});
+      //   });
+      // });
     });
   });
 });

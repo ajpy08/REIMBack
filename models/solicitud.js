@@ -38,7 +38,9 @@ var solicitudScheme = new Schema({
   cp: { type: String, requiered: [true, 'El codigo postal para Facturación es necesario'] },
   correoFac: { type: String, requiered: [true, 'El correo de facturación es necesario'] },
   usuario: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  usuarioAprobo: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  fAprobacion: { type: Date },
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date }
