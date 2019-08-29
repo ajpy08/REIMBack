@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
+var varias = require('../public/varias');
 var mongoose = require('mongoose');
 
 
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre')
+    .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
     .exec(
@@ -138,6 +140,7 @@ app.get('/:id', (req, res) => {
     });
 });
 
+
 app.get('/:id/includes', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
@@ -146,9 +149,11 @@ app.get('/:id/includes', (req, res) => {
     .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre _id')
+    .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioAprobo', 'nombre email')
-    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+    .populate('contenedores.maniobra', 'contenedor tipo estatus grado folio solicitud')
+    .populate('contenedores.transportista', 'razonSocial')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -219,15 +224,12 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     solicitud = new Solicitud({
       agencia: body.agencia,
       naviera: body.naviera,
-      transportista: body.transportista,
       cliente: body.cliente,
       buque: body.buque,
       blBooking: body.blBooking,
       viaje: body.viaje,
       observaciones: body.observaciones,
       rutaBL: body.rutaBL,
-      credito: body.credito,
-      rutaComprobante: body.rutaComprobante,
       correo: body.correo,
       contenedores: body.contenedores,
       tipo: body.tipo,
@@ -244,6 +246,8 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       estado: body.estado,
       cp: body.cp,
       correoFac: body.correoFac,
+      credito: body.credito,
+      rutaComprobante: body.rutaComprobante,
       usuarioAlta: req.usuario._id
     });
   } else {
@@ -252,10 +256,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       transportista: body.transportista,
       cliente: body.cliente,
       observaciones: body.observaciones,
-      credito: body.credito,
-      rutaComprobante: body.rutaComprobante,
       correo: body.correo,
-      correoFac: body.correoFac,
       contenedores: body.contenedores,
       tipo: body.tipo,
       estatus: body.estatus,
@@ -272,23 +273,35 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       estado: body.estado,
       cp: body.cp,
       correoFac: body.correoFac,
+      credito: body.credito,
+      rutaComprobante: body.rutaComprobante,
       usuarioAlta: req.usuario._id
     });
   }
 
-  if (solicitud.tipo == 'D' && solicitud.rutaBL != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaBL)) {
-    fs.rename('./uploads/temp/' + solicitud.rutaBL, './uploads/solicitudes/' + solicitud.rutaBL, (err) => {
-      if (err) { console.log(err); }
-    });
+
+  if (solicitud.tipo == 'D') {
+    varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaBL, './uploads/solicitudes/', solicitud.rutaBL);
   }
 
-  if (solicitud.rutaComprobante != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaComprobante)) {
-    fs.rename('./uploads/temp/' + solicitud.rutaComprobante, './uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
-      if (err) { console.log(err); }
-    });
+  if (!solicitud.credito && solicitud.rutaComprobante != '..') {
+    varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante);
+  } else {
+    solicitud.rutaComprobante = undefined;
   }
+
+  // if (solicitud.tipo == 'D' && solicitud.rutaBL != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaBL)) {
+  //   fs.rename('./uploads/temp/' + solicitud.rutaBL, './uploads/solicitudes/' + solicitud.rutaBL, (err) => {
+  //     if (err) { console.log(err); }
+  //   });
+  // }
+
+  // if (solicitud.rutaComprobante != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaComprobante)) {
+  //   fs.rename('./uploads/temp/' + solicitud.rutaComprobante, './uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
+  //     if (err) { console.log(err); }
+  //   });
+  // }
   solicitud.save((err, solicitudGuardado) => {
-
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -300,7 +313,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       ok: true,
       solicitud: solicitudGuardado
     });
-
   });
 });
 
@@ -336,56 +348,68 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     solicitud.cliente = body.cliente;
     solicitud.facturarA = body.facturarA;
     solicitud.observaciones = body.observaciones;
-    solicitud.credito = body.credito;
     solicitud.correo = body.correo;
     solicitud.contenedores = body.contenedores;
-    solicitud.facturarA = body.facturarA,
-      solicitud.rfc = body.rfc,
-      solicitud.razonSocial = body.razonSocial,
-      solicitud.calle = body.razonSocial,
-      solicitud.noExterior = body.noExterior,
-      solicitud.noInterior = body.noInterior,
-      solicitud.colonia = body.colonia,
-      solicitud.municipio = body.municipio,
-      solicitud.ciudad = body.ciudad,
-      solicitud.estado = body.estado,
-      solicitud.cp = body.cp,
-      correoFac = body.correoFac,
-      solicitud.fMod = Date.now();
+    solicitud.facturarA = body.facturarA;
+    solicitud.rfc = body.rfc;
+    solicitud.razonSocial = body.razonSocial;
+    solicitud.calle = body.razonSocial;
+    solicitud.noExterior = body.noExterior;
+    solicitud.noInterior = body.noInterior;
+    solicitud.colonia = body.colonia;
+    solicitud.municipio = body.municipio;
+    solicitud.ciudad = body.ciudad;
+    solicitud.estado = body.estado;
+    solicitud.cp = body.cp;
+    solicitud.credito = body.credito;
+    correoFac = body.correoFac;
+    solicitud.fMod = Date.now();
     solicitud.usuarioMod = req.usuario._id;
 
-
-    if (solicitud.tipo == 'D' && solicitud.rutaBL != body.rutaBL) {
-      if (fs.existsSync('./uploads/temp/' + body.rutaBL)) {
-        if (solicitud.rutaBL != undefined || solicitud.rutaBL != '' && solicitud.rutaBL != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaBL)) {
-          fs.unlink('./uploads/solicitudes/' + solicitud.rutaBL, (err) => {
-            if (err) console.log(err);
-            else
-              console.log('Imagen anterior fue borrada con éxito');
-          });
+    if (solicitud.tipo == 'D') {
+      if (solicitud.rutaBL != body.rutaBL) {
+        if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaBL, './uploads/solicitudes/', solicitud.rutaBL)) {
+          solicitud.rutaBL = body.rutaBL;
         }
-        fs.rename('./uploads/temp/' + body.rutaBL, './uploads/solicitudes/' + body.rutaBL, (err) => {
-          if (err) { console.log(err); }
-        });
+      }
+    }
+
+    if (!solicitud.credito && body.rutaComprobante != '..' && solicitud.rutaComprobante != body.rutaComprobante) {
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante)) {
         solicitud.rutaBL = body.rutaBL;
       }
     }
+    // if (solicitud.tipo == 'D' && solicitud.rutaBL != body.rutaBL) {
+    //   if (fs.existsSync('./uploads/temp/' + body.rutaBL)) {
+    //     if (solicitud.rutaBL != undefined || solicitud.rutaBL != '' && solicitud.rutaBL != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaBL)) {
+    //       fs.unlink('./uploads/solicitudes/' + solicitud.rutaBL, (err) => {
+    //         if (err) console.log(err);
+    //         else
+    //           console.log('Imagen anterior fue borrada con éxito');
+    //       });
+    //     }
+    //     fs.rename('./uploads/temp/' + body.rutaBL, './uploads/solicitudes/' + body.rutaBL, (err) => {
+    //       if (err) { console.log(err); }
+    //     });
+    //     solicitud.rutaBL = body.rutaBL;
+    //   }
+    // }
 
-    if (solicitud.rutaComprobante != body.rutaComprobante) {
-      if (fs.existsSync('./uploads/temp/' + body.rutaComprobante)) {
-        if (solicitud.rutaComprobante != undefined || solicitud.rutaComprobante != '' && solicitud.rutaComprobante != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaComprobante)) {
-          fs.unlink('./uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
-            if (err) console.log(err);
-            else
-              console.log('Imagen anterior fue borrada con éxito');
-          });
-        }
-        fs.rename('./uploads/temp/' + body.rutaComprobante, './uploads/solicitudes/' + body.rutaComprobante, (err) => {
-          if (err) { console.log(err); }
-        });
-        solicitud.rutaComprobante = body.rutaComprobante;
-      }
-    }
+    // if (solicitud.rutaComprobante != body.rutaComprobante) {
+    //   if (fs.existsSync('./uploads/temp/' + body.rutaComprobante)) {
+    //     if (solicitud.rutaComprobante != undefined || solicitud.rutaComprobante != '' && solicitud.rutaComprobante != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaComprobante)) {
+    //       fs.unlink('./uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
+    //         if (err) console.log(err);
+    //         else
+    //           console.log('Imagen anterior fue borrada con éxito');
+    //       });
+    //     }
+    //     fs.rename('./uploads/temp/' + body.rutaComprobante, './uploads/solicitudes/' + body.rutaComprobante, (err) => {
+    //       if (err) { console.log(err); }
+    //     });
+    //     solicitud.rutaComprobante = body.rutaComprobante;
+    //   }
+    // }
     solicitud.save((err, solicitudGuardado) => {
 
       if (err) {
@@ -426,7 +450,7 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe solicitud con ese ID' }
       });
     }
-    solicitud.contenedores = body.contenedores;
+    //solicitud.contenedores = body.contenedores;
     solicitud.estatus = "APROBADA";
     solicitud.fAprobacion = Date.now();
     solicitud.usuarioAprobo = req.usuario._id;
@@ -442,16 +466,16 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         ok: true,
         solicitud: solicitudGuardado
       });
-      solicitud.contenedores.forEach((element) => {
-        Maniobra.findById(element.maniobra, (err, maniobra) => {
-          maniobra.estatus = "TRANSITO";
-          maniobra.solicitud = id;
-          maniobra.agencia = solicitud.agencia;
-          maniobra.transportista = solicitud.transportista;
-          maniobra.cliente = solicitud.cliente;
-          maniobra.save((err, maniobraGuardado) => {});
-        });
-      });
+      // solicitud.contenedores.forEach((element) => {
+      //   Maniobra.findById(element.maniobra, (err, maniobra) => {
+      //     maniobra.estatus = "TRANSITO";
+      //     maniobra.solicitud = id;
+      //     maniobra.agencia = solicitud.agencia;
+      //     maniobra.transportista = solicitud.transportista;
+      //     maniobra.cliente = solicitud.cliente;
+      //     maniobra.save((err, maniobraGuardado) => {});
+      //   });
+      // });
     });
   });
 });
