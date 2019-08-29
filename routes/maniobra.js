@@ -167,6 +167,7 @@ app.put('/asigna_solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     maniobra.estatus = "TRANSITO";
     maniobra.agencia = body.agencia;
     maniobra.cliente = body.cliente;
+    maniobra.patio = body.patio;
 
     maniobra.save((err, maniobraGuardado) => {
       if (err) {

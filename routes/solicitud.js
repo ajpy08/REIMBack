@@ -12,13 +12,30 @@ var Maniobra = require('../models/maniobra');
 // =======================================
 // Obtener solicitudes TODAS
 // =======================================
-app.get('/', (req, res) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
-  Solicitud.find({})
+app.get('/:tipo?:estatus?:finialta?:ffinalta?', (req, res) => {
+
+  var tipo = req.query.tipo || '';
+  var estatus = req.query.estatus || '';
+  var finialta = req.query.finialta || '';
+  var ffinalta = req.query.ffinalta || '';
+  var filtro = '{';
+  if (tipo != 'undefined' && tipo != '')
+    filtro += '\"tipo\":' + '\"' + tipo + '\",';
+  if (estatus != 'undefined' && estatus != '')
+    filtro += '\"estatus\":' + '\"' + estatus + '\",';
+  // if (finialta != '' && ffinalta) {
+  //   fIni = moment(finialta, 'DD-MM-YYYY', true).utc().startOf('day').format();
+  //   fFin = moment(ffinalta, 'DD-MM-YYYY', true).utc().endOf('day').format();
+  //   filtro += '\"fArribo\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
+  // }
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+  // console.log(json);
+  Solicitud.find(json)
     .populate('agencia', 'razonSocial')
     .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre')
     .populate('viaje', 'viaje')
@@ -33,82 +50,111 @@ app.get('/', (req, res) => {
             errors: err
           });
         }
-        Solicitud.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            solicitudes: solicitudes,
-            total: conteo
-          });
 
-        });
-
-      });
-});
-
-// =======================================
-// Obtener solicitudes NO APROBADAS
-// =======================================
-app.get('/NA/', (req, res) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
-  var estatus = 'NA';
-
-  Solicitud.find({ 'estatus': estatus })
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
-    .populate('cliente', 'razonSocial')
-    .populate('buque', 'buque')
-    .populate('usuarioAlta', 'nombre email')
-    .exec(
-      (err, solicitudesD) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando solicitudes',
-            errors: err
-          });
-        }
-        SolicitudD.countDocuments({ 'estatus': estatus }, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            solicitudesD,
-            total: conteo
-          });
-
-        });
-
-      });
-});
-
-// =======================================
-// Obtener solicitudes de Descarga
-// =======================================
-app.get('/descargas/', (req, res) => {
-  Solicitud.find({ 'tipo': 'D' })
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
-    .populate('cliente', 'razonSocial')
-    .populate('buque', 'nombre')
-    .populate('viaje', 'viaje')
-    .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-    .populate('usuarioAlta', 'nombre email')
-    .exec(
-      (err, solicitudes) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando solicitudes',
-            errors: err
-          });
-        }
         res.status(200).json({
           ok: true,
           solicitudes: solicitudes,
           total: solicitudes.length
         });
+
       });
 });
+
+// // =======================================
+// // Obtener solicitudes NO APROBADAS
+// // =======================================
+// app.get('/NA/', (req, res) => {
+//   var desde = req.query.desde || 0;
+//   desde = Number(desde);
+//   var estatus = 'NA';
+
+//   Solicitud.find({ 'estatus': estatus })
+//     .populate('agencia', 'razonSocial')
+//     .populate('naviera', 'razonSocial')
+//     .populate('cliente', 'razonSocial')
+//     .populate('buque', 'nombre')
+//     .populate('viaje', 'viaje')
+//     .populate('usuarioAlta', 'nombre email')
+//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+//     .exec(
+//       (err, solicitudesD) => {
+//         if (err) {
+//           return res.status(500).json({
+//             ok: false,
+//             mensaje: 'Error cargando solicitudes',
+//             errors: err
+//           });
+//         }
+//         SolicitudD.countDocuments({ 'estatus': estatus }, (err, conteo) => {
+//           res.status(200).json({
+//             ok: true,
+//             solicitudesD,
+//             total: conteo
+//           });
+
+//         });
+
+//       });
+// });
+
+// // =======================================
+// // Obtener solicitudes de Descarga
+// // =======================================
+// app.get('/descargas/', (req, res) => {
+//   Solicitud.find({ 'tipo': 'D' })
+//     .populate('agencia', 'razonSocial')
+//     .populate('naviera', 'razonSocial')
+//     .populate('cliente', 'razonSocial')
+//     .populate('buque', 'nombre')
+//     .populate('viaje', 'viaje')
+//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+//     .populate('usuarioAlta', 'nombre email')
+
+//   .exec(
+//     (err, solicitudes) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando solicitudes',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         solicitudes: solicitudes,
+//         total: solicitudes.length
+//       });
+//     });
+// });
+
+// // =======================================
+// // Obtener solicitudes de Carga
+// // =======================================
+// app.get('/cargas/', (req, res) => {
+//   Solicitud.find({ 'tipo': 'C' })
+//     .populate('agencia', 'razonSocial')
+//     .populate('naviera', 'razonSocial')
+//     .populate('cliente', 'razonSocial')
+//     .populate('buque', 'nombre')
+//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+//     .populate('usuarioAlta', 'nombre email')
+//     .exec(
+//       (err, solicitudes) => {
+//         if (err) {
+//           return res.status(500).json({
+//             ok: false,
+//             mensaje: 'Error cargando solicitudes',
+//             errors: err
+//           });
+//         }
+//         res.status(200).json({
+//           ok: true,
+//           solicitudes: solicitudes,
+//           total: solicitudes.length
+//         });
+//       });
+// });
+
 
 // ==========================================
 //  Obtener solicitudes por ID
@@ -140,6 +186,9 @@ app.get('/:id', (req, res) => {
     });
 });
 
+// ==========================================
+//  Obtener solicitudes por ID, CON INCLUDES
+// ==========================================
 
 app.get('/:id/includes', (req, res) => {
   var id = req.params.id;
@@ -179,47 +228,12 @@ app.get('/:id/includes', (req, res) => {
 
 
 // =======================================
-// Obtener solicitudes de Carga
-// =======================================
-app.get('/cargas/', (req, res) => {
-
-  Solicitud.find({ 'tipo': 'C' })
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
-    .populate('cliente', 'razonSocial')
-    .populate('buque', 'buque')
-    .populate('usuarioAlta', 'nombre email')
-    .limit(5)
-    .exec(
-      (err, solicitudes) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando solicitudes',
-            errors: err
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          solicitudes: solicitudes,
-          total: solicitudes.length
-        });
-      });
-});
-
-
-
-
-// =======================================
 // Crear Solicitudes
 // =======================================
 
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
   var body = req.body;
   var solicitud;
-
   if (body.tipo === 'D') {
     solicitud = new Solicitud({
       agencia: body.agencia,
@@ -233,7 +247,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       correo: body.correo,
       contenedores: body.contenedores,
       tipo: body.tipo,
-      estatus: body.estatus,
       facturarA: body.facturarA,
       rfc: body.rfc,
       razonSocial: body.razonSocial,
@@ -259,7 +272,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       correo: body.correo,
       contenedores: body.contenedores,
       tipo: body.tipo,
-      estatus: body.estatus,
       blBooking: body.blBooking,
       facturarA: body.facturarA,
       rfc: body.rfc,
@@ -278,29 +290,14 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       usuarioAlta: req.usuario._id
     });
   }
-
-
   if (solicitud.tipo == 'D') {
     varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaBL, './uploads/solicitudes/', solicitud.rutaBL);
   }
-
   if (!solicitud.credito && solicitud.rutaComprobante != '..') {
     varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante);
   } else {
     solicitud.rutaComprobante = undefined;
   }
-
-  // if (solicitud.tipo == 'D' && solicitud.rutaBL != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaBL)) {
-  //   fs.rename('./uploads/temp/' + solicitud.rutaBL, './uploads/solicitudes/' + solicitud.rutaBL, (err) => {
-  //     if (err) { console.log(err); }
-  //   });
-  // }
-
-  // if (solicitud.rutaComprobante != '' && fs.existsSync('./uploads/temp/' + solicitud.rutaComprobante)) {
-  //   fs.rename('./uploads/temp/' + solicitud.rutaComprobante, './uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
-  //     if (err) { console.log(err); }
-  //   });
-  // }
   solicitud.save((err, solicitudGuardado) => {
     if (err) {
       return res.status(400).json({
@@ -322,6 +319,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
+
   Solicitud.findById(id, (err, solicitud) => {
     if (err) {
       return res.status(500).json({
@@ -335,6 +333,13 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         ok: false,
         mensaje: 'La solicitud con el id ' + id + ' no existe',
         errors: { message: 'No existe solicitud con ese ID' }
+      });
+    }
+    if (solicitud.estatus === 'APROBADA') {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud ha sido aprobada con anterioridad y no puede ser modificada.',
+        errors: { message: 'La solicitud ha sido aprobada con anterioridad y no puede ser modificada.' }
       });
     }
     if (solicitud.tipo == 'D') {
@@ -379,37 +384,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         solicitud.rutaBL = body.rutaBL;
       }
     }
-    // if (solicitud.tipo == 'D' && solicitud.rutaBL != body.rutaBL) {
-    //   if (fs.existsSync('./uploads/temp/' + body.rutaBL)) {
-    //     if (solicitud.rutaBL != undefined || solicitud.rutaBL != '' && solicitud.rutaBL != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaBL)) {
-    //       fs.unlink('./uploads/solicitudes/' + solicitud.rutaBL, (err) => {
-    //         if (err) console.log(err);
-    //         else
-    //           console.log('Imagen anterior fue borrada con éxito');
-    //       });
-    //     }
-    //     fs.rename('./uploads/temp/' + body.rutaBL, './uploads/solicitudes/' + body.rutaBL, (err) => {
-    //       if (err) { console.log(err); }
-    //     });
-    //     solicitud.rutaBL = body.rutaBL;
-    //   }
-    // }
-
-    // if (solicitud.rutaComprobante != body.rutaComprobante) {
-    //   if (fs.existsSync('./uploads/temp/' + body.rutaComprobante)) {
-    //     if (solicitud.rutaComprobante != undefined || solicitud.rutaComprobante != '' && solicitud.rutaComprobante != null && fs.existsSync('./uploads/solicitudes/' + solicitud.rutaComprobante)) {
-    //       fs.unlink('./uploads/solicitudes/' + solicitud.rutaComprobante, (err) => {
-    //         if (err) console.log(err);
-    //         else
-    //           console.log('Imagen anterior fue borrada con éxito');
-    //       });
-    //     }
-    //     fs.rename('./uploads/temp/' + body.rutaComprobante, './uploads/solicitudes/' + body.rutaComprobante, (err) => {
-    //       if (err) { console.log(err); }
-    //     });
-    //     solicitud.rutaComprobante = body.rutaComprobante;
-    //   }
-    // }
     solicitud.save((err, solicitudGuardado) => {
 
       if (err) {
@@ -577,16 +551,6 @@ app.put('/apruebacarga/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
   });
 });
-
-
-
-
-
-
-
-
-
-
 
 
 
