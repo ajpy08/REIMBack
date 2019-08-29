@@ -11,45 +11,60 @@ var ParamsToJSON = require('../public/varias');
 // =======================================
 // Obtener Maniobras
 // =======================================
-app.get('/', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
+app.get('/:cargadescarga?:estatus?:tranportista?:contenedor?', (req, res, netx) => {
 
-  Maniobra.find({})
-    .skip(desde)
-    .limit(5)
-    .populate('operador', 'operador')
+  var cargadescarga = req.query.cargadescarga || '';
+  var estatus = req.query.estatus || '';
+  var transportista = req.query.transportista || '';
+  var contenedor = req.query.contenedor || '';
+
+  var filtro = '{\"estatus\":\"TRANSITO\",';
+
+  if (cargadescarga != 'undefined' && cargadescarga != '')
+    filtro += '\"cargaDescarga\":' + '\"' + cargadescarga + '\",';
+
+  if (estatus != 'undefined' && estatus != '')
+    filtro += '\"estatus\":' + '\"' + estatus + '\",';
+
+  if (transportista != 'undefined' && transportista != '')
+    filtro += '\"transportista\":' + '\"' + transportista + '\",';
+
+  if (contenedor != 'undefined' && contenedor != '')
+    filtro += '\"contenedor\":{ \"$regex\":' + '\".*' + contenedor + '\",\"$options\":\"i\"},';
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+  console.log(json);
+
+  Maniobra.find(json)
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
     .populate({
-      path: "camiones",
-      select: 'placa numbereconomico',
+      path: "viaje",
+      select: 'viaje fechaArribo',
       populate: {
-        path: "transportista",
+        path: "buque",
         select: 'nombre'
       }
     })
-    .populate('cliente', 'cliente')
-    .populate('agencia', 'nombre')
-    .populate('transportista', 'nombre')
-    .populate('viaje', 'viaje')
-    .exec(
-      (err, maniobras) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando maniobras',
-            errors: err
-          });
-        }
-        Maniobra.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            maniobras,
-            total: conteo
-          });
-
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
         });
-
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
       });
+    });
 });
 
 // ============================================
@@ -97,13 +112,7 @@ app.get('/buscaxcontenedorviaje', (req, res, netx) => {
 });
 
 app.get('/transito/', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  var contenedor = new RegExp(req.query.contenedor, 'i');
-  desde = Number(desde);
-  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   Maniobra.find({ "estatus": "TRANSITO" })
-    .skip(desde)
-    .limit(100)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
@@ -124,13 +133,11 @@ app.get('/transito/', (req, res, netx) => {
           errors: err
         });
       }
-
       res.status(200).json({
         ok: true,
         maniobras: maniobras,
         total: maniobras.length
       });
-
     });
 });
 

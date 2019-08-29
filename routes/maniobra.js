@@ -185,6 +185,84 @@ app.put('/asigna_solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+// =======================================
+// Asigna Chofer y camion
+// =======================================
+app.put('/asigna_camion_operador/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.camion = body.camion;
+    maniobra.operador = body.operador;
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Reasigna Transportista
+// =======================================
+app.put('/reasigna_transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.transportista = body.transportista;
+    maniobra.camion = undefined;
+    maniobra.operador = undefined;
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
 
 // =======================================
 // Registra LLegada Contendor
