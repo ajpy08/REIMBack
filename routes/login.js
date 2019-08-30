@@ -112,12 +112,12 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/disponibles' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/lavado_reparacion' });
     menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
-    menu[0].submenu.unshift({ titulo: 'Espera', url: '/espera' });
-    menu[0].submenu.unshift({ titulo: 'Transito', url: '/transito' });
+    menu[0].submenu.unshift({ titulo: 'Espera', url: '/maniobras/espera' });
+    menu[0].submenu.unshift({ titulo: 'Transito', url: '/maniobras/transito' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
-    //menu[0].submenu.unshift({ titulo: 'Buques2', url: '/buques2' });
+
 
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });

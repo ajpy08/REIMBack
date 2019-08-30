@@ -48,11 +48,12 @@ app.get('/:id/includes', (req, res) => {
   Maniobra.findById(id)
     .populate('operador', 'nombre foto')
     .populate('camion', 'placa noEconomico')
-    .populate('operador', 'nombre')
+    .populate('operador', 'nombre licencia')
     .populate('cliente', 'razonSocial')
     .populate('agencia', 'razonSocial')
     .populate('transportista', 'razonSocial')
     .populate('viaje', 'viaje ')
+    .populate('solicitud', 'viaje ')
     .populate({
       path: 'viaje',
       select: 'viaje',
@@ -270,6 +271,42 @@ app.put('/reasigna_transportista/:id', mdAutenticacion.verificaToken, (req, res)
 app.put('/registra_llegada/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
+
+  if (body.transportista === undefined || body.transportista === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el transportista',
+      errors: { message: 'Se debe declarar el transportista' }
+    });
+  }
+  if (body.camion === undefined || body.camion === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el camion',
+      errors: { message: 'Se debe declarar el camion' }
+    });
+  }
+  if (body.operador === undefined || body.operador === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el operador',
+      errors: { message: 'Se debe declarar el operador' }
+    });
+  }
+  if (body.fLlegada === undefined || body.fLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Fecha de Llegada',
+      errors: { message: 'Se debe declarar la Fecha de Llegada' }
+    });
+  }
+  if (body.hLlegada === undefined || body.hLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Hora de Llegada',
+      errors: { message: 'Se debe declarar la Hora de Llegada' }
+    });
+  }
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
