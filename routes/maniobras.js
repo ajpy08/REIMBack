@@ -36,12 +36,14 @@ app.get('/:cargadescarga?:estatus?:tranportista?:contenedor?', (req, res, netx) 
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  console.log(json);
+  // console.log(json);
 
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
+    .populate('operador', 'nombre')
+    .populate('camion', 'placa noEconomico')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo',
@@ -111,72 +113,72 @@ app.get('/buscaxcontenedorviaje', (req, res, netx) => {
       });
 });
 
-app.get('/transito/', (req, res, netx) => {
-  Maniobra.find({ "estatus": "TRANSITO" })
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
-    .populate({
-      path: "viaje",
-      select: 'viaje fechaArribo',
-      populate: {
-        path: "buque",
-        select: 'nombre'
-      }
-    })
-    .populate('usuarioAlta', 'nombre email')
-    .exec((err, maniobras) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando maniobras',
-          errors: err
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        maniobras: maniobras,
-        total: maniobras.length
-      });
-    });
-});
+// app.get('/transito/', (req, res, netx) => {
+//   Maniobra.find({ "estatus": "TRANSITO" })
+//     .populate('cliente', 'rfc razonSocial')
+//     .populate('agencia', 'rfc razonSocial')
+//     .populate('transportista', 'rfc razonSocial')
+//     .populate({
+//       path: "viaje",
+//       select: 'viaje fechaArribo',
+//       populate: {
+//         path: "buque",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('usuarioAlta', 'nombre email')
+//     .exec((err, maniobras) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando maniobras',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         maniobras: maniobras,
+//         total: maniobras.length
+//       });
+//     });
+// });
 
-app.get('/espera/', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  var contenedor = new RegExp(req.query.contenedor, 'i');
-  desde = Number(desde);
-  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-  Maniobra.find({ "estatus": "ESPERA" })
-    .skip(desde)
-    .limit(100)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
-    .populate({
-      path: "viaje",
-      select: 'viaje fechaArribo',
-      populate: {
-        path: "buque",
-        select: 'nombre'
-      }
-    })
-    .populate('usuarioAlta', 'nombre email')
-    .exec((err, maniobras) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando maniobras',
-          errors: err
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        maniobras: maniobras,
-        total: maniobras.length
-      });
+// app.get('/espera/', (req, res, netx) => {
+//   var desde = req.query.desde || 0;
+//   var contenedor = new RegExp(req.query.contenedor, 'i');
+//   desde = Number(desde);
+//   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+//   Maniobra.find({ "estatus": "ESPERA" })
+//     .skip(desde)
+//     .limit(100)
+//     .populate('cliente', 'rfc razonSocial')
+//     .populate('agencia', 'rfc razonSocial')
+//     .populate('transportista', 'rfc razonSocial')
+//     .populate({
+//       path: "viaje",
+//       select: 'viaje fechaArribo',
+//       populate: {
+//         path: "buque",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('usuarioAlta', 'nombre email')
+//     .exec((err, maniobras) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando maniobras',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         maniobras: maniobras,
+//         total: maniobras.length
+//       });
 
-    });
-});
+//     });
+// });
 
 app.get('/revision/', (req, res, netx) => {
   var desde = req.query.desde || 0;
