@@ -11,7 +11,6 @@ var solicitudScheme = new Schema({
   buque: { type: Schema.Types.ObjectId, ref: 'Buque', requiered: [true, 'El Buque es necesaria'] },
   blBooking: { type: String },
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje', requiered: [true, 'El Viaje es necesario'] },
-
   observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
@@ -19,6 +18,7 @@ var solicitudScheme = new Schema({
   correo: { type: String, requiered: [true, 'EL correo es necesario'] },
   contenedores: [{
     maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
+    patio: { type: String, default: 'PROGRESO' },
     transportista: { type: Schema.Types.ObjectId, ref: 'Transportista' },
     peso: { type: String },
     grado: { type: String }

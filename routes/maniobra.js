@@ -48,11 +48,12 @@ app.get('/:id/includes', (req, res) => {
   Maniobra.findById(id)
     .populate('operador', 'nombre foto')
     .populate('camion', 'placa noEconomico')
-    .populate('operador', 'nombre')
+    .populate('operador', 'nombre licencia')
     .populate('cliente', 'razonSocial')
     .populate('agencia', 'razonSocial')
     .populate('transportista', 'razonSocial')
     .populate('viaje', 'viaje ')
+    .populate('solicitud', 'viaje ')
     .populate({
       path: 'viaje',
       select: 'viaje',
@@ -167,6 +168,7 @@ app.put('/asigna_solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     maniobra.estatus = "TRANSITO";
     maniobra.agencia = body.agencia;
     maniobra.cliente = body.cliente;
+    maniobra.patio = body.patio;
 
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
@@ -184,6 +186,84 @@ app.put('/asigna_solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+// =======================================
+// Asigna Chofer y camion
+// =======================================
+app.put('/asigna_camion_operador/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.camion = body.camion;
+    maniobra.operador = body.operador;
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Reasigna Transportista
+// =======================================
+app.put('/reasigna_transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.transportista = body.transportista;
+    maniobra.camion = undefined;
+    maniobra.operador = undefined;
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
 
 // =======================================
 // Registra LLegada Contendor
@@ -191,6 +271,42 @@ app.put('/asigna_solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/registra_llegada/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
+
+  if (body.transportista === undefined || body.transportista === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el transportista',
+      errors: { message: 'Se debe declarar el transportista' }
+    });
+  }
+  if (body.camion === undefined || body.camion === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el camion',
+      errors: { message: 'Se debe declarar el camion' }
+    });
+  }
+  if (body.operador === undefined || body.operador === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el operador',
+      errors: { message: 'Se debe declarar el operador' }
+    });
+  }
+  if (body.fLlegada === undefined || body.fLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Fecha de Llegada',
+      errors: { message: 'Se debe declarar la Fecha de Llegada' }
+    });
+  }
+  if (body.hLlegada === undefined || body.hLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Hora de Llegada',
+      errors: { message: 'Se debe declarar la Hora de Llegada' }
+    });
+  }
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
