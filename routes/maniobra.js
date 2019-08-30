@@ -561,9 +561,9 @@ app.put('/removeimgr/:id&:img', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // Subir fotos lavado de la maniobra
 // ==========================================
-app.put('/addimg/:id', (req, res, next) => {
+app.put('/addimg/:id&:LR', (req, res, next) => {
   var id = req.params.id;
-
+  var LR = req.params.LR;
   if (!req.files) {
     return res.status(400).json({
       ok: false,
@@ -576,21 +576,25 @@ app.put('/addimg/:id', (req, res, next) => {
   var archivo = req.files.file;
   var nombreCortado = archivo.name.split('.');
   var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-  var path = './uploads/fotos_lavado/' + nombreArchivo;
+  if (!fs.existsSync(`./uploads/maniobras/${id}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+    fs.mkdirSync(`./uploads/maniobras/${id}/`);
+  }
+  if (!fs.existsSync(`./uploads/maniobras/${id}/${LR}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+    fs.mkdirSync(`./uploads/maniobras/${id}/${LR}/`);
+  }
+  var path = `./uploads/maniobras/${id}/${LR}/${nombreArchivo}`;
   archivo.mv(path, err => {
-
     if (err) {
       return res.status(500).json({
         ok: false,
         mensaje: 'Error al mover archivo',
-        errors: err
+        errors: err        
       });
     }
     res.status(200).json({
       ok: true,
-      mensaje: 'Archivo guardado en tmp',
+      mensaje: 'Archivo guardado!',
       nombreArchivo: nombreArchivo,
       path: path
     });
