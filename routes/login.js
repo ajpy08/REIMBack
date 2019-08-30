@@ -94,23 +94,17 @@ function obtenerMenu(ROLE) {
       {
         titulo: 'Agencia',
         icono: 'mdi mdi-folder-lock-open',
-        submenu: [
-
-        ]
+        submenu: []
       },
       {
         titulo: 'Naviera',
         icono: 'mdi mdi-folder-lock-open',
-        submenu: [
-
-        ]
+        submenu: []
       },
       {
         titulo: 'Transportista',
         icono: 'mdi mdi-folder-lock-open',
-        submenu: [
-
-        ]
+        submenu: []
       },
     ];
     menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
@@ -118,12 +112,12 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/disponibles' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/lavado_reparacion' });
     menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
-    menu[0].submenu.unshift({ titulo: 'Espera', url: '/espera' });
-    menu[0].submenu.unshift({ titulo: 'Transito', url: '/transito' });
+    menu[0].submenu.unshift({ titulo: 'Espera', url: '/maniobras/espera' });
+    menu[0].submenu.unshift({ titulo: 'Transito', url: '/maniobras/transito' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
-    //menu[0].submenu.unshift({ titulo: 'Buques2', url: '/buques2' });
+
 
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
@@ -134,7 +128,7 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques2' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
     menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
-    
+
 
     menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/solicitudes_carga' });
     menu[2].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descarga' });
@@ -208,8 +202,10 @@ function obtenerMenu(ROLE) {
         ]
       },
     ];
+    menu[1].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
     menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[1].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+
 
     return menu;
   }
