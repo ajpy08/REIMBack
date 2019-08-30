@@ -43,6 +43,8 @@ var maniobraSchema = new Schema({
   hTerminacionReparacion: { type: String },
   maniobraAsociada: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
   facturaManiobra: { type: String },
+  fAsignacionPapeleta: { type: Date },
+  fExpiracionPapeleta: { type: Date },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },

@@ -226,6 +226,45 @@ app.put('/asigna_camion_operador/:id', mdAutenticacion.verificaToken, (req, res)
 });
 
 // =======================================
+// Fecha de Asignacion
+// =======================================
+app.put('/actualiza_fecha_asignacion/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.fAsignacionPapeleta = moment().startOf('day').utc();
+    maniobra.fExpiracionPapeleta = moment().add(3,'days').startOf('day').utc();
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
 // Reasigna Transportista
 // =======================================
 app.put('/reasigna_transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
