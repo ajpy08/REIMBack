@@ -135,6 +135,9 @@ function obtenerMenu(ROLE) {
     menu[2].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
     menu[2].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
 
+    menu[4].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
+    menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
+    menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
     return menu;
 
   }
