@@ -180,44 +180,43 @@ app.get('/buscaxcontenedorviaje', (req, res, netx) => {
 //     });
 // });
 
-app.get('/revision/', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  var contenedor = new RegExp(req.query.contenedor, 'i');
-  desde = Number(desde);
-  //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
-  Maniobra.find({ "estatus": "REVISION" })
-    .skip(desde)
-    .limit(100)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
-    .populate({
-      path: "viaje",
-      select: 'viaje fechaArribo',
-      populate: {
-        path: "buque",
-        select: 'nombre'
-      }
-    })
-    .populate('usuarioAlta', 'nombre email')
-    .exec((err, maniobras) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando maniobras',
-          errors: err
-        });
-      }
+// app.get('/revision/', (req, res, netx) => {
+//   var desde = req.query.desde || 0;
+//   var contenedor = new RegExp(req.query.contenedor, 'i');
+//   desde = Number(desde);
+//   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
+//   Maniobra.find({ "estatus": "REVISION" })
+//     .skip(desde)
+//     .limit(100)
+//     .populate('cliente', 'rfc razonSocial')
+//     .populate('agencia', 'rfc razonSocial')
+//     .populate('transportista', 'rfc razonSocial')
+//     .populate({
+//       path: "viaje",
+//       select: 'viaje fechaArribo',
+//       populate: {
+//         path: "buque",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('usuarioAlta', 'nombre email')
+//     .exec((err, maniobras) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando maniobras',
+//           errors: err
+//         });
+//       }
 
-      res.status(200).json({
-        ok: true,
-        maniobras: maniobras,
-        total: maniobras.length
-      });
+//       res.status(200).json({
+//         ok: true,
+//         maniobras: maniobras,
+//         total: maniobras.length
+//       });
 
-    });
-});
-
+//     });
+// });
 
 app.get('/lavado_reparacion/', (req, res, netx) => {
   Maniobra.find({ "estatus": "LAVADO_REPARACION" })
