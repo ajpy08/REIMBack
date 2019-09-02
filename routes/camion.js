@@ -7,12 +7,21 @@ var app = express();
 // ==========================================
 // Obtener todos los camiones
 // ==========================================
-app.get('/', (req, res, next) => {
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-    Camion.find({})
-        .skip(desde)
-        .limit(10)
+app.get('/camiones/:transportista?', (req, res, next) => {
+    var transportista = req.query.transportista || '';
+    
+    var filtro = '{';
+
+    if (transportista != 'undefined' && transportista != '')
+        filtro += '\"transportista\":' + '\"' + transportista + '\",';
+
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+    //console.log(json)
+
+    Camion.find(json)
         .populate('usuarioAlta', 'nombre email')
         .populate('transportista', 'rfc razonSocial')
         .exec(
@@ -24,12 +33,10 @@ app.get('/', (req, res, next) => {
                         errors: err
                     });
                 }
-                Camion.countDocuments({}, (err, conteo) => {
-                    res.status(200).json({
-                        ok: true,
-                        camiones: camiones,
-                        total: conteo
-                    });
+                res.status(200).json({
+                    ok: true,
+                    camiones: camiones,
+                    total: camiones.length
                 });
             });
 });
@@ -70,22 +77,22 @@ app.get('/:id', (req, res) => {
 app.get('/transportista/:id', (req, res, next) => {
     var id = req.params.id;
     Camion.find({ transportista: id })
-    .exec((err, camiones) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al cargar los camiones',
-                errors: err
-            });
-        }
-        Camion.countDocuments({}, (err, conteo) => {
-            res.status(200).json({
-                ok: true,
-                camiones: camiones,
-                total: conteo
+        .exec((err, camiones) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al cargar los camiones',
+                    errors: err
+                });
+            }
+            Camion.countDocuments({}, (err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    camiones: camiones,
+                    total: conteo
+                });
             });
         });
-    });
 });
 
 
@@ -97,7 +104,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     // console.log(body)
     var camion = new Camion({
         transportista: body.transportista,
-        operador : body.operador,
+        operador: body.operador,
         placa: body.placa,
         noEconomico: body.noEconomico,
         vigenciaSeguro: body.vigenciaSeguro,
@@ -150,8 +157,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
         camion.transportista = body.transportista,
-        camion.operador = body.operador,
-        camion.placa = body.placa;
+            camion.operador = body.operador,
+            camion.placa = body.placa;
         camion.noEconomico = body.noEconomico;
         camion.vigenciaSeguro = body.vigenciaSeguro;
         camion.usuarioMod = req.usuario._id;
@@ -170,7 +177,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
                 camion.pdfSeguro = body.pdfSeguro;
             }
-        }        
+        }
         camion.save((err, camionGuardado) => {
             if (err) {
                 return res.status(400).json({
