@@ -6,14 +6,23 @@ var app = express();
 var ParamsToJSON = require('../public/varias');
 
 // ==========================================
-// Obtener todos los Operador
+// Obtener todos los Operadores
 // ==========================================
-app.get('/', (req, res, next) => {
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-    Operador.find({})
-        .skip(desde)
-        .limit(10)
+app.get('/operadores/:operador?', (req, res, next) => {
+    var transportista = req.query.transportista || '';
+
+    var filtro = '{';
+
+    if (transportista != 'undefined' && transportista != '')
+        filtro += '\"transportista\":' + '\"' + transportista + '\",';
+
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+    console.log(json)
+
+    Operador.find(json)
         .populate('usuarioAlta', 'nombre email')
         .populate('usuarioMod', 'nombre email')
         .populate('transportista', 'rfc razonSocial')
@@ -26,14 +35,12 @@ app.get('/', (req, res, next) => {
                         errors: err
                     });
                 }
-                Operador.countDocuments({}, (err, conteo) => {
-                    res.status(200).json({
-                        ok: true,
-                        operadores: operadores,
-                        totalRegistros: conteo
-                    });
+                res.status(200).json({
+                    ok: true,
+                    operadores: operadores,
+                    totalRegistros: operadores.length
                 });
-            });
+});
 });
 
 // ==========================================
@@ -179,35 +186,35 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         console.log(operador.foto)
         console.log(body.foto)
         // if (operador.foto != body.foto) {
-            if (fs.existsSync('./uploads/temp/' + body.foto)) {
-                if (operador.foto != undefined || operador.foto != '' && operador.foto != null && fs.existsSync('./uploads/operadores/' + operador.foto)) {
-                    fs.unlink('./uploads/operadores/' + operador.foto, (err) => {
-                        if (err) console.log(err);
-                        else
-                            console.log('Imagen anterior fue borrada con éxito');
-                    });
-                }
-                fs.rename('./uploads/temp/' + body.foto, './uploads/operadores/' + body.foto, (err) => {
-                    if (err) { console.log(err); }
+        if (fs.existsSync('./uploads/temp/' + body.foto)) {
+            if (operador.foto != undefined || operador.foto != '' && operador.foto != null && fs.existsSync('./uploads/operadores/' + operador.foto)) {
+                fs.unlink('./uploads/operadores/' + operador.foto, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
                 });
-                operador.foto = body.foto;
             }
+            fs.rename('./uploads/temp/' + body.foto, './uploads/operadores/' + body.foto, (err) => {
+                if (err) { console.log(err); }
+            });
+            operador.foto = body.foto;
+        }
         // }
 
         // if (operador.fotoLicencia != body.fotoLicencia) {
-            if (fs.existsSync('./uploads/temp/' + body.fotoLicencia)) {
-                if (operador.fotoLicencia != undefined || operador.fotoLicencia != '' && operador.fotoLicencia != null && fs.existsSync('./uploads/operadores/' + operador.fotoLicencia)) {
-                    fs.unlink('./uploads/operadores/' + operador.fotoLicencia, (err) => {
-                        if (err) console.log(err);
-                        else
-                            console.log('Imagen anterior fue borrada con éxito');
-                    });
-                }
-                fs.rename('./uploads/temp/' + body.fotoLicencia, './uploads/operadores/' + body.fotoLicencia, (err) => {
-                    if (err) { console.log(err); }
+        if (fs.existsSync('./uploads/temp/' + body.fotoLicencia)) {
+            if (operador.fotoLicencia != undefined || operador.fotoLicencia != '' && operador.fotoLicencia != null && fs.existsSync('./uploads/operadores/' + operador.fotoLicencia)) {
+                fs.unlink('./uploads/operadores/' + operador.fotoLicencia, (err) => {
+                    if (err) console.log(err);
+                    else
+                        console.log('Imagen anterior fue borrada con éxito');
                 });
-                operador.fotoLicencia = body.fotoLicencia;
             }
+            fs.rename('./uploads/temp/' + body.fotoLicencia, './uploads/operadores/' + body.fotoLicencia, (err) => {
+                if (err) { console.log(err); }
+            });
+            operador.fotoLicencia = body.fotoLicencia;
+        }
         // }
 
         operador.save((err, operadorGuardado) => {
