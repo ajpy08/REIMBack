@@ -412,7 +412,7 @@ app.put('/registra_descarga/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
     maniobra.lavado = body.lavado;
-    if (manioba.lavado) maniobra.lavadoObservacion = body.lavadoObservacion;
+    if (maniobra.lavado) maniobra.lavadoObservacion = body.lavadoObservacion;
 
     maniobra.reparaciones = body.reparaciones;
     if (maniobra.reparaciones.length > 0)

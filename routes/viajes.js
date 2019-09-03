@@ -164,17 +164,15 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     }
     body.contenedores.forEach(function(element) {
       var maniobra;
-      if (element.peso == 'VACIO') {
+      var peso = element.peso;
+      if (peso.toString().toUpperCase() == 'VACIO') {
         maniobra = new Maniobra({
           viaje: viaje._id,
-          cliente: "5c49e55b6b427b166466c9b3",
-          facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
-          correoFac: 'aqui iria correo del datos que hay en clientes',
+          cliente: viaje.naviera,
           contenedor: element.contenedor,
           tipo: element.tipo,
-          peso: element.peso,
+          peso: 'VACIO',
           estatus: 'TRANSITO',
-          destinatario: element.destinatario,
           usuarioAlta: req.usuario._id
         });
       } else {
@@ -182,7 +180,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
           viaje: viaje._id,
           contenedor: element.contenedor,
           tipo: element.tipo,
-          peso: element.peso,
+          peso: 'VACIO IMPORT',
           estatus: 'APROBACION',
           destinatario: element.destinatario,
           usuarioAlta: req.usuario._id

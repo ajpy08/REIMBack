@@ -130,8 +130,7 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
 
 
-    menu[2].submenu.unshift({ titulo: 'Solicitud de carga', url: '/solicitudes_carga' });
-    menu[2].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descarga' });
+    menu[2].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes' });
     menu[2].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
     menu[2].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
 

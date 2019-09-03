@@ -7,10 +7,10 @@ var moment = require('moment');
 var viajeSchema = new Schema({
   anio: { type: Number },
   viaje: { type: String, required: [true, 'El viaje es necesario'] },
-  buque: { type: Schema.Types.ObjectId, ref: 'Buque', required: [true, 'El viaje es necesario'] },
+  buque: { type: Schema.Types.ObjectId, ref: 'Buque', required: [true, 'El buque es necesario'] },
   naviera: { type: Schema.Types.ObjectId, ref: 'Naviera' },
-  fArribo: { type: Date, default: moment().startOf('day') },
-  fVigenciaTemporal: { type: Date, default: moment().startOf('day') },
+  fArribo: { type: Date },
+  fVigenciaTemporal: { type: Date },
   contenedores: { type: [] },
   pdfTemporal: { type: String, required: false },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
