@@ -179,6 +179,10 @@ function obtenerMenu(ROLE) {
         ]
       },
     ];
+
+    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+
     menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
     menu[1].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
     menu[1].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });

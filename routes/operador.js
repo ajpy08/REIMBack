@@ -8,9 +8,9 @@ var ParamsToJSON = require('../public/varias');
 // ==========================================
 // Obtener todos los Operadores
 // ==========================================
-app.get('/operadores/:operador?', (req, res, next) => {
-    var transportista = req.query.transportista || '';
-
+app.get('/operadores/:transportista?', (req, res, next) => {
+    var transportista = req.params.transportista || '';
+    console.log(req)
     var filtro = '{';
 
     if (transportista != 'undefined' && transportista != '')
@@ -20,7 +20,7 @@ app.get('/operadores/:operador?', (req, res, next) => {
         filtro = filtro.slice(0, -1);
     filtro = filtro + '}';
     var json = JSON.parse(filtro);
-    console.log(json)
+    //console.log(json)
 
     Operador.find(json)
         .populate('usuarioAlta', 'nombre email')
