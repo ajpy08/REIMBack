@@ -96,7 +96,6 @@ run().catch(error => console.error(error));
 
 app.use('/uploadFileTemp', uploadFileTemp);
 app.use('/exceltojson', exceltojson);
-app.use('/prealta', prealta);
 app.use('/uploadFile', UploadFile);
 app.use('/reset_password', resetpass);
 app.use('/forgot_password', forgotpass);
@@ -113,7 +112,6 @@ app.use('/camion', camionRoutes);
 app.use('/operador', operadorRoutes);
 app.use('/maniobra', maniobraRoutes);
 app.use('/maniobras', maniobrasRoutes);
-app.use('/solicitud', solicitudRoute);
 app.use('/solicitudes', solicitudesRoute);
 app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);

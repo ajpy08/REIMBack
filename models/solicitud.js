@@ -6,11 +6,12 @@ var solicitudScheme = new Schema({
 
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Agencia Aduanal es necesaria'] },
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Naviera es necesaria'] },
-  //transportista: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'El Cliente es necesario'] },
-  buque: { type: Schema.Types.ObjectId, ref: 'Buque', requiered: [true, 'El Buque es necesaria'] },
+  buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
+  nombreBuque: { type: String },
   blBooking: { type: String },
-  viaje: { type: Schema.Types.ObjectId, ref: 'Viaje', requiered: [true, 'El Viaje es necesario'] },
+  viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
+  noViaje: { type: String },
   observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
@@ -18,8 +19,10 @@ var solicitudScheme = new Schema({
   correo: { type: String, requiered: [true, 'EL correo es necesario'] },
   contenedores: [{
     maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
-    patio: { type: String, default: 'PROGRESO' },
+    patio: { type: String, default: 'POLIGONO INDUSTRIAL' },
     transportista: { type: Schema.Types.ObjectId, ref: 'Transportista' },
+    contenedor: { type: String },
+    tipo: { type: String },
     peso: { type: String },
     grado: { type: String }
   }],
