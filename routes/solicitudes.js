@@ -131,11 +131,9 @@ app.get('/solicitud/:id/includes', (req, res) => {
     });
 });
 
-
 // =======================================
 // Crear Solicitudes
 // =======================================
-
 app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var solicitud;
@@ -307,6 +305,44 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
         solicitud: solicitudGuardado
       });
 
+    });
+  });
+});
+
+// =======================================
+// Borrar Solicitud
+// =======================================
+
+app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  Solicitud.findById(id, (err, solicitudBorrada) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al intentar borrar la solicitud',
+        errors: err
+      });
+    }
+    if (!solicitudBorrada) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No existe solicitud con ese id',
+        errors: { message: 'No existe solicitud con ese id' }
+      });
+    }
+    if (solicitudBorrada.estatus !== "NA") {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud no puede ser eliminada porque tiene el estado de ' + solicitudBorrada.estatus,
+        errors: { message: 'La solicitud no puede ser eliminada porque tiene el estado de ' + solicitudBorrada.estatus }
+      });
+    }
+    varias.BorrarArchivo('./uploads/solicitudes/', solicitudBorrada.rutaComprobante);
+    varias.BorrarArchivo('./uploads/solicitudes/', solicitudBorrada.rutaBL);
+    solicitudBorrada.remove();
+    res.status(200).json({
+      ok: true,
+      viaje: solicitudBorrada
     });
   });
 });
