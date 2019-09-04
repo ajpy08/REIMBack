@@ -114,9 +114,9 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
     menu[0].submenu.unshift({ titulo: 'Espera', url: '/maniobras/espera' });
     menu[0].submenu.unshift({ titulo: 'Transito', url: '/maniobras/transito' });
-    menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
+    menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
 
 
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
