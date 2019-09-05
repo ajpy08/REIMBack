@@ -15,8 +15,11 @@ app.use(fileUpload());
 // las fechas deben ir en formato DD-MM-YYYY
 // ==========================================
 app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
-
+  console.log('|||||||')
+  console.log(req.query)
+  console.log('|||||||')
   var viaje = req.query.viaje || '';
+  console.log(viaje)
   var buque = req.query.buque || '';
   var finiarribo = req.query.finiarribo || '';
   var ffinarribo = req.query.ffinarribo || '';
@@ -165,7 +168,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     body.contenedores.forEach(function(element) {
       var maniobra;
       var peso = element.peso;
-      if (peso.toString().toUpperCase() == 'VACIO') {
+      if (peso == 'VACIO') {
         maniobra = new Maniobra({
           viaje: viaje._id,
           cliente: viaje.naviera,
@@ -444,7 +447,8 @@ app.get('/anio/:anio', (req, res, next) => {
   // console.log("fFin: " + fFin);
   // console.log('"anio": { "$gte":' + fIni + ', "$lte": ' + fFin + '}')
 
-  Viaje.find({ "anio": { "$gte": fIni, "$lt": fFin } })
+  // Viaje.find({ "anio": { "$gte": fIni, "$lte": fFin } })
+  Viaje.find({})
     .populate('buque', 'nombre')
     .exec(
       (err, viajes) => {
