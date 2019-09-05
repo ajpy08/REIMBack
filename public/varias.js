@@ -11,7 +11,8 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
         if (req.params[param] != '' && req.params[param] != null && req.params[param] != 'undefined') {
           filtro += '\"' + param + '\"' + ':' + '\"' + req.params[param] + '\"' + ',';
         } else {
-          console.log('No se agrego el param ' + param + ' al JSON');
+          // console.log('No se agrego el param ' + param + ' al JSON');
+          // console.log('En : ' + req.originalUrl);
         }
       } else {
         console.log('No se pudo el hasOwnProperty');
