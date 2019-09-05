@@ -309,6 +309,60 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+// ==========================================
+// Actualizar buque viaje Solicitud
+// ==========================================
+app.put('/solicitud/:id/guarda_buque_viaje', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  console.log('guarda viaje buque');
+  Solicitud.findById(id, (err, solicitud) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la solicitud',
+        errors: err
+      });
+    }
+    if (!solicitud) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud con el id ' + id + ' no existe',
+        errors: { message: 'No existe solicitud con ese ID' }
+      });
+    }
+    if (solicitud.estatus === 'APROBADA') {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud ha sido aprobada con anterioridad y no puede ser modificada.',
+        errors: { message: 'La solicitud ha sido aprobada con anterioridad y no puede ser modificada.' }
+      });
+    }
+
+    if (solicitud.tipo === 'C') {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud es una carga por lo tanto no cplica Buque viaje.',
+        errors: { message: 'La solicitud es una carga por lo tanto no cplica Buque viaje.' }
+      });
+    }
+    solicitud.buque = body.buque !== '' ? body.buque : undefined;
+    solicitud.viaje = body.viaje !== '' ? body.viaje : undefined;
+    solicitud.save((err, solicitudGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la solicitud',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        solicitud: solicitudGuardado
+      });
+    });
+  });
+});
 // =======================================
 // Borrar Solicitud
 // =======================================

@@ -113,6 +113,7 @@ app.use('/operador', operadorRoutes);
 app.use('/maniobra', maniobraRoutes);
 app.use('/maniobras', maniobrasRoutes);
 app.use('/solicitudes', solicitudesRoute);
+app.use('/solicitud', solicitudRoute);
 app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);
 app.use('/upload', uploadRoutes);
