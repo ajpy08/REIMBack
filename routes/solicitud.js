@@ -46,16 +46,6 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
         ok: true,
         solicitud: solicitudGuardado
       });
-      // solicitud.contenedores.forEach((element) => {
-      //   Maniobra.findById(element.maniobra, (err, maniobra) => {
-      //     maniobra.estatus = "TRANSITO";
-      //     maniobra.solicitud = id;
-      //     maniobra.agencia = solicitud.agencia;
-      //     maniobra.transportista = solicitud.transportista;
-      //     maniobra.cliente = solicitud.cliente;
-      //     maniobra.save((err, maniobraGuardado) => {});
-      //   });
-      // });
     });
   });
 });
@@ -64,12 +54,12 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // Aprobar Solicitud descarga 
 // ==========================================
-app.put('/apruebadescarga/:idsol/contenedor/:idcont', mdAutenticacion.verificaToken, (req, res) => {
-  var idSolicitud = req.params.idsol;
-  var idCont = req.params.idcont;
-  var body = req.body;
+app.put('/solicitud/:id/contenedor/:contenedor', mdAutenticacion.verificaToken, (req, res) => {
+  var idSolicitud = req.params.id;
+  var idCont = req.params.contenedor;
+  var maniobra = req.query.maniobra;
   Solicitud.updateOne({ "_id": new mongoose.Types.ObjectId(idSolicitud), "contenedores._id": new mongoose.Types.ObjectId(idCont) }, {
-    $set: { "contenedores.$.usuarioAprobo": new mongoose.Types.ObjectId(req.usuario._id), "contenedores.$.maniobra": "3333", "contenedores.$.fAprobacion": Date.now() }
+    $set: { "contenedores.$.maniobra": maniobra }
   }, (err, cont) => {
     if (err) {
       return res.status(400).json({

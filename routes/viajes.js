@@ -183,7 +183,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
           viaje: viaje._id,
           contenedor: element.contenedor,
           tipo: element.tipo,
-          peso: 'VACIO IMPORT',
+          peso: 'VACIO_IMPORT',
           estatus: 'APROBACION',
           destinatario: element.destinatario,
           usuarioAlta: req.usuario._id
@@ -337,20 +337,20 @@ app.delete('/viaje/:id', mdAutenticacion.verificaToken, (req, res) => {
 // Agregar Contenedor al viaje
 // ==========================================
 
-app.put('/viaje/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  var contenedor = req.params.contenedor;
-  var tipo = req.params.tipo;
-  var peso = req.params.peso;
-  var destinatario = req.params.destinatario;
+  var contenedor = req.query.contenedor;
+  var tipo = req.query.tipo;
+  var peso = req.query.peso;
+  var destinatario = req.query.destinatario;
+  console.log(contenedor);
   if (peso == 'VACIO') {
     maniobra = new Maniobra({
       viaje: id,
-      facturarA: "AQUI IRIA NOMBRE DE LA NAVIERA",
       contenedor: contenedor,
       tipo: tipo,
       peso: peso,
-      estatus: 'APROBADO',
+      estatus: 'TRANSITO',
       destinatario: destinatario,
       usuarioAlta: req.usuario._id
     });
@@ -370,14 +370,14 @@ app.put('/viaje/addcontenedor/:id&:contenedor&:tipo&:peso&:destinatario', mdAute
       console.log(err);
       return res.status(400).json({
         ok: false,
-        mensaje: "Error al cargar la maniobra",
+        mensaje: "Error al darde alta la maniobra maniobra",
         errors: err
       });
     }
     res.status(201).json({
       ok: true,
       mensaje: 'Contenedor Agregado con éxito.',
-      contenedor: maniobraGuardado
+      maniobra: maniobraGuardado
     });
   });
 });

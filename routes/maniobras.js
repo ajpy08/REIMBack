@@ -78,23 +78,23 @@ app.get('/buscaxcontenedorviaje', (req, res, netx) => {
   var viaje = req.query.viaje.trim();
   var buque = req.query.buque.trim();
   Maniobra.aggregate([{
-    $lookup: {
-      from: "viajes",
-      localField: "viaje",
-      foreignField: "_id",
-      as: "match"
-    }
-  },
-  {
-    $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
-  },
-  {
-    $project: {
-      _id: 1,
-      contenedor: 1
-    }
-  }
-  ])
+        $lookup: {
+          from: "viajes",
+          localField: "viaje",
+          foreignField: "_id",
+          as: "match"
+        }
+      },
+      {
+        $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
+      },
+      {
+        $project: {
+          _id: 1,
+          contenedor: 1
+        }
+      }
+    ])
     .exec(
       (err, maniobra) => {
         if (err) {
@@ -283,16 +283,15 @@ app.get('/LR', (req, res, next) => {
 
   var filtro2 = '{';
 
-  
-  if (buque != 'undefined' && buque != ''){
+
+  if (buque != 'undefined' && buque != '') {
     filtro2 += '\"viaje.buque\":' + '\"' + buque + '\",';
-  }
-  else {
+  } else {
     if (naviera != 'undefined' && naviera != '') {
       filtro2 += '\"naviera\":' + '\"' + naviera + '\",';
     }
   }
-  
+
 
   if (filtro2 != '{')
     filtro2 = filtro2.slice(0, -1);
@@ -301,8 +300,8 @@ app.get('/LR', (req, res, next) => {
   console.log(filtro2)
 
   Maniobra.find(
-    json
-  )
+      json
+    )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
@@ -330,36 +329,36 @@ app.get('/LR', (req, res, next) => {
     });
 });
 
-// app.get('/contenedores/disponibles/', (req, res, netx) => {
-//   Maniobra.find({ "estatus": "DISPONIBLE" })
-//     .populate('cliente', 'rfc razonSocial')
-//     .populate('agencia', 'rfc razonSocial')
-//     .populate('transportista', 'rfc razonSocial')
-//     .populate({
-//       path: "viaje",
-//       select: 'viaje fVigenciaTemporal pdfTemporal',
-//       populate: {
-//         path: "buque",
-//         select: 'nombre'
-//       }
-//     })
-//     .populate('usuarioAlta', 'nombre email')
-//     .exec((err, maniobras) => {
-//       if (err) {
-//         return res.status(500).json({
-//           ok: false,
-//           mensaje: 'Error cargando maniobras',
-//           errors: err
-//         });
-//       }
-//       res.status(200).json({
-//         ok: true,
-//         maniobras: maniobras,
-//         total: maniobras.length
-//       });
-//     });
+app.get('/contenedores/disponibles/', (req, res, netx) => {
+  Maniobra.find({ "estatus": "DISPONIBLE" })
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate({
+      path: "viaje",
+      select: 'viaje fVigenciaTemporal pdfTemporal',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
 
-// });
+});
 
 
 // app.get('/xcargar/', (req, res, netx) => {
