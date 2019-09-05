@@ -6,7 +6,6 @@ var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
 var ParamsToJSON = require('../public/varias');
-var ObjectId = require('mongodb').ObjectID;
 
 
 // =======================================
@@ -526,7 +525,7 @@ app.get('/:viaje?&:peso?&:cargaDescarga?', (req, res) => {
   // console.log('vacios')
   // console.log(req.params)
   var filtro = ParamsToJSON.ParamsToJSON(req);
-  console.log(filtro)
+  //console.log(filtro)
   Maniobra.find(filtro)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
