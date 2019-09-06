@@ -12,10 +12,7 @@ var usuarioSchema = new Schema({
   password: { type: String, required: [true, 'La contraseña es necesario'] },
   img: { type: String, required: false },
   role: { type: String, required: true, enum: rolesValidos },
-  empresas: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Cliente'
-  }],
+  empresas: [{ type: Schema.Types.ObjectId, ref: 'Cliente' }],
   activo: { type: Boolean, default: true, required: [true, 'El campo es obligatorio'] },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
