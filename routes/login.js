@@ -48,6 +48,14 @@ app.post('/', (req, res) => {
         errors: err
       });
     }
+    console.log(usuarioDB)
+    if (usuarioDB.activo === false) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El usuario se encuentra deshabilitado',
+        errors: err
+      });
+    }
 
     if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
       return res.status(400).json({
