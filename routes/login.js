@@ -121,7 +121,7 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
 
 
-    menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
+
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
     menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[1].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
@@ -129,6 +129,8 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques2' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
+
+    menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
     menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
 
 
