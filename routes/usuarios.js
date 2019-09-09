@@ -234,7 +234,7 @@ app.put('/usuario/:id/perfil', [mdAutenticacion.verificaToken, mdAutenticacion.v
 });
 
 // =======================================
-// Actualizar Usuarios
+// Actualizar Usuarios    HABILITAR DESHABILITAR
 // =======================================
 app.put('/usuario/:id/habilita_deshabilita', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
   var id = req.params.id;
