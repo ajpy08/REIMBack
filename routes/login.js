@@ -111,7 +111,6 @@ function obtenerMenu(ROLE) {
     ];
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
-    menu[0].submenu.unshift({ titulo: 'Cont. X Cargar', url: '/xcargar' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
