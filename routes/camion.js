@@ -1,6 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Camion = require('../models/camion');
+var varias = require('../public/varias');
 var fs = require('fs');
 var app = express();
 
@@ -127,28 +128,21 @@ app.put('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe camion con ese ID' }
       });
     }
-    camion.transportista = body.transportista,
-      camion.operador = body.operador,
-      camion.placa = body.placa;
+    camion.transportista = body.transportista;
+
+    camion.operador = body.operador === '' ? undefined : body.operador;
+    camion.placa = body.placa;
     camion.noEconomico = body.noEconomico;
     camion.vigenciaSeguro = body.vigenciaSeguro;
     camion.usuarioMod = req.usuario._id;
     camion.fMod = new Date();
+
     if (camion.pdfSeguro != body.pdfSeguro) {
-      if (fs.existsSync('./uploads/temp/' + body.pdfSeguro)) {
-        if (camion.pdfSeguro != undefined || camion.pdfSeguro != '' && camion.pdfSeguro != null && fs.existsSync('./uploads/camiones/' + camion.pdfSeguro)) {
-          fs.unlink('./uploads/camiones/' + camion.pdfSeguro, (err) => {
-            if (err) console.log(err);
-            else
-              console.log('Imagen anterior fue borrada con éxito');
-          });
-        }
-        fs.rename('./uploads/temp/' + body.pdfSeguro, './uploads/camiones/' + body.pdfSeguro, (err) => {
-          if (err) { console.log(err); }
-        });
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.pdfSeguro, './uploads/camiones/', camion.pdfSeguro)) {
         camion.pdfSeguro = body.pdfSeguro;
       }
     }
+
     camion.save((err, camionGuardado) => {
       if (err) {
         return res.status(400).json({
