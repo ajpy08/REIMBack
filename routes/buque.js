@@ -7,65 +7,54 @@ var Buque = require('../models/buque');
 // Obtener todos los buques
 // ==========================================
 app.get('/', (req, res, next) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
   Buque.find({})
-    .skip(desde)
-    // .limit(10)
     .populate('naviera', 'razonSocial')
     .populate('usuarioAlta', 'nombre email')
-    .exec(
-      (err, buques) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al cargar clientes',
-            errors: err
-          });
-        }
-        Buque.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            buques: buques,
-            total: conteo
-          });
+    .exec((err, buques) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al cargar clientes',
+          errors: err
         });
+      }
+      res.status(200).json({
+        ok: true,
+        buques: buques,
+        total: buques.length
       });
+    });
 });
 
 // ==========================================
 // Obtener todos los buques por naviera
 // ==========================================
 app.get('/naviera/:id', (req, res, next) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
   var id = req.params.id;
   Buque.find({ naviera: id })
     .populate('naviera', 'naviera')
     .populate('usuario', 'nombre email')
-    .exec(
-      (err, buques) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al cargar clientes',
-            errors: err
-          });
-        }
-        Buque.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            buques,
-            total: conteo
-          });
+    .exec((err, buques) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al cargar clientes',
+          errors: err
         });
+      }
+      res.status(200).json({
+        ok: true,
+        buques: buques,
+        total: buques.length
       });
+
+    });
 });
 
 // ==========================================
-//  Obtener Buques por ID
+//  Obtener Buque por ID
 // ==========================================
-app.get('/:id', (req, res) => {
+app.get('/buque/:id', (req, res) => {
   var id = req.params.id;
   Buque.findById(id)
     .populate('usuario', 'nombre img email')
@@ -94,7 +83,7 @@ app.get('/:id', (req, res) => {
 // ==========================================
 // Crear nuevo buque
 // ==========================================
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/buque/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var buque = new Buque({
     nombre: body.nombre,
@@ -119,7 +108,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // Actualizar Buque
 // ==========================================
-app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/buque/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
   Buque.findById(id, (err, buque) => {
@@ -161,7 +150,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 //   Borrar buques por el id
 // ============================================
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/buque/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Buque.findByIdAndRemove(id, (err, buqueBorrado) => {
     if (err) {

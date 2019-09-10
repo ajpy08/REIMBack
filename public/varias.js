@@ -12,10 +12,9 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
           filtro += '\"' + param + '\"' + ':' + '\"' + req.params[param] + '\"' + ',';
         } else {
           // console.log('No se agrego el param ' + param + ' al JSON');
-          // console.log('En : ' + req.originalUrl);
         }
       } else {
-        console.log('No se pudo el hasOwnProperty');
+        // console.log('No se pudo el hasOwnProperty');
         // return;
       }
     }
@@ -32,7 +31,7 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
     //console.log(json)
     //console.log(req.params);
   } else {
-    console.log('La URL no tiene parametros');
+    // console.log('La URL no tiene parametros');
     return;
   }
 
@@ -44,9 +43,9 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
     if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
       fs.unlink(rutaDestino + nameActual, (err) => {
         if (err) {
-          console.log(err);
+          // console.log(err);
         } else {
-          console.log('Documento anterior borrado con éxito');
+          // console.log('Documento anterior borrado con éxito');
         }
       });
     }
@@ -65,9 +64,9 @@ exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
   if (nameFile != null && nameFile != undefined && nameFile != '' && fs.existsSync(ruta + nameFile)) {
     fs.unlink(ruta + nameFile, (err) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
       } else {
-        console.log('Documento borrado con éxito');
+        // console.log('Documento borrado con éxito');
       }
     });
   }

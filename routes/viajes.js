@@ -241,20 +241,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         console.log('entro');
         viaje.pdfTemporal = body.pdfTemporal;
       }
-
-      // if (fs.existsSync('./uploads/temp/' + body.pdfTemporal)) {
-      //   if (viaje.pdfTemporal != undefined || viaje.pdfTemporal != '' && viaje.pdfTemporal != null && fs.existsSync('./uploads/viajes/' + viaje.pdfTemporal)) {
-      //     fs.unlink('./uploads/viajes/' + viaje.pdfTemporal, (err) => {
-      //       if (err) console.log(err);
-      //       else
-      //         console.log('File anterior fue borrado con éxito');
-      //     });
-      //   }
-      //   fs.rename('./uploads/temp/' + body.pdfTemporal, './uploads/viajes/' + body.pdfTemporal, (err) => {
-      //     if (err) { console.log(err); }
-      //   });
-      //   viaje.pdfTemporal = body.pdfTemporal;
-      // }
     }
     viaje.save((err, viajeGuardado) => {
       if (err) {
