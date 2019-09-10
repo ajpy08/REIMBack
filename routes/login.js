@@ -14,25 +14,19 @@ var Usuario = require('../models/usuario');
 //  Renovar De Token
 // ==========================================
 app.get('/renuevatoken', mdAutenticacion.verificaToken, (req, res) => {
-
   var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 14400 }); // 4 horas
-
   res.status(200).json({
     ok: true,
     token: token
   });
-
 });
 
 // ==========================================
 //  Autenticación normal
 // ==========================================
 app.post('/', (req, res) => {
-
   var body = req.body;
-
   Usuario.findOne({ email: body.email }, (err, usuarioDB) => {
-
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -116,19 +110,12 @@ function obtenerMenu(ROLE) {
       },
     ];
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
-    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
     menu[0].submenu.unshift({ titulo: 'Cont. X Cargar', url: '/xcargar' });
-    menu[0].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/disponibles' });
-    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/lavado_reparacion' });
-    menu[0].submenu.unshift({ titulo: 'Revision', url: '/revision' });
-    menu[0].submenu.unshift({ titulo: 'Espera', url: '/maniobras/espera' });
-    menu[0].submenu.unshift({ titulo: 'Transito', url: '/maniobras/transito' });
+    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
-
-
 
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
@@ -140,17 +127,25 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
     menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
 
+    //AGENCIA ADUANAL
 
     menu[2].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes' });
-    menu[2].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
-    menu[2].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
+    menu[2].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
 
+    //NAVIERA
+
+    menu[3].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    menu[3].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+
+    //TRANSPORTISTA
     menu[4].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
     menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+
     return menu;
 
   }
+
   if (ROLE === 'AA_ROLE') {
     let menu = [{
         titulo: 'Principal',
@@ -168,12 +163,11 @@ function obtenerMenu(ROLE) {
       },
     ];
 
-    menu[1].submenu.unshift({ titulo: 'Solicitud de carga', url: '/solicitudes_carga' });
-    menu[1].submenu.unshift({ titulo: 'Solicitud de descarga', url: '/solicitudes_descarga' });
+    menu[1].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes' });
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
-
     return menu;
   }
+
   if (ROLE === 'NAVIERA_ROLE') {
     let menu = [{
         titulo: 'Principal',
@@ -191,16 +185,8 @@ function obtenerMenu(ROLE) {
       },
     ];
 
-    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
-    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
-
-    menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
-    menu[1].submenu.unshift({ titulo: 'Reporte de contenedores reparación / lavado', url: '/reportesRL' });
-    menu[1].submenu.unshift({ titulo: 'Contenedores en reparación / lavado', url: '/contenedoresRL' });
-    menu[1].submenu.unshift({ titulo: 'Contenedores Disponibles', url: '/contenedoresDisponibles' });
-    menu[1].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
-    menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
-
+    menu[1].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    menu[1].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     return menu;
   }
   if (ROLE === 'TRANSPORTISTA_ROLE') {
