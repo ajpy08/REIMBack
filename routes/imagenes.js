@@ -26,7 +26,6 @@ app.get('/:tipo/:img', (req, res, netx) => {
 
 // Recupera Fotos de Maniobra (Lavado o Reparacion)
 app.get('/:id/:LR/:img', (req, res, netx) => {
-
     var id = req.params.id;
     var img = req.params.img;
     var LR = req.params.LR;
@@ -69,11 +68,11 @@ app.get('/:maniobra&:LR', (req, res, netx) => {
             // res.json(array)
         });
     } else {
-        return res.status(400).json({
-            ok: false,
-            mensaje: 'No se encontraron fotos',
-            errors: { message: 'No existen fotos para ' + lavado_reparacion }
-        });
+        // return res.status(400).json({
+        //     ok: false,
+        //     mensaje: 'No se encontraron fotos',
+        //     errors: { message: 'No existen fotos para ' + lavado_reparacion }
+        // });
     }
 });
 

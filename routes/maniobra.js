@@ -16,6 +16,7 @@ app.use(fileUpload());
 // ==========================================
 app.get('/:id', (req, res) => {
   var id = req.params.id;
+  console.log(id)
   Maniobra.findById(id)
     .exec((err, maniobra) => {
       if (err) {
