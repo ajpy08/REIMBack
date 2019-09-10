@@ -26,7 +26,6 @@ app.get('/', (req, res, next) => {
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  console.log(json);
   Operador.find(json)
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
@@ -128,7 +127,6 @@ app.post('/operador/', mdAutenticacion.verificaToken, (req, res) => {
   varias.MoverArchivoFromTemp('./uploads/temp/', operador.fotoLicencia, './uploads/operadores/', operador.fotoLicencia);
 
   operador.save((err, operadorGuardado) => {
-    console.log(err)
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -168,23 +166,20 @@ app.put('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
     operador.transportista = body.transportista;
     operador.nombre = body.nombre;
     operador.usuario = req.usuario._id;
-    operador.foto = body.foto;
-    operador.licencia = body.licencia;
     operador.vigenciaLicencia = body.vigenciaLicencia;
-    operador.fotoLicencia = body.fotoLicencia;
     operador.activo = body.activo;
     operador.usuarioMod = req.usuario._id;
     operador.fMod = new Date();
 
     if (operador.foto != body.foto) {
       if (varias.MoverArchivoFromTemp('./uploads/temp/', body.foto, './uploads/operadores/', operador.foto)) {
-        operador.foto = body.foto
+        operador.foto = body.foto;
       }
     }
 
     if (operador.fotoLicencia != body.fotoLicencia) {
       if (varias.MoverArchivoFromTemp('./uploads/temp/', body.fotoLicencia, './uploads/operadores/', operador.fotoLicencia)) {
-        operador.fotoLicencia = body.fotoLicencia
+        operador.fotoLicencia = body.fotoLicencia;
       }
     }
 
@@ -249,7 +244,6 @@ app.put('/operador/:id/habilita_deshabilita', mdAutenticacion.verificaToken, (re
 app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
-  console.log(new mongoose.Types.ObjectId(id));
   Maniobra.find({ "operador": new mongoose.Types.ObjectId(id) })
     .exec(
       (err, maniobra) => {
