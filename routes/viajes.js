@@ -15,9 +15,6 @@ app.use(fileUpload());
 // las fechas deben ir en formato DD-MM-YYYY
 // ==========================================
 app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
-  console.log('|||||||')
-  console.log(req.query)
-  console.log('|||||||')
   var viaje = req.query.viaje || '';
   console.log(viaje)
   var buque = req.query.buque || '';
@@ -165,7 +162,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         errors: err
       });
     }
-    body.contenedores.forEach(function(element) {
+    body.contenedores.forEach(function (element) {
       var maniobra;
       var peso = element.peso;
       if (peso == 'VACIO') {
@@ -271,11 +268,11 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/viaje/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.find({
-      $or: [
-        { "viaje": id, "peso": "VACIO", "estatus": { $ne: "TRANSITO" } },
-        { "viaje": id, "peso": { $ne: "VACIO" }, "estatus": { $ne: "APROBACION" } }
-      ]
-    })
+    $or: [
+      { "viaje": id, "peso": "VACIO", "estatus": { $ne: "TRANSITO" } },
+      { "viaje": id, "peso": { $ne: "VACIO" }, "estatus": { $ne: "APROBACION" } }
+    ]
+  })
     .exec(
       (err, maniobras) => {
         if (err) {
@@ -406,35 +403,20 @@ app.put('/viaje/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken
     });
 });
 
-
-
-
-
-
 // ==========================================
 // Obtener los ultimos N viajes JAVI
 // ==========================================
 app.get('/anio/:anio', (req, res, next) => {
+  var fechaInicio = req.params.anio;
   var fechaFin = req.params.anio;
-  //var fechaInicio = req.params.anio;
-  //console.log("fechaInicio: " + fechaInicio + "y fechaFin: " + fechaFin)
 
+  if (fechaInicio != '' && fechaInicio) {
+    fechaFin = new Date(fechaFin);
+    fechaInicio = new Date(fechaInicio);
+    fechaInicio.setFullYear(2018);
+  }
 
-  fechaFin = new Date(fechaFin);
-  fFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), fechaFin.getDate(), 23, 59, 59);
-  //console.log("fechaFin: " + fechaFin + "y fFin: " + fFin)
-
-  //fechaInicio = new Date(fechaInicio);
-  // fechaInicio.setFullYear(2018);
-  fIni = new Date(fechaFin.getFullYear() - 1, fechaFin.getMonth(), fechaFin.getDate(), 0, 0, 0);
-  //console.log("fechaInicio: " + fechaInicio + "y fIni: " + fIni)
-
-  // console.log("fIni: " + fIni);
-  // console.log("fFin: " + fFin);
-  // console.log('"anio": { "$gte":' + fIni + ', "$lte": ' + fFin + '}')
-
-  // Viaje.find({ "anio": { "$gte": fIni, "$lte": fFin } })
-  Viaje.find({})
+  Viaje.find({"anio": { "$gte": fechaInicio.getFullYear(), "$lte": fechaFin.getFullYear() }})
     .populate('buque', 'nombre')
     .exec(
       (err, viajes) => {
