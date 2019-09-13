@@ -849,7 +849,7 @@ app.put('/asigna_factura/:id&:facturaManiobra', mdAutenticacion.verificaToken, (
         errors: err
       });
     }
-    if (maniobra) {
+    if (!maniobra) {
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
