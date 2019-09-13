@@ -839,8 +839,8 @@ app.put('/addimg/:id&:LR', (req, res, next) => {
 app.put('/asigna_factura/:id&:facturaManiobra', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var facturaManiobra = req.params.facturaManiobra;
-  console.log("El id es:" + id)
-  console.log("La factura es :" + facturaManiobra)
+  // console.log("El id es:" + id)
+  // console.log("La factura es :" + facturaManiobra)
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
@@ -849,7 +849,7 @@ app.put('/asigna_factura/:id&:facturaManiobra', mdAutenticacion.verificaToken, (
         errors: err
       });
     }
-    if (!maniobra) {
+    if (maniobra) {
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
