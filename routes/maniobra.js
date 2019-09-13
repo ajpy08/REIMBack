@@ -422,8 +422,8 @@ app.put('/registra_descarga/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     maniobra.grado = body.grado;
 
-    if (body.hSalida) {
-      maniobra.hSalida = body.hSalida;
+    if (body.hDescarga && body.descargaAutorizada === true) {
+      maniobra.hDescarga = body.hDescarga;
       maniobra.estatus = "LAVADO_REPARACION";
       if (!body.lavado && body.reparaciones.length == 0)
         maniobra.estatus = "DISPONIBLE";
