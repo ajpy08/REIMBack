@@ -42,7 +42,7 @@ var maniobraRoutes = require('./routes/maniobra');
 var maniobrasRoutes = require('./routes/maniobras');
 var clienteRoutes = require('./routes/cliente');
 var viajesRoutes = require('./routes/viajes');
-var buesquedaRoutes = require('./routes/busqueda');
+// var buesquedaRoutes = require('./routes/busqueda');
 var forgotpass = require('./routes/forgotpass');
 var resetpass = require('./routes/resetpass');
 var UploadFile = require('./routes/uploadfile');
@@ -71,8 +71,9 @@ mongoose.connection.on('error', (error) => {
   console.log('ERROR: ' + error);
 });
 
-const run = async() => {
-  await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
+const run = async () => {
+  // await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
+  await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
     autoReconnect: true,
     reconnectTries: 1000000,
     reconnectInterval: 3000,
@@ -105,7 +106,7 @@ app.use('/camiones', camionRoutes);
 app.use('/uploadFile', UploadFile);
 app.use('/reset_password', resetpass);
 app.use('/forgot_password', forgotpass);
-app.use('/busqueda', buesquedaRoutes);
+// app.use('/busqueda', buesquedaRoutes);
 app.use('/viajes', viajesRoutes);
 app.use('/cliente', clienteRoutes);
 app.use('/maniobra', maniobraRoutes);
