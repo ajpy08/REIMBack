@@ -413,7 +413,7 @@ app.get('/anio/:anio', (req, res, next) => {
   if (fechaInicio != '' && fechaInicio) {
     fechaFin = new Date(fechaFin);
     fechaInicio = new Date(fechaInicio);
-    fechaInicio.setFullYear(2018);
+    fechaInicio.setFullYear(fechaInicio.getFullYear()-1);
   }
 
   Viaje.find({"anio": { "$gte": fechaInicio.getFullYear(), "$lte": fechaFin.getFullYear() }})

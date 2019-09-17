@@ -16,7 +16,12 @@ app.get('', (req, res, netx) => {
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
   var contenedor = req.query.contenedor || '';
-  var filtro = '{\"estatus\":\"TRANSITO\",';
+  var viaje = req.query.viaje || '';
+  var peso = req.query.peso || '';
+  var lavado = req.query.lavado || '';
+  var reparacion = req.query.reparacion || '';
+
+  var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
     filtro += '\"cargaDescarga\":' + '\"' + cargadescarga + '\",';
   if (estatus != 'undefined' && estatus != '')
@@ -25,6 +30,19 @@ app.get('', (req, res, netx) => {
     filtro += '\"transportista\":' + '\"' + transportista + '\",';
   if (contenedor != 'undefined' && contenedor != '')
     filtro += '\"contenedor\":{ \"$regex\":' + '\".*' + contenedor + '\",\"$options\":\"i\"},';
+  if (viaje != 'undefined' && viaje != '')
+    filtro += '\"viaje\":' + '\"' + viaje + '\",';
+  if (peso != 'undefined' && peso != '')
+    filtro += '\"peso\":' + '\"' + peso + '\",';
+
+  if(lavado === 'true'){
+    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
+  }
+
+  if(reparacion === 'true'){
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  }
+
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
@@ -93,7 +111,6 @@ app.get('/LR', (req, res, next) => {
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  console.log(filtro)
 
   var filtro2 = '{';
 
@@ -111,11 +128,10 @@ app.get('/LR', (req, res, next) => {
     filtro2 = filtro2.slice(0, -1);
   filtro2 = filtro2 + '}';
   var json2 = JSON.parse(filtro2);
-  console.log(filtro2)
 
   Maniobra.find(
-      json
-    )
+    json
+  )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
@@ -280,54 +296,52 @@ app.get('/rangofecha', (req, res, netx) => {
 // ==========================================
 // Obtener todas las maniobras de vacio
 // ==========================================
-app.get('/:viaje?&:peso?&:cargaDescarga?', (req, res) => {
-  // console.log('vacios')
-  // console.log(req.params)
-  var filtro = ParamsToJSON.ParamsToJSON(req);
-  //console.log(filtro)
-  Maniobra.find(filtro)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
-    .populate('operador', 'nombre')
-    .populate('camion', 'placa')
-    .populate({
-      path: "viaje",
-      select: 'viaje fechaArribo',
-      populate: {
-        path: "buque",
-        select: 'nombre'
-      }
-    })
-    .populate('usuarioAlta', 'nombre email')
-    .exec((err, vacios) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar vacios',
-          errors: err
-        });
-      }
-      if (!vacios) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'No existen maniobras de vacio para el viaje: ' + viaje,
-          errors: { message: "No existen maniobras de vacio" }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        vacios: vacios,
-        total: vacios.length
-      });
-    });
-
-});
 
 module.exports = app;
 
+// app.get('/:viaje?&:peso?&:cargaDescarga?', (req, res) => {
+//   // console.log('vacios')
+//   // console.log(req.params)
+//   var filtro = ParamsToJSON.ParamsToJSON(req);
+//   //console.log(filtro)
+//   Maniobra.find(filtro)
+//     .populate('cliente', 'rfc razonSocial')
+//     .populate('agencia', 'rfc razonSocial')
+//     .populate('transportista', 'rfc razonSocial')
+//     .populate('operador', 'nombre')
+//     .populate('camion', 'placa')
+//     .populate({
+//       path: "viaje",
+//       select: 'viaje fechaArribo',
+//       populate: {
+//         path: "buque",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('usuarioAlta', 'nombre email')
+//     .exec((err, vacios) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error al buscar vacios',
+//           errors: err
+//         });
+//       }
+//       if (!vacios) {
+//         return res.status(400).json({
+//           ok: false,
+//           mensaje: 'No existen maniobras de vacio para el viaje: ' + viaje,
+//           errors: { message: "No existen maniobras de vacio" }
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         vacios: vacios,
+//         total: vacios.length
+//       });
+//     });
 
-
+// });
 
 // // ============================================
 // // Obtener Maniobras por contenedor buque viaje
