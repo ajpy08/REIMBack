@@ -5,7 +5,6 @@ var app = express();
 var Usuario = require('../models/usuario');
 var Camion = require('../models/camion');
 var Operador = require('../models/operador');
-var Contenedor = require('../models/contenedor');
 var Cliente = require('../models/cliente');
 var Maniobra = require('../models/maniobra');
 var Transportista = require('../models/transportista');
