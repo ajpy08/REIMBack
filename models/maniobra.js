@@ -25,7 +25,6 @@ var maniobraSchema = new Schema({
   hLlegada: { type: String },
   hEntrada: { type: String },
   solicitud: { type: Schema.Types.ObjectId, ref: 'Solicitud' },
-  hSalida: { type: String },
   lavado: { type: String },
   lavadoObservacion: { type: String },
   reparaciones: [{
@@ -34,6 +33,9 @@ var maniobraSchema = new Schema({
     costo: { type: String },
   }],
   reparacionesObservacion: { type: String },
+  hSalida: { type: String },
+  descargaAutorizada: { type: Boolean, default: false },
+  hDescarga: { type: String },
   fIniLavado: { type: Date },
   hIniLavado: { type: String },
   hFinLavado: { type: String },
