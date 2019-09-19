@@ -32,14 +32,19 @@ app.get('', (req, res, netx) => {
     filtro += '\"contenedor\":{ \"$regex\":' + '\".*' + contenedor + '\",\"$options\":\"i\"},';
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
-  if (peso != 'undefined' && peso != '')
-    filtro += '\"peso\":' + '\"' + peso + '\",';
 
-  if(lavado === 'true'){
+  // if (peso != 'undefined' && peso != '')
+  //   filtro += '\"peso\":' + '\"' + peso + '\",';
+  peso = peso.replace(/,/g, '\",\"');
+
+  if (peso != 'undefined' && peso != '')
+    filtro += '\"peso\":{\"$in\":[\"' + peso + '\"]},';
+
+  if (lavado === 'true') {
     filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
   }
 
-  if(reparacion === 'true'){
+  if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
   }
 
@@ -48,6 +53,7 @@ app.get('', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
+  console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
@@ -130,8 +136,8 @@ app.get('/LR', (req, res, next) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-    json
-  )
+      json
+    )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
