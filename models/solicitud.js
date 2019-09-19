@@ -2,6 +2,9 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
+
+var Maniobra = require('./maniobra');
+
 var solicitudScheme = new Schema({
 
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Agencia Aduanal es necesaria'] },
@@ -50,4 +53,46 @@ var solicitudScheme = new Schema({
 }, { collection: 'solicitudes' });
 
 solicitudScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
+
+solicitudScheme.pre('save', function(next) {
+  var doc = this;
+
+  if (doc.estatus === 'APROBADA' && doc.tipo === 'C') {
+    doc.contenedores.forEach(function(element, index) {
+      if (element.maniobra == null || element.maniobra == undefined || element.maniobra == '') {
+        var maniobra;
+        maniobra = new Maniobra({
+          solicitud: doc._id,
+          cargaDescarga: doc.tipo,
+          cliente: doc.cliente,
+          agencia: doc.agencia,
+          transportista: element.transportista,
+          correo: doc.correo,
+          correoFac: doc.correoFac,
+          tipo: element.tipo,
+          peso: element.peso,
+          grado: element.grado,
+          estatus: 'TRANSITO',
+          patio: element.patio
+        });
+        doc.contenedores[index].maniobra = maniobra._id;
+        maniobra.save((err, maniobraGuardado) => {
+          if (err) {
+            console.log(err);
+            return next(err);
+          } else {
+            console.log("guardado");
+
+          }
+        });
+      }
+    });
+    console.log(doc);
+    next();
+  } else {
+    next();
+  }
+});
+
+
 module.exports = mongoose.model('Solicitud', solicitudScheme);
