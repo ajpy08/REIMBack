@@ -220,6 +220,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+
 // ==========================================
 // Actualizar Solicitud
 // ==========================================
@@ -290,7 +291,7 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     if (!solicitud.credito && body.rutaComprobante != '..' && solicitud.rutaComprobante != body.rutaComprobante) {
       if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante)) {
-        solicitud.rutaBL = body.rutaBL;
+        solicitud.rutaComprobante = body.rutaComprobante;
       }
     }
     solicitud.save((err, solicitudGuardado) => {
