@@ -17,12 +17,14 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
   var finialta = req.query.finialta || '';
   var ffinalta = req.query.ffinalta || '';
   var agencias = req.query.agencias || '';
-  agencias = agencias.replace(',', '\",\"');
+
   var filtro = '{';
   if (tipo != 'undefined' && tipo != '')
     filtro += '\"tipo\":' + '\"' + tipo + '\",';
   if (estatus != 'undefined' && estatus != '')
     filtro += '\"estatus\":' + '\"' + estatus + '\",';
+
+  agencias = agencias.replace(/,/g, '\",\"');
   if (agencias != 'undefined' && agencias != '')
     filtro += '\"agencia\":{\"$in\":[\"' + agencias + '\"]},';
   // if (finialta != '' && ffinalta) {
