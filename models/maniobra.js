@@ -57,7 +57,8 @@ var maniobraSchema = new Schema({
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 maniobraSchema.pre('save', function(next) {
   var doc = this;
-  if (this.peso != 'VACIO' && (this.folio === undefined || this.folio === '')) {
+  if (this.cargaDescarga === 'D' && this.peso != 'VACIO' && (this.folio === undefined || this.folio === '') ||
+    (this.cargaDescarga === 'C' && (this.folio === undefined || this.folio === ''))) {
     Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function(error, cont) {
       if (error)
         return next(error);
