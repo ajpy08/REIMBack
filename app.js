@@ -34,6 +34,7 @@ var transportistaRoutes = require('./routes/transportista');
 var operadorRoutes = require('./routes/operador');
 var camionRoutes = require('./routes/camion');
 var buqueRoutes = require('./routes/buque');
+var tiposContenedorRoutes = require('./routes/tiposContenedor');
 
 var uploadRoutes = require('./routes/upload');
 var dropzoneRoutes = require('./routes/dropzone');
@@ -71,9 +72,9 @@ mongoose.connection.on('error', (error) => {
   console.log('ERROR: ' + error);
 });
 
-const run = async () => {
-  // await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
-  await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
+const run = async() => {
+  await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
+    //await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
     autoReconnect: true,
     reconnectTries: 1000000,
     reconnectInterval: 3000,
@@ -102,6 +103,7 @@ app.use('/transportistas', transportistaRoutes);
 app.use('/buques', buqueRoutes);
 app.use('/operadores', operadorRoutes);
 app.use('/camiones', camionRoutes);
+app.use('/tipos_contenedores', tiposContenedorRoutes);
 
 app.use('/uploadFile', UploadFile);
 app.use('/reset_password', resetpass);
@@ -121,4 +123,4 @@ app.use('/', appRoutes);
 // Escuchar peticiones
 app.listen(3000, () => {
   console.log('Express server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
-})
+});

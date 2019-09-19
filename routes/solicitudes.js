@@ -17,12 +17,14 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
   var finialta = req.query.finialta || '';
   var ffinalta = req.query.ffinalta || '';
   var agencias = req.query.agencias || '';
-  agencias = agencias.replace(',', '\",\"');
+
   var filtro = '{';
   if (tipo != 'undefined' && tipo != '')
     filtro += '\"tipo\":' + '\"' + tipo + '\",';
   if (estatus != 'undefined' && estatus != '')
     filtro += '\"estatus\":' + '\"' + estatus + '\",';
+
+  agencias = agencias.replace(/,/g, '\",\"');
   if (agencias != 'undefined' && agencias != '')
     filtro += '\"agencia\":{\"$in\":[\"' + agencias + '\"]},';
   // if (finialta != '' && ffinalta) {
@@ -218,6 +220,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+
 // ==========================================
 // Actualizar Solicitud
 // ==========================================
@@ -288,7 +291,7 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     if (!solicitud.credito && body.rutaComprobante != '..' && solicitud.rutaComprobante != body.rutaComprobante) {
       if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante)) {
-        solicitud.rutaBL = body.rutaBL;
+        solicitud.rutaComprobante = body.rutaComprobante;
       }
     }
     solicitud.save((err, solicitudGuardado) => {
