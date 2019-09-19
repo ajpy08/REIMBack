@@ -52,7 +52,6 @@ var maniobraSchema = new Schema({
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
 
-
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
