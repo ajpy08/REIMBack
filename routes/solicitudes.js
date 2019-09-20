@@ -366,6 +366,87 @@ app.put('/solicitud/:id/guarda_buque_viaje', mdAutenticacion.verificaToken, (req
     });
   });
 });
+
+
+// ==========================================
+// Aprobar Solicitud con maniobra
+// ==========================================
+app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res) => {
+
+  var id = req.params.id;
+  var body = req.body;
+  Solicitud.findById(id, (err, solicitud) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar viaje',
+        errors: err
+      });
+    }
+    if (!solicitud) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud con el id ' + id + ' no existe',
+        errors: { message: 'No existe solicitud con ese ID' }
+      });
+    }
+
+
+    // solicitud.contenedores.forEach((element, index) => {
+    //   if (element.maniobra == null || element.maniobra == undefined || element.maniobra == '') {
+    //     var maniobra;
+    //     maniobra = new Maniobra({
+    //       solicitud: solicitud._id,
+    //       cargaDescarga: solicitud.tipo,
+    //       cliente: solicitud.cliente,
+    //       agencia: solicitud.agencia,
+    //       transportista: element.transportista,
+    //       correo: solicitud.correo,
+    //       correoFac: solicitud.correoFac,
+    //       tipo: element.tipo,
+    //       peso: element.peso,
+    //       grado: element.grado,
+    //       estatus: 'TRANSITO',
+    //       patio: element.patio,
+    //       usuarioAlta: req.usuario._id
+    //     });
+    //     solicitud.contenedores[index].maniobra = maniobra._id;
+    //     maniobra.save((err, maniobraGuardado) => {
+    //       if (err) {
+    //         console.log(err);
+    //       } else {
+    //         console.log(maniobraGuardado._id);
+
+    //       }
+    //     });
+    //   }
+    // });
+
+    // console.log(solicitud.contenedores);
+    // //solicitud.contenedores = body.contenedores;
+    solicitud.estatus = "APROBADA";
+    solicitud.fAprobacion = Date.now();
+    solicitud.usuarioAprobo = req.usuario._id;
+    solicitud.save((err, solicitudGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la solicitud',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        solicitud: solicitudGuardado
+      });
+    });
+
+  });
+});
+
+
+
+
 // =======================================
 // Borrar Solicitud
 // =======================================
@@ -403,141 +484,6 @@ app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
   });
 });
-
-
-// // =======================================
-// // Obtener solicitudes id de agencia
-// // =======================================
-// app.get('/agencia/:agencias', (req, res) => {
-//   var desde = req.query.desde || 0;
-//   desde = Number(desde);
-//   var agencias = req.params.agencias;
-//   var a = ['5bfecd483965fc0b7058ceae', '5c1ad1bf5657c12c4c4bfc6b'];
-
-//   SolicitudD.find({ agencia: { "$in": a } })
-//     .skip(desde)
-//     .populate('agencia', 'razonSocial')
-//     .populate('naviera', 'razonSocial')
-//     .populate('transportista', 'razonSocial')
-//     .populate('cliente', 'razonSocial')
-//     .populate('buque', 'buque')
-//     .populate('usuario', 'nombre email')
-//     .exec(
-//       (err, solicitudesD) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando solicitudes',
-//             errors: err
-//           });
-//         }
-//         SolicitudD.countDocuments({ agencia: { "$in": a } }, (err, conteo) => {
-//           res.status(200).json({
-//             ok: true,
-//             solicitudesD,
-//             total: conteo
-//           });
-
-//         });
-
-//       });
-// });
-
-
-// // =======================================
-// // Obtener solicitudes NO APROBADAS
-// // =======================================
-// app.get('/NA/', (req, res) => {
-//   var desde = req.query.desde || 0;
-//   desde = Number(desde);
-//   var estatus = 'NA';
-
-//   Solicitud.find({ 'estatus': estatus })
-//     .populate('agencia', 'razonSocial')
-//     .populate('naviera', 'razonSocial')
-//     .populate('cliente', 'razonSocial')
-//     .populate('buque', 'nombre')
-//     .populate('viaje', 'viaje')
-//     .populate('usuarioAlta', 'nombre email')
-//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-//     .exec(
-//       (err, solicitudesD) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando solicitudes',
-//             errors: err
-//           });
-//         }
-//         SolicitudD.countDocuments({ 'estatus': estatus }, (err, conteo) => {
-//           res.status(200).json({
-//             ok: true,
-//             solicitudesD,
-//             total: conteo
-//           });
-
-//         });
-
-//       });
-// });
-
-// // =======================================
-// // Obtener solicitudes de Descarga
-// // =======================================
-// app.get('/descargas/', (req, res) => {
-//   Solicitud.find({ 'tipo': 'D' })
-//     .populate('agencia', 'razonSocial')
-//     .populate('naviera', 'razonSocial')
-//     .populate('cliente', 'razonSocial')
-//     .populate('buque', 'nombre')
-//     .populate('viaje', 'viaje')
-//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-//     .populate('usuarioAlta', 'nombre email')
-
-//   .exec(
-//     (err, solicitudes) => {
-//       if (err) {
-//         return res.status(500).json({
-//           ok: false,
-//           mensaje: 'Error cargando solicitudes',
-//           errors: err
-//         });
-//       }
-//       res.status(200).json({
-//         ok: true,
-//         solicitudes: solicitudes,
-//         total: solicitudes.length
-//       });
-//     });
-// });
-
-// // =======================================
-// // Obtener solicitudes de Carga
-// // =======================================
-// app.get('/cargas/', (req, res) => {
-//   Solicitud.find({ 'tipo': 'C' })
-//     .populate('agencia', 'razonSocial')
-//     .populate('naviera', 'razonSocial')
-//     .populate('cliente', 'razonSocial')
-//     .populate('buque', 'nombre')
-//     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-//     .populate('usuarioAlta', 'nombre email')
-//     .exec(
-//       (err, solicitudes) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando solicitudes',
-//             errors: err
-//           });
-//         }
-//         res.status(200).json({
-//           ok: true,
-//           solicitudes: solicitudes,
-//           total: solicitudes.length
-//         });
-//       });
-// });
 
 
 
