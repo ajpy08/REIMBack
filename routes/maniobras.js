@@ -129,7 +129,7 @@ app.get('/LR', (req, res, next) => {
     }
   }
 
-
+  //Sirve para el populate de abajo
   if (filtro2 != '{')
     filtro2 = filtro2.slice(0, -1);
   filtro2 = filtro2 + '}';
@@ -140,12 +140,17 @@ app.get('/LR', (req, res, next) => {
     )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')    
     .populate({
       path: 'viaje',
       select: 'viaje buque naviera',
       match: json2,
+      populate: {
+        path: "naviera",
+        select: 'razonSocial'
+      }
     })
+    .populate('naviera', 'rfc razonSocial')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, maniobras) => {
       if (err) {
