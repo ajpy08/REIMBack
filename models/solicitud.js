@@ -56,7 +56,6 @@ solicitudScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
 
 solicitudScheme.pre('save', function(next) {
   var doc = this;
-
   if (doc.estatus === 'APROBADA' && doc.tipo === 'C') {
     doc.contenedores.forEach(function(element, index) {
       if (element.maniobra == null || element.maniobra == undefined || element.maniobra == '') {
@@ -68,30 +67,24 @@ solicitudScheme.pre('save', function(next) {
           agencia: doc.agencia,
           transportista: element.transportista,
           correo: doc.correo,
-          correoFac: doc.correoFac,
           tipo: element.tipo,
           peso: element.peso,
           grado: element.grado,
           estatus: 'TRANSITO',
-          patio: element.patio
+          patio: element.patio,
+          usuarioAlta: doc.usuarioAprobo
         });
         doc.contenedores[index].maniobra = maniobra._id;
-        maniobra.save((err, maniobraGuardado) => {
+        maniobra.save((err) => {
           if (err) {
             console.log(err);
             return next(err);
-          } else {
-            console.log("guardado");
-
           }
         });
       }
     });
-    console.log(doc);
-    next();
-  } else {
-    next();
   }
+  next();
 });
 
 
