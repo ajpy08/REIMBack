@@ -73,8 +73,8 @@ mongoose.connection.on('error', (error) => {
 });
 
 const run = async() => {
-  await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
-    //await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
+  //await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
+  await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
     autoReconnect: true,
     reconnectTries: 1000000,
     reconnectInterval: 3000,
