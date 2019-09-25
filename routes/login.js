@@ -108,9 +108,13 @@ function obtenerMenu(ROLE) {
         icono: 'mdi mdi-folder-lock-open',
         submenu: []
       },
+      {
+        titulo: 'Facturación',
+        icono: 'mdi mdi-folder-lock-open',
+        submenu: []
+      }
     ];
-    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
-    menu[0].submenu.unshift({ titulo: 'Vacios', url: '/vacios' });
+    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });    
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
@@ -141,6 +145,8 @@ function obtenerMenu(ROLE) {
     menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
 
+    menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
+    menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
     return menu;
 
   }
