@@ -53,7 +53,75 @@ app.get('', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
-  console.log(json);
+  //console.log(json);
+  Maniobra.find(json)
+    .populate('cliente', 'rfc razonSocial')
+    .populate('agencia', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial')
+    .populate('operador', 'nombre')
+    .populate('camion', 'placa noEconomico')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
+});
+
+// =======================================
+// Obtener Maniobras Que no incluyen VACIOS
+// =======================================
+app.get('/facturacion-maniobras', (req, res, netx) => {
+  var cargadescarga = req.query.cargadescarga || '';  
+  var viaje = req.query.viaje || '';
+  var peso = req.query.peso || '';
+  var lavado = req.query.lavado || '';
+  var reparacion = req.query.reparacion || '';
+
+  var filtro = '{';
+  if (cargadescarga != 'undefined' && cargadescarga != '')
+    filtro += '\"cargaDescarga\":' + '\"' + cargadescarga + '\",';
+  
+  if (viaje != 'undefined' && viaje != '')
+    filtro += '\"viaje\":' + '\"' + viaje + '\",';
+
+  // if (peso != 'undefined' && peso != '')
+  //   filtro += '\"peso\":' + '\"' + peso + '\",';
+  //peso = peso.replace(/,/g, '\",\"');
+  if (peso != 'undefined' && peso != '')
+    filtro += '\"peso\":{\"$ne\":[\"' + peso + '\"]},';
+
+  if (lavado === 'true') {
+    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
+  }
+
+  if (reparacion === 'true') {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  //console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
