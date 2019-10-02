@@ -5,12 +5,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
-//cconfigurar AWS con las claves de acceso
-AWS.config.update({
-  accessKeyId: "AKIAIZJVVYGLOPMWJ3BQ",
-  secretAccessKey: "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",
-  region: 'us-east-1'
-});
+
 
 var s3 = new AWS.S3();
 
