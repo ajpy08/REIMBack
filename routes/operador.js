@@ -122,9 +122,9 @@ app.post('/operador/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', operador.foto, './uploads/operadores/', operador.foto);
+  varias.MoverArchivoFromTemp('./uploads/temp/', operador.foto, 'operadores/', operador.foto);
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', operador.fotoLicencia, './uploads/operadores/', operador.fotoLicencia);
+  varias.MoverArchivoFromTemp('./uploads/temp/', operador.fotoLicencia, 'operadores/', operador.fotoLicencia);
 
   operador.save((err, operadorGuardado) => {
     if (err) {
@@ -172,13 +172,13 @@ app.put('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
     operador.fMod = new Date();
 
     if (operador.foto != body.foto) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.foto, './uploads/operadores/', operador.foto)) {
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.foto, 'operadores/', operador.foto)) {
         operador.foto = body.foto;
       }
     }
 
     if (operador.fotoLicencia != body.fotoLicencia) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.fotoLicencia, './uploads/operadores/', operador.fotoLicencia)) {
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.fotoLicencia, 'operadores/', operador.fotoLicencia)) {
         operador.fotoLicencia = body.fotoLicencia;
       }
     }
