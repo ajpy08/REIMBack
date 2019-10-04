@@ -5,12 +5,15 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
+//cconfigurar AWS con las claves de acceso
+AWS.config.update({
+  accessKeyId: "",
+  secretAccessKey: "",
+  region: 'us-east-1'
+});
 
 
 var s3 = new AWS.S3();
-
-
-
 
 exports.ParamsToJSON = function ParamsToJSON(req) {
   var json;

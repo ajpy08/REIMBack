@@ -8,10 +8,10 @@ var app = express();
 var path = require('path');
 var fs = require('fs');
 
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 
 
-var s3 = new AWS.S3();
+// var s3 = new AWS.S3();
 
 
 // Rutas
@@ -30,15 +30,15 @@ app.get('/:tipo/:img', (req, res, netx) => {
   }
 
 
-  const params = {
-    Bucket: "bucketcontainerpark",
-    Key: `${tipo}/${img}`
-  };
-  s3.getObject(params, (err, data) => {
-    if (err) console.error(err);
-    fs.writeFileSync("", data.Body.toString());
-    console.log(`${filePath} has been created!`);
-  });
+  // const params = {
+  //   Bucket: "bucketcontainerpark",
+  //   Key: `${tipo}/${img}`
+  // };
+  // s3.getObject(params, (err, data) => {
+  //   if (err) console.error(err);
+  //   fs.writeFileSync("", data.Body.toString());
+  //   console.log(`${filePath} has been created!`);
+  // });
 
 
 
