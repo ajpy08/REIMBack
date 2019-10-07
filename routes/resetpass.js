@@ -14,13 +14,17 @@ var mongoose = require('mongoose'),
     crypto = require('crypto'),
     _ = require('lodash'),
     hbs = require('nodemailer-express-handlebars'),
-    email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
+    email = process.env.MAILER_EMAIL_ID || 'jpuc@tlreim.com.mx',
+    pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
     nodemailer = require('nodemailer');
+    // email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
+    // pass = process.env.MAILER_PASSWORD || 'fmat*0348',
+    // nodemailer = require('nodemailer');
 
 
 var smtpTransport = nodemailer.createTransport({
-    service: process.env.MAILER_SERVICE_PROVIDER || 'Gmail',
+    // service: process.env.MAILER_SERVICE_PROVIDER || 'Gmail',
+    service: process.env.MAILER_SERVICE_PROVIDER || '192.168.2.246',
     auth: {
         user: email,
         pass: pass
