@@ -4,6 +4,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var SEED = require('../config/config').SEED;
 var mdAutenticacion = require('../middlewares/autenticacion');
+const sentMail = require('./sendAlert');
 
 // Inicializar variables
 var app = express();
@@ -61,13 +62,13 @@ app.post('/', (req, res) => {
     // Crear token
     usuarioDB.password = '=)';
     var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
-
+    sentMail(usuarioDB.nombre, usuarioDB.email, 'Prueba de Correo');
     res.status(200).json({
       ok: true,
       usuario: usuarioDB,
       token: token,
       id: usuarioDB._id,
-      menu: obtenerMenu(usuarioDB.role)
+      menu: obtenerMenu(usuarioDB.role)      
     });
 
   }).populate('empresas', 'razonSocial');
