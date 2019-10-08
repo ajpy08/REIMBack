@@ -30,6 +30,7 @@ app.get('/:tipo/:img', (req, res, netx) => {
   }
 
 
+
   // const params = {
   //   Bucket: "bucketcontainerpark",
   //   Key: `${tipo}/${img}`
@@ -39,6 +40,7 @@ app.get('/:tipo/:img', (req, res, netx) => {
   //   fs.writeFileSync("", data.Body.toString());
   //   console.log(`${filePath} has been created!`);
   // });
+
 
 
 
