@@ -4,14 +4,9 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
+var configuracion = require('../config/config');
 
-//cconfigurar AWS con las claves de acceso
-AWS.config.update({
-  accessKeyId: "",
-  secretAccessKey: "",
-  region: 'us-east-1'
-});
-
+AWS.config.update(configuracion.CONFIG_BUCKET);
 
 var s3 = new AWS.S3();
 
@@ -94,6 +89,7 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
     // });
 
     //configuring parameters
+
     var params = {
       Bucket: 'bucketcontainerpark',
       Body: fs.createReadStream(rutaTmp + nametmp),
