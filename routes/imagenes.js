@@ -28,21 +28,6 @@ app.get('/:tipo/:img', (req, res, netx) => {
     var pathNoImagen = path.resolve(__dirname, `../assets/no-img.jpg`);
     res.sendFile(pathNoImagen);
   }
-
-
-  const params = {
-    Bucket: "bucketcontainerpark",
-    Key: `${tipo}/${img}`
-  };
-  s3.getObject(params, (err, data) => {
-    if (err) console.error(err);
-    fs.writeFileSync("", data.Body.toString());
-    console.log(`${filePath} has been created!`);
-  });
-
-
-
-
 });
 
 // Recupera Fotos de Maniobra (Lavado o Reparacion)
