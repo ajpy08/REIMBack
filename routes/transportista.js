@@ -147,16 +147,17 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
     transportista.fMod = new Date();
 
     if (transportista.formatoR1 != body.formatoR1) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.formatoR1, './uploads/clientes/', transportista.formatoR1)) {
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.formatoR1, 'clientes/', transportista.formatoR1)) {
         transportista.formatoR1 = body.formatoR1;
       }
     }
 
     if (transportista.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, './uploads/clientes/', transportista.img)) {
+      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, 'clientes/', transportista.img)) {
         transportista.img = body.img;
       }
     }
+
 
     transportista.save((err, transportistaGuardado) => {
       if (err) {
