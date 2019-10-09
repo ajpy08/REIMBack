@@ -72,41 +72,42 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
 
 exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, rutaDestino, nameActual) {
   if (nametmp != null && nametmp != undefined && nametmp != '' && fs.existsSync(rutaTmp + nametmp)) {
+
     // if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
-    //   fs.unlink(rutaDestino + nameActual, (err) => {
-    //     if (err) {
-    //       // console.log(err);
-    //     } else {
-    //       // console.log('Documento anterior borrado con éxito');
-    //     }
-    //   });
-    // }
-    // if (!fs.existsSync(rutaDestino)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-    //   fs.mkdirSync(rutaDestino);
-    // }
-    // fs.rename(rutaTmp + nametmp, rutaDestino + nametmp, (err) => {
-    //   if (err) { console.log(err); throw err; }
+    if (nameActual != null && nameActual != undefined && nameActual != '') { //BORRAR
+      var paramsDelete = {
+        Bucket: 'bucketcontainerpark',
+        Key: `${rutaDestino}/${nameActual}`
+      };
+
+      console.log(`${rutaDestino}/${nameActual}`);
+      s3.deleteObject(paramsDelete, function(err, data) {
+        if (err) {
+          console.log("Error", err);
+        }
+        //success
+        if (data) {
+          console.log("Elemento eliminado:", data);
+        }
+      });
+    }
+
+    // var params = {
+    //   Bucket: 'bucketcontainerpark',
+    //   Body: fs.createReadStream(rutaTmp + nametmp),
+    //   Key: rutaDestino + nametmp
+    // };
+
+    // s3.upload(params, function(err, data) {
+    //   //handle error
+    //   if (err) {
+    //     console.log("Error", err);
+    //   }
+    //   //success
+    //   if (data) {
+    //     console.log("Uploaded in:", data.Location);
+    //   }
     // });
-
-    //configuring parameters
-
-    var params = {
-      Bucket: 'bucketcontainerpark',
-      Body: fs.createReadStream(rutaTmp + nametmp),
-      Key: rutaDestino + nametmp
-    };
-
-    s3.upload(params, function(err, data) {
-      //handle error
-      if (err) {
-        console.log("Error", err);
-      }
-
-      //success
-      if (data) {
-        console.log("Uploaded in:", data.Location);
-      }
-    });
 
     return (true);
   }
