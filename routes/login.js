@@ -84,34 +84,34 @@ function obtenerMenu(ROLE) {
   if (ROLE === 'ADMIN_ROLE') {
     let menu = [{
         titulo: 'Principal',
-        icono: 'mdi mdi-gauge',
+        icono: 'fas fa-home',
         submenu: [
           { titulo: 'Dashboard', url: '/dashboard' }
         ]
       },
       {
         titulo: 'Catálogos',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-ellipsis-v',
         submenu: []
       },
       {
         titulo: 'Agencia',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'far fa-bookmark',
         submenu: []
       },
       {
         titulo: 'Naviera',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-ship',
         submenu: []
       },
       {
         titulo: 'Transportista',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-truck-moving',
         submenu: []
       },
       {
         titulo: 'Facturación',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-dollar-sign',
         submenu: []
       }
     ];
@@ -155,14 +155,14 @@ function obtenerMenu(ROLE) {
   if (ROLE === 'AA_ROLE') {
     let menu = [{
         titulo: 'Principal',
-        icono: 'mdi mdi-gauge',
+        icono: 'fas fa-home',
         submenu: [
           { titulo: 'Dashboard', url: '/dashboard' }
         ]
       },
       {
         titulo: 'Agencia',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'far fa-bookmark',
         submenu: [
 
         ]
@@ -177,14 +177,14 @@ function obtenerMenu(ROLE) {
   if (ROLE === 'NAVIERA_ROLE') {
     let menu = [{
         titulo: 'Principal',
-        icono: 'mdi mdi-gauge',
+        icono: 'fas fa-home',
         submenu: [
           { titulo: 'Dashboard', url: '/dashboard' }
         ]
       },
       {
         titulo: 'Naviera',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-ship',
         submenu: [
 
         ]
@@ -198,14 +198,14 @@ function obtenerMenu(ROLE) {
   if (ROLE === 'TRANSPORTISTA_ROLE') {
     let menu = [{
         titulo: 'Principal',
-        icono: 'mdi mdi-gauge',
+        icono: 'fas fa-home',
         submenu: [
           { titulo: 'Dashboard', url: '/dashboard' }
         ]
       },
       {
         titulo: 'Transportista',
-        icono: 'mdi mdi-folder-lock-open',
+        icono: 'fas fa-truck-moving',
         submenu: [
 
         ]
