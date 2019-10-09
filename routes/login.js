@@ -68,7 +68,7 @@ app.post('/', (req, res) => {
       usuario: usuarioDB,
       token: token,
       id: usuarioDB._id,
-      menu: obtenerMenu(usuarioDB.role)      
+      menu: obtenerMenu(usuarioDB.role)
     });
 
   }).populate('empresas', 'razonSocial');
@@ -84,7 +84,7 @@ function obtenerMenu(ROLE) {
   if (ROLE === 'ADMIN_ROLE') {
     let menu = [{
         titulo: 'Principal',
-        icono: 'mdi mdi-gauge',
+        icono: 'fas fa-asterisk',
         submenu: [
           { titulo: 'Dashboard', url: '/dashboard' }
         ]
@@ -115,7 +115,7 @@ function obtenerMenu(ROLE) {
         submenu: []
       }
     ];
-    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });    
+    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras' });
