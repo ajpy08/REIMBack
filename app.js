@@ -3,6 +3,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var configuracion = require('./config/config');
 
 // Inicializar variables
 var app = express();
@@ -13,7 +14,7 @@ var corsOptions = {
   allowedHeaders: ['Origin', 'X-Requested-With', 'contentType', 'Content-Type', 'Accept', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
-}
+};
 app.use(cors(corsOptions));
 
 // Body Parser
@@ -73,23 +74,17 @@ mongoose.connection.on('error', (error) => {
 });
 
 const run = async() => {
-  //await mongoose.connect('mongodb://myDbAdmin:reim*0348@187.210.87.57:27017/reim', {
-  await mongoose.connect('mongodb+srv://Angelus:apdxpp030408@clusterreim-tqwyf.gcp.mongodb.net/reim?retryWrites=true&w=majority', {
+
+  await mongoose.connect(configuracion.CONEXION_MONGO, {
     autoReconnect: true,
     reconnectTries: 1000000,
     reconnectInterval: 3000,
     useCreateIndex: true,
     useNewUrlParser: true
   });
-}
-
+};
 
 run().catch(error => console.error(error));
-//mongoose.connect('mongodb://myDbAdmin:reim*0348@192.168.2.253:27017/reim', { useCreateIndex: true, useNewUrlParser: true }, (err, res) => {
-//  if (err) throw err;
-// console.log('Base de datos Mongoose: \x1b[32m%s\x1b[0m', 'online');
-// })
-
 
 // Rutas
 app.use('/login', loginRoutes);
