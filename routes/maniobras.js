@@ -89,7 +89,7 @@ app.get('', (req, res, netx) => {
 // Obtener Maniobras Que no incluyen VACIOS
 // =======================================
 app.get('/facturacion-maniobras', (req, res, netx) => {
-  var cargadescarga = req.query.cargadescarga || '';  
+  var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
   var lavado = req.query.lavado || '';
@@ -98,7 +98,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
     filtro += '\"cargaDescarga\":' + '\"' + cargadescarga + '\",';
-  
+
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
 
@@ -208,7 +208,7 @@ app.get('/LR', (req, res, next) => {
     )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')    
+    .populate('transportista', 'rfc razonSocial')
     .populate({
       path: 'viaje',
       select: 'viaje buque naviera',
@@ -371,6 +371,53 @@ app.get('/rangofecha', (req, res, netx) => {
 
       });
 });
+
+
+// ==========================================
+// Subir fotos lavado o Reparacion de la maniobra
+// ==========================================
+app.put('/addimg/:id&:LR', (req, res, next) => {
+  var id = req.params.id;
+  var LR = req.params.LR;
+  if (!req.files) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'No selecciono nada',
+      errors: { message: 'Debe de seleccionar una imagen' }
+    });
+  }
+
+  // Obtener nombre del archivo
+  var archivo = req.files.file;
+  var nombreCortado = archivo.name.split('.');
+  var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+  var nombreArchivo = `${uuid()}.${extensionArchivo}`;
+  if (!fs.existsSync(`./uploads/maniobras/${id}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+    fs.mkdirSync(`./uploads/maniobras/${id}/`);
+  }
+  if (!fs.existsSync(`./uploads/maniobras/${id}/${LR}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+    fs.mkdirSync(`./uploads/maniobras/${id}/${LR}/`);
+  }
+  var path = `./uploads/maniobras/${id}/${LR}/${nombreArchivo}`;
+  archivo.mv(path, err => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al mover archivo',
+        errors: err
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Archivo guardado!',
+      nombreArchivo: nombreArchivo,
+      path: path
+    });
+  });
+
+});
+
+
 
 // ==========================================
 // Obtener todas las maniobras de vacio
