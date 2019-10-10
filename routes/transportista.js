@@ -86,9 +86,9 @@ app.post('/transportista/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', transportista.img, './uploads/clientes/', transportista.img);
+  varias.MoverArchivoBucket('temp/', transportista.img, 'clientes/');
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', transportista.formatoR1, './uploads/clientes/', transportista.formatoR1);
+  varias.MoverArchivoBucket('temp/', transportista.formatoR1, 'clientes/');
 
   transportista.save((err, transportistaGuardado) => {
     if (err) {
@@ -147,13 +147,19 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
     transportista.fMod = new Date();
 
     if (transportista.formatoR1 != body.formatoR1) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.formatoR1, 'clientes/', transportista.formatoR1)) {
+      if (varias.MoverArchivoBucket('temp/', body.formatoR1, 'clientes/')) {
+        if (transportista.formatoR1 != null && transportista.formatoR1 != undefined && transportista.formatoR1 != '') { //BORRAR EL ACTUAL
+          varias.BorrarArchivoBucket('clientes/', transportista.formatoR1)
+        }
         transportista.formatoR1 = body.formatoR1;
       }
     }
 
     if (transportista.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, 'clientes/', transportista.img)) {
+      if (varias.MoverArchivoBucket('temp/', body.img, 'clientes/')) {
+        if (transportista.img != null && transportista.img != undefined && transportista.img != '') { //BORRAR EL ACTUAL
+          varias.BorrarArchivoBucket('clientes/', transportista.img)
+        }
         transportista.img = body.img;
       }
     }

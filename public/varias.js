@@ -1,6 +1,3 @@
-//var fs = require('fs');
-//var path = require('path');
-
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
@@ -47,85 +44,39 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
   return json;
 }
 
-// exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, rutaDestino, nameActual) {
-//   if (nametmp != null && nametmp != undefined && nametmp != '' && fs.existsSync(rutaTmp + nametmp)) {
-//     if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
-//       fs.unlink(rutaDestino + nameActual, (err) => {
-//         if (err) {
-//           // console.log(err);
-//         } else {
-//           // console.log('Documento anterior borrado con éxito');
-//         }
-//       });
-//     }
-//     if (!fs.existsSync(rutaDestino)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-//       fs.mkdirSync(rutaDestino);
-//     }
-//     fs.rename(rutaTmp + nametmp, rutaDestino + nametmp, (err) => {
-//       if (err) { console.log(err); throw err; }
-//     });
-//     return (true);
-//   }
-//   return false;
-// }
-
-
 exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, rutaDestino, nameActual) {
   if (nametmp != null && nametmp != undefined && nametmp != '' && fs.existsSync(rutaTmp + nametmp)) {
-
-    // if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
-    if (nameActual != null && nameActual != undefined && nameActual != '') { //BORRAR
-      var paramsDelete = {
-        Bucket: 'bucketcontainerpark',
-        Key: rutaDestino + nameActual
-      };
-
-      console.log(rutaDestino + nameActual);
-      s3.deleteObject(paramsDelete, function(err, data) {
+    if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
+      fs.unlink(rutaDestino + nameActual, (err) => {
         if (err) {
-          console.log("Error", err);
-        }
-        //success
-        if (data) {
-          console.log("Elemento eliminado:", data);
+          // console.log(err);
+        } else {
+          // console.log('Documento anterior borrado con éxito');
         }
       });
     }
-
-    var params = {
-      Bucket: 'bucketcontainerpark',
-      Body: fs.createReadStream(rutaTmp + nametmp),
-      Key: rutaDestino + nametmp
-    };
-
-    s3.upload(params, function(err, data) {
-      //handle error
-      if (err) {
-        console.log("Error", err);
-      }
-      //success
-      if (data) {
-        console.log("Uploaded in:", data.Location);
-      }
+    if (!fs.existsSync(rutaDestino)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
+      fs.mkdirSync(rutaDestino);
+    }
+    fs.rename(rutaTmp + nametmp, rutaDestino + nametmp, (err) => {
+      if (err) { console.log(err); throw err; }
     });
-
     return (true);
   }
   return false;
-};
+}
 
 exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
   if (nameFile != null && nameFile != undefined && nameFile != '' && fs.existsSync(ruta + nameFile)) {
     fs.unlink(ruta + nameFile, (err) => {
       if (err) {
-        // console.log(err);
+        console.log(err);
       } else {
-        // console.log('Documento borrado con éxito');
+        console.log('Documento borrado con éxito');
       }
     });
   }
 }
-
 
 exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_reparacion) {
   var pathFotos = "";
@@ -139,4 +90,48 @@ exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_re
     }
     return pathFotos;
   }
+}
+
+exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
+  var params = {
+    Bucket: "bucketcontainerpark",
+    CopySource: 'bucketcontainerpark/' + rutaTmp + nameTmp,
+    Key: rutaDestino + nameTmp
+  };
+  s3.copyObject(params, function(err, data) {
+    if (err) {
+      console.log(err, err.stack); // an error occurred
+    } else {
+      console.log('Archivo movido ' + rutaDestino + nameTmp);
+      //Si se mueve, borro el original
+      var paramsDelete = {
+        Bucket: 'bucketcontainerpark',
+        Key: rutaTmp + nameTmp
+      };
+      s3.deleteObject(paramsDelete, function(err, data) {
+        if (err) {
+          console.log("Error", err);
+        }
+        if (data) {
+          console.log("Elemento eliminado:", rutaTmp + nameTmp);
+        }
+      });
+    }
+  });
+  return (true);
+}
+
+exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
+  var paramsDelete = {
+    Bucket: 'bucketcontainerpark',
+    Key: ruta + name
+  };
+  s3.deleteObject(paramsDelete, function(err, data) {
+    if (err) {
+      console.log("Error", err);
+    }
+    if (data) {
+      console.log("Elemento eliminado:", ruta + name);
+    }
+  });
 }
