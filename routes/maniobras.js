@@ -86,7 +86,7 @@ app.get('', (req, res, netx) => {
 });
 
 // =======================================
-// Obtener Maniobras Que no incluyen VACIOS
+// Obtener maniobras que no incluyen VACIOS
 // =======================================
 app.get('/facturacion-maniobras', (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';  
@@ -102,11 +102,11 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
 
-  // if (peso != 'undefined' && peso != '')
-  //   filtro += '\"peso\":' + '\"' + peso + '\",';
-  //peso = peso.replace(/,/g, '\",\"');
-  if (peso != 'undefined' && peso != '')
-    filtro += '\"peso\":{\"$ne\":[\"' + peso + '\"]},';
+    peso = peso.replace(/,/g, '\",\"');
+
+    if (peso != 'undefined' && peso != '')
+      filtro += '\"peso\":{\"$ne\":\"' + peso + '\"},';
+  
 
   if (lavado === 'true') {
     filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
@@ -141,7 +141,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
       if (err) {
         return res.status(500).json({
           ok: false,
-          mensaje: 'Error cargando maniobras',
+          mensaje: 'Error cargando Facturacion Maniobras',
           errors: err
         });
       }
