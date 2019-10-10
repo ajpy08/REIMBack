@@ -43,7 +43,7 @@ app.post('/', (req, res) => {
         errors: err
       });
     }
-    console.log(usuarioDB)
+    //console.log(usuarioDB)
     if (usuarioDB.activo === false) {
       return res.status(400).json({
         ok: false,
@@ -62,7 +62,7 @@ app.post('/', (req, res) => {
     // Crear token
     usuarioDB.password = '=)';
     var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
-    sentMail(usuarioDB.nombre, usuarioDB.email, 'Prueba de Correo');
+    //sentMail(usuarioDB.nombre, usuarioDB.email, 'Prueba de Correo');
     res.status(200).json({
       ok: true,
       usuario: usuarioDB,
