@@ -789,49 +789,7 @@ app.put('/registra_carga/:id', mdAutenticacion.verificaToken, (req, res) => {
 // });
 
 
-// ==========================================
-// Subir fotos lavado de la maniobra
-// ==========================================
-app.put('/addimg/:id&:LR', (req, res, next) => {
-  var id = req.params.id;
-  var LR = req.params.LR;
-  if (!req.files) {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'No selecciono nada',
-      errors: { message: 'Debe de seleccionar una imagen' }
-    });
-  }
 
-  // Obtener nombre del archivo
-  var archivo = req.files.file;
-  var nombreCortado = archivo.name.split('.');
-  var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-  var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-  if (!fs.existsSync(`./uploads/maniobras/${id}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-    fs.mkdirSync(`./uploads/maniobras/${id}/`);
-  }
-  if (!fs.existsSync(`./uploads/maniobras/${id}/${LR}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-    fs.mkdirSync(`./uploads/maniobras/${id}/${LR}/`);
-  }
-  var path = `./uploads/maniobras/${id}/${LR}/${nombreArchivo}`;
-  archivo.mv(path, err => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al mover archivo',
-        errors: err
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Archivo guardado!',
-      nombreArchivo: nombreArchivo,
-      path: path
-    });
-  });
-
-});
 
 // =======================================
 // Asigna Factura Maniobra

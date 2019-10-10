@@ -108,7 +108,7 @@ app.post('/usuario', mdAutenticacion.verificaToken, (req, res) => {
     usuario.empresas = undefined;
   }
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', usuario.img, './uploads/usuarios/', usuario.img);
+  varias.MoverArchivoBucket('temp/', usuario.img, 'usuarios/');
 
   usuario.save((err, usuarioGuardado) => {
     if (err) {
@@ -161,10 +161,14 @@ app.put('/usuario/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verifica
     usuario.fMod = new Date();
 
     if (usuario.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, './uploads/usuarios/', usuario.img)) {
+      if (varias.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
+        if (usuario.img != null && usuario.img != undefined && usuario.img != '') { //BORRAR EL ACTUAL
+          varias.BorrarArchivoBucket('usuarios/', usuario.img)
+        }
         usuario.img = body.img;
       }
     }
+
     usuario.save((err, usuarioGuardado) => {
       if (err) {
         return res.status(400).json({
@@ -211,7 +215,10 @@ app.put('/usuario/:id/perfil', [mdAutenticacion.verificaToken, mdAutenticacion.v
     usuario.fMod = new Date();
 
     if (usuario.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, './uploads/usuarios/', usuario.img)) {
+      if (varias.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
+        if (usuario.img != null && usuario.img != undefined && usuario.img != '') { //BORRAR EL ACTUAL
+          varias.BorrarArchivoBucket('usuarios/', usuario.img)
+        }
         usuario.img = body.img;
       }
     }

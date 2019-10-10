@@ -26,6 +26,9 @@ app.use(bodyParser.json())
 var appRoutes = require('./routes/app');
 var exceltojson = require('./routes/exceltojson');
 var uploadFileTemp = require('./routes/uploadFileTemp');
+var uploadFileTempBucket = require('./routes/uploadFileTempBucket');
+
+
 var loginRoutes = require('./routes/login');
 var usuariosRoutes = require('./routes/usuarios');
 var reparacionesRoutes = require('./routes/reparaciones');
@@ -89,6 +92,7 @@ run().catch(error => console.error(error));
 // Rutas
 app.use('/login', loginRoutes);
 app.use('/uploadFileTemp', uploadFileTemp);
+app.use('/uploadBucketTemp', uploadFileTempBucket);
 app.use('/exceltojson', exceltojson);
 app.use('/usuarios', usuariosRoutes); //ANGELUS
 app.use('/reparaciones', reparacionesRoutes);
