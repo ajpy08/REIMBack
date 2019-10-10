@@ -77,10 +77,10 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
     if (nameActual != null && nameActual != undefined && nameActual != '') { //BORRAR
       var paramsDelete = {
         Bucket: 'bucketcontainerpark',
-        Key: `${rutaDestino}/${nameActual}`
+        Key: rutaDestino + nameActual
       };
 
-      console.log(`${rutaDestino}/${nameActual}`);
+      console.log(rutaDestino + nameActual);
       s3.deleteObject(paramsDelete, function(err, data) {
         if (err) {
           console.log("Error", err);
@@ -92,27 +92,27 @@ exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, r
       });
     }
 
-    // var params = {
-    //   Bucket: 'bucketcontainerpark',
-    //   Body: fs.createReadStream(rutaTmp + nametmp),
-    //   Key: rutaDestino + nametmp
-    // };
+    var params = {
+      Bucket: 'bucketcontainerpark',
+      Body: fs.createReadStream(rutaTmp + nametmp),
+      Key: rutaDestino + nametmp
+    };
 
-    // s3.upload(params, function(err, data) {
-    //   //handle error
-    //   if (err) {
-    //     console.log("Error", err);
-    //   }
-    //   //success
-    //   if (data) {
-    //     console.log("Uploaded in:", data.Location);
-    //   }
-    // });
+    s3.upload(params, function(err, data) {
+      //handle error
+      if (err) {
+        console.log("Error", err);
+      }
+      //success
+      if (data) {
+        console.log("Uploaded in:", data.Location);
+      }
+    });
 
     return (true);
   }
   return false;
-}
+};
 
 exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
   if (nameFile != null && nameFile != undefined && nameFile != '' && fs.existsSync(ruta + nameFile)) {

@@ -36,13 +36,13 @@ app.get('/:tipo/:img', (req, res, netx) => {
 
   const params = {
     Bucket: "bucketcontainerpark",
-    Key: `${tipo}/${img}`
+    Key: tipo + '/' + img
   };
 
 
   s3.getObject(params, (err, data) => {
     if (err) {
-      console.error('ERROR EN CALLBACK ' + `${tipo}/${img}`);
+      console.error('ERROR EN CALLBACK ' + tipo + '/' + img);
       return res.status(400).json({
         ok: false,
         mensaje: 'No se encontraron fotos',
@@ -50,7 +50,6 @@ app.get('/:tipo/:img', (req, res, netx) => {
       });
 
     } else {
-      console.log(data);
       res.setHeader('Content-disposition', 'atachment; filename=' + img);
       res.setHeader('Content-length', data.ContentLength);
       res.send(data.Body);
