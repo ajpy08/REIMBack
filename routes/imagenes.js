@@ -2,20 +2,12 @@
 var express = require('express');
 var varias = require('../public/varias');
 var configuracion = require('../config/config');
-
-// Inicializar variables
 var app = express();
-
 var path = require('path');
 var fs = require('fs');
-
 const AWS = require('aws-sdk');
 
 
-
-
-
-// Rutas
 app.get('/:tipo/:img', (req, res, netx) => {
 
   var tipo = req.params.tipo;
@@ -30,24 +22,22 @@ app.get('/:tipo/:img', (req, res, netx) => {
   //   res.sendFile(pathNoImagen);
   // }
 
-
   var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
-
-
   const params = {
     Bucket: "bucketcontainerpark",
     Key: tipo + '/' + img
   };
 
-
   s3.getObject(params, (err, data) => {
     if (err) {
       console.error('ERROR EN CALLBACK ' + tipo + '/' + img);
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'No se encontraron fotos',
-        errors: { message: 'No se encontro el documento' }
-      });
+      var pathNoImagen = path.resolve(__dirname, `../assets/no-img.jpg`);
+      res.sendFile(pathNoImagen);
+      // return res.status(400).json({
+      //   ok: false,
+      //   mensaje: 'No se encontraron fotos',
+      //   errors: { message: 'No se encontro el documento' }
+      // });
 
     } else {
       res.setHeader('Content-disposition', 'atachment; filename=' + img);

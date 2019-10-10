@@ -43,7 +43,7 @@ app.post('/', (req, res) => {
         errors: err
       });
     }
-    console.log(usuarioDB)
+    //console.log(usuarioDB)
     if (usuarioDB.activo === false) {
       return res.status(400).json({
         ok: false,
