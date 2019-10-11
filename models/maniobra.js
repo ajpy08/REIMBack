@@ -33,6 +33,8 @@ var maniobraSchema = new Schema({
     costo: { type: String },
   }],
   reparacionesObservacion: { type: String },
+  mostrarFotosRNaviera: {type: Boolean, default: false},
+  mostrarFotosRAA: {type: Boolean, default: false},
   hSalida: { type: String },
   descargaAutorizada: { type: Boolean, default: false },
   hDescarga: { type: String },
