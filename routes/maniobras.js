@@ -5,8 +5,10 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
-var ParamsToJSON = require('../public/varias');
-
+var varias = require('../public/varias');
+var fileUpload = require('express-fileupload');
+var uuid = require('uuid/v1');
+app.use(fileUpload());
 
 // =======================================
 // Obtener Maniobras
@@ -102,11 +104,11 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
 
-    peso = peso.replace(/,/g, '\",\"');
+  peso = peso.replace(/,/g, '\",\"');
 
-    if (peso != 'undefined' && peso != '')
-      filtro += '\"peso\":{\"$ne\":\"' + peso + '\"},';
-  
+  if (peso != 'undefined' && peso != '')
+    filtro += '\"peso\":{\"$ne\":\"' + peso + '\"},';
+
 
   if (lavado === 'true') {
     filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
@@ -372,13 +374,14 @@ app.get('/rangofecha', (req, res, netx) => {
       });
 });
 
-
 // ==========================================
 // Subir fotos lavado o Reparacion de la maniobra
 // ==========================================
-app.put('/addimg/:id&:LR', (req, res, next) => {
+app.put('/maniobra/:id/addimg/:LR', (req, res) => {
+
   var id = req.params.id;
   var LR = req.params.LR;
+
   if (!req.files) {
     return res.status(400).json({
       ok: false,
@@ -387,128 +390,28 @@ app.put('/addimg/:id&:LR', (req, res, next) => {
     });
   }
 
+
   // Obtener nombre del archivo
   var archivo = req.files.file;
   var nombreCortado = archivo.name.split('.');
   var extensionArchivo = nombreCortado[nombreCortado.length - 1];
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
-  if (!fs.existsSync(`./uploads/maniobras/${id}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-    fs.mkdirSync(`./uploads/maniobras/${id}/`);
-  }
-  if (!fs.existsSync(`./uploads/maniobras/${id}/${LR}/`)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-    fs.mkdirSync(`./uploads/maniobras/${id}/${LR}/`);
-  }
-  var path = `./uploads/maniobras/${id}/${LR}/${nombreArchivo}`;
-  archivo.mv(path, err => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al mover archivo',
-        errors: err
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Archivo guardado!',
-      nombreArchivo: nombreArchivo,
-      path: path
-    });
-  });
+  var path = 'maniobras/' + id + '/' + LR + '/';
+
+  varias.SubirArchivoBucket(archivo, path, nombreArchivo)
+    .then((value) => {
+      if (value) {
+        console.log('ya termino de subir.');
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Archivo guardado!',
+        });
+      }
+    })
 
 });
 
 
 
-// ==========================================
-// Obtener todas las maniobras de vacio
-// ==========================================
 
 module.exports = app;
-
-// app.get('/:viaje?&:peso?&:cargaDescarga?', (req, res) => {
-//   // console.log('vacios')
-//   // console.log(req.params)
-//   var filtro = ParamsToJSON.ParamsToJSON(req);
-//   //console.log(filtro)
-//   Maniobra.find(filtro)
-//     .populate('cliente', 'rfc razonSocial')
-//     .populate('agencia', 'rfc razonSocial')
-//     .populate('transportista', 'rfc razonSocial')
-//     .populate('operador', 'nombre')
-//     .populate('camion', 'placa')
-//     .populate({
-//       path: "viaje",
-//       select: 'viaje fechaArribo',
-//       populate: {
-//         path: "buque",
-//         select: 'nombre'
-//       }
-//     })
-//     .populate('usuarioAlta', 'nombre email')
-//     .exec((err, vacios) => {
-//       if (err) {
-//         return res.status(500).json({
-//           ok: false,
-//           mensaje: 'Error al buscar vacios',
-//           errors: err
-//         });
-//       }
-//       if (!vacios) {
-//         return res.status(400).json({
-//           ok: false,
-//           mensaje: 'No existen maniobras de vacio para el viaje: ' + viaje,
-//           errors: { message: "No existen maniobras de vacio" }
-//         });
-//       }
-//       res.status(200).json({
-//         ok: true,
-//         vacios: vacios,
-//         total: vacios.length
-//       });
-//     });
-
-// });
-
-// // ============================================
-// // Obtener Maniobras por contenedor buque viaje
-// // ============================================
-// app.get('/buscaxcontenedorviaje', (req, res, netx) => {
-//   console.log('buscaxcontenedorviaje')
-//   var contenedor = req.query.contenedor.trim();
-//   var viaje = req.query.viaje.trim();
-//   var buque = req.query.buque.trim();
-//   Maniobra.aggregate([{
-//         $lookup: {
-//           from: "viajes",
-//           localField: "viaje",
-//           foreignField: "_id",
-//           as: "match"
-//         }
-//       },
-//       {
-//         $match: { "contenedor": contenedor, "match.viaje": viaje, "match.buque": new mongoose.Types.ObjectId(buque) }
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           contenedor: 1
-//         }
-//       }
-//     ])
-//     .exec(
-//       (err, maniobra) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando maniobras',
-//             errors: err
-//           });
-//         }
-//         res.status(200).json({
-//           ok: true,
-//           maniobra: maniobra
-//         });
-
-
-//       });
-// });
