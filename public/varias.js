@@ -57,24 +57,32 @@ exports.getListaRutaFotosLRBucket = function getListaRutaFotosLRBucket(idManiobr
   }
 };
 
-exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
-  var params = {
-    Bucket: 'bucketcontainerpark',
-    Body: archivo.data,
-    Key: rutaDestino + nombreArchivo,
-    ContentType: archivo.mimetype
-  };
 
-  s3.upload(params, function(err, data) {
-    if (err) {
-      console.log("Error", err);
-    }
-    if (data) {
-      console.log("Uploaded in:", data.Location);
-    }
+
+exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
+  return new Promise((resolve, reject) => {
+    var params = {
+      Bucket: 'bucketcontainerpark',
+      Body: archivo.data,
+      Key: rutaDestino + nombreArchivo,
+      ContentType: archivo.mimetype
+    };
+
+    s3.upload(params, function(err, data) {
+      if (err) {
+        console.log("Error", err);
+      }
+      if (data) {
+        console.log("Uploaded in:", data.Location);
+        resolve(true);
+      }
+    });
   });
-  return (true);
-};
+}
+
+
+
+
 
 exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
   var params = {
