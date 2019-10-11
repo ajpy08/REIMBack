@@ -14,6 +14,9 @@ app.get('/:tipo/:img', (req, res, netx) => {
     Bucket: "bucketcontainerpark",
     Key: tipo + '/' + img
   };
+  if (img === 'xxx') {
+    res.sendFile(path.resolve(__dirname, `../assets/no-img.jpg`));
+  }
 
   s3.getObject(params, (err, data) => {
     if (err) {
