@@ -78,7 +78,21 @@ exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
   }
 }
 
-exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_reparacion) {
+// exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_reparacion) {
+//   var pathFotos = "";
+//   if (lavado_reparacion === 'L') {
+//     pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_lavado/`);
+//     return pathFotos;
+//   } else {
+//     if (lavado_reparacion === 'R') {
+//       pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_reparacion/`);
+//       return pathFotos;
+//     }
+//     return pathFotos;
+//   }
+// }
+
+exports.getListaRutaFotosLRBucket = function getListaRutaFotosLRBucket(idManiobra, lavado_reparacion) {
   var pathFotos = "";
   if (lavado_reparacion === 'L') {
     pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_lavado/`);
@@ -90,6 +104,25 @@ exports.DevuelveRutaFotosLR = function DevuelveRutaFotosLR(idManiobra, lavado_re
     }
     return pathFotos;
   }
+}
+
+exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
+  var params = {
+    Bucket: 'bucketcontainerpark',
+    Body: archivo.data,
+    Key: rutaDestino + nombreArchivo,
+    ContentType: archivo.mimetype
+  };
+
+  s3.upload(params, function(err, data) {
+    if (err) {
+      console.log("Error", err);
+    }
+    if (data) {
+      console.log("Uploaded in:", data.Location);
+    }
+  });
+  return (true);
 }
 
 exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
