@@ -66,26 +66,26 @@ app.get('/:id/includes', (req, res) => {
     })
 
 
-  .exec((err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
       });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + 'no existe',
-        errors: { message: 'No existe maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      maniobra: maniobra
     });
-  });
 });
 
 
@@ -815,6 +815,56 @@ app.put('/asigna_factura/:id&:facturaManiobra', mdAutenticacion.verificaToken, (
       });
     }
     maniobra.facturaManiobra = facturaManiobra;
+
+    maniobra.save((err, maniobraGuardada) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardada
+      });
+    });
+  });
+});
+
+// =======================================
+// Actualizar Maniobra    HABILITAR DESHABILITAR mostrarFotosReparacion
+// =======================================
+
+app.put('/:id/habilita_deshabilita_mostrarFotosReparacion', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    console.log(body.tipo)
+    if (body.tipo === 'Naviera') {
+      maniobra.mostrarFotosRNaviera = body.mostrarFotosRNaviera;
+    } else if (body.tipo === 'AA') {
+      maniobra.mostrarFotosRAA = body.mostrarFotosRAA;
+    } else {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al actualizar la maniobra'
+      });
+    }
 
     maniobra.save((err, maniobraGuardada) => {
       if (err) {
