@@ -27,6 +27,7 @@ var appRoutes = require('./routes/app');
 var exceltojson = require('./routes/exceltojson');
 var uploadFileTemp = require('./routes/uploadFileTemp');
 var uploadFileTempBucket = require('./routes/uploadFileTempBucket');
+var documentosRoutes = require('./routes/documentos');
 
 
 var loginRoutes = require('./routes/login');
@@ -47,7 +48,6 @@ var maniobraRoutes = require('./routes/maniobra');
 var maniobrasRoutes = require('./routes/maniobras');
 var clienteRoutes = require('./routes/cliente');
 var viajesRoutes = require('./routes/viajes');
-// var buesquedaRoutes = require('./routes/busqueda');
 var forgotpass = require('./routes/forgotpass');
 var resetpass = require('./routes/resetpass');
 var UploadFile = require('./routes/uploadfile');
@@ -91,9 +91,11 @@ run().catch(error => console.error(error));
 
 // Rutas
 app.use('/login', loginRoutes);
+app.use('/uploadFile', UploadFile);
 app.use('/uploadFileTemp', uploadFileTemp);
 app.use('/uploadBucketTemp', uploadFileTempBucket);
 app.use('/exceltojson', exceltojson);
+app.use('/documentos', documentosRoutes);
 app.use('/usuarios', usuariosRoutes); //ANGELUS
 app.use('/reparaciones', reparacionesRoutes);
 app.use('/navieras', navieraRoutes);
@@ -103,11 +105,8 @@ app.use('/buques', buqueRoutes);
 app.use('/operadores', operadorRoutes);
 app.use('/camiones', camionRoutes);
 app.use('/tipos_contenedores', tiposContenedorRoutes);
-
-app.use('/uploadFile', UploadFile);
 app.use('/reset_password', resetpass);
 app.use('/forgot_password', forgotpass);
-// app.use('/busqueda', buesquedaRoutes);
 app.use('/viajes', viajesRoutes);
 app.use('/cliente', clienteRoutes);
 app.use('/maniobra', maniobraRoutes);
