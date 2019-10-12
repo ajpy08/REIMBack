@@ -6,6 +6,7 @@ var app = express();
 var Viaje = require('../models/viaje');
 var Maniobra = require('../models/maniobra');
 var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var moment = require('moment');
 
 app.use(fileUpload());
@@ -162,7 +163,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         errors: err
       });
     }
-    body.contenedores.forEach(function (element) {
+    body.contenedores.forEach(function(element) {
       var maniobra;
       var peso = element.peso;
       if (peso == 'VACIO') {
@@ -268,11 +269,11 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/viaje/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.find({
-    $or: [
-      { "viaje": id, "peso": "VACIO", "estatus": { $ne: "TRANSITO" } },
-      { "viaje": id, "peso": { $ne: "VACIO" }, "estatus": { $ne: "APROBACION" } }
-    ]
-  })
+      $or: [
+        { "viaje": id, "peso": "VACIO", "estatus": { $ne: "TRANSITO" } },
+        { "viaje": id, "peso": { $ne: "VACIO" }, "estatus": { $ne: "APROBACION" } }
+      ]
+    })
     .exec(
       (err, maniobras) => {
         if (err) {
@@ -304,7 +305,8 @@ app.delete('/viaje/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe viaje con ese id' }
               });
             }
-            varias.BorrarArchivo('./uploads/viajes/', viajeBorrado.pdfTemporal);
+
+            variasBucket.BorrarArchivoBucket('viajes/', viajeBorrado.pdfTemporal);
             viajeBorrado.remove();
             res.status(200).json({
               ok: true,
@@ -413,10 +415,10 @@ app.get('/anio/:anio', (req, res, next) => {
   if (fechaInicio != '' && fechaInicio) {
     fechaFin = new Date(fechaFin);
     fechaInicio = new Date(fechaInicio);
-    fechaInicio.setFullYear(fechaInicio.getFullYear()-1);
+    fechaInicio.setFullYear(fechaInicio.getFullYear() - 1);
   }
 
-  Viaje.find({"anio": { "$gte": fechaInicio.getFullYear(), "$lte": fechaFin.getFullYear() }})
+  Viaje.find({ "anio": { "$gte": fechaInicio.getFullYear(), "$lte": fechaFin.getFullYear() } })
     .populate('buque', 'nombre')
     .exec(
       (err, viajes) => {
