@@ -1,11 +1,4 @@
-var AWS = require('aws-sdk');
 var fs = require('fs');
-var path = require('path');
-var configuracion = require('../config/config');
-
-AWS.config.update(configuracion.CONFIG_BUCKET);
-
-var s3 = new AWS.S3();
 
 exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, rutaDestino, nameActual) {
   if (nametmp != null && nametmp != undefined && nametmp != '' && fs.existsSync(rutaTmp + nametmp)) {
@@ -42,91 +35,6 @@ exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
 };
 
 
-
-exports.getListaRutaFotosLRBucket = function getListaRutaFotosLRBucket(idManiobra, lavado_reparacion) {
-  var pathFotos = "";
-  if (lavado_reparacion === 'L') {
-    pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_lavado/`);
-    return pathFotos;
-  } else {
-    if (lavado_reparacion === 'R') {
-      pathFotos = path.resolve(__dirname, `../uploads/maniobras/${idManiobra}/fotos_reparacion/`);
-      return pathFotos;
-    }
-    return pathFotos;
-  }
-};
-
-
-
-exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
-  return new Promise((resolve, reject) => {
-    var params = {
-      Bucket: 'bucketcontainerpark',
-      Body: archivo.data,
-      Key: rutaDestino + nombreArchivo,
-      ContentType: archivo.mimetype
-    };
-
-    s3.upload(params, function(err, data) {
-      if (err) {
-        console.log("Error", err);
-      }
-      if (data) {
-        console.log("Uploaded in:", data.Location);
-        resolve(true);
-      }
-    });
-  });
-}
-
-
-
-
-
-exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
-  var params = {
-    Bucket: "bucketcontainerpark",
-    CopySource: 'bucketcontainerpark/' + rutaTmp + nameTmp,
-    Key: rutaDestino + nameTmp
-  };
-  s3.copyObject(params, function(err, data) {
-    if (err) {
-      console.log(err, err.stack); // an error occurred
-    } else {
-      console.log('Archivo movido ' + rutaDestino + nameTmp);
-      //Si se mueve, borro el original
-      var paramsDelete = {
-        Bucket: 'bucketcontainerpark',
-        Key: rutaTmp + nameTmp
-      };
-      s3.deleteObject(paramsDelete, function(err, data) {
-        if (err) {
-          console.log("Error", err);
-        }
-        if (data) {
-          console.log("Elemento eliminado:", rutaTmp + nameTmp);
-        }
-      });
-    }
-  });
-  return (true);
-};
-
-exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
-  var paramsDelete = {
-    Bucket: 'bucketcontainerpark',
-    Key: ruta + name
-  };
-  s3.deleteObject(paramsDelete, function(err, data) {
-    if (err) {
-      console.log("Error", err);
-    }
-    if (data) {
-      console.log("Elemento eliminado:", ruta + name);
-    }
-  });
-};
 
 
 // exports.ParamsToJSON = function ParamsToJSON(req) {
