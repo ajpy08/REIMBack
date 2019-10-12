@@ -29,13 +29,13 @@ var uploadFileTemp = require('./routes/uploadFileTemp');
 var uploadFileTempBucket = require('./routes/uploadFileTempBucket');
 var documentosRoutes = require('./routes/documentos');
 
+var reparacionesRoutes = require('./routes/reparaciones');
 
 var loginRoutes = require('./routes/login');
 var usuariosRoutes = require('./routes/usuarios');
-var reparacionesRoutes = require('./routes/reparaciones');
-var navieraRoutes = require('./routes/naviera');
-var agenciaRoutes = require('./routes/agencia');
-var transportistaRoutes = require('./routes/transportista');
+var navieraRoutes = require('./routes/navieras');
+var agenciaRoutes = require('./routes/agencias');
+var transportistaRoutes = require('./routes/transportistas');
 var operadorRoutes = require('./routes/operador');
 var camionRoutes = require('./routes/camion');
 var buqueRoutes = require('./routes/buque');
