@@ -1,13 +1,13 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Naviera = require('../models/naviera');
-var varias = require('../public/varias');
-var fs = require('fs');
+var variasBucket = require('../public/variasBucket');
 var app = express();
 
 // ==========================================
 // Obtener todas las navieras
 // ==========================================
+
 app.get('/', (req, res, next) => {
   var role = 'NAVIERA_ROLE';
   Naviera.find({ role: role })
@@ -85,9 +85,8 @@ app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', naviera.img, './uploads/clientes/', naviera.img);
-
-  varias.MoverArchivoFromTemp('./uploads/temp/', naviera.formatoR1, './uploads/clientes/', naviera.formatoR1);
+  variasBucket.MoverArchivoBucket('temp/', naviera.img, 'clientes/');
+  variasBucket.MoverArchivoBucket('temp/', naviera.formatoR1, 'clientes/');
 
 
   naviera.save((err, navieraGuardado) => {
@@ -150,19 +149,24 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
     naviera.fMod = new Date();
 
     if (naviera.formatoR1 != body.formatoR1) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.formatoR1, './uploads/clientes/', naviera.formatoR1)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.formatoR1, 'clientes/')) {
+        if (naviera.formatoR1 != null && naviera.formatoR1 != undefined && naviera.formatoR1 != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('clientes/', naviera.formatoR1);
+        }
         naviera.formatoR1 = body.formatoR1;
       }
     }
 
     if (naviera.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, './uploads/clientes/', naviera.img)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.img, 'clientes/')) {
+        if (naviera.img != null && naviera.img != undefined && naviera.img != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('clientes/', naviera.img);
+        }
         naviera.img = body.img;
       }
     }
 
     naviera.save((err, navieraGuardado) => {
-
       if (err) {
         return res.status(400).json({
           ok: false,
@@ -170,14 +174,11 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
           errors: err
         });
       }
-
       res.status(200).json({
         ok: true,
         naviera: navieraGuardado
       });
-
     });
-
   });
 });
 
@@ -201,7 +202,10 @@ app.delete('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe naviera con ese id' }
       });
     }
+    variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.img);
+    variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.formatoR1);
     res.status(200).json({
+
       ok: true,
       naviera: navieraBorrado
     });

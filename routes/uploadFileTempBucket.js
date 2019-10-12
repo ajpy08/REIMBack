@@ -4,11 +4,8 @@ var fileUpload = require('express-fileupload');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var configuracion = require('../config/config');
-const uuid = require('uuid/v1');
-const AWS = require('aws-sdk');
-
-AWS.config.update(configuracion.CONFIG_BUCKET);
-var s3 = new AWS.S3();
+var uuid = require('uuid/v1');
+var AWS = require('aws-sdk');
 
 // Inicializar variables
 var app = express();
@@ -38,9 +35,9 @@ app.put('/', (req, res) => {
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
 
   console.log('subiendo: ' + nombreArchivo);
-
+  var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
   var params = {
-    Bucket: 'bucketcontainerpark',
+    Bucket: configuracion.BUCKET,
     Body: archivo.data,
     Key: 'temp/' + nombreArchivo,
     ContentType: archivo.mimetype
