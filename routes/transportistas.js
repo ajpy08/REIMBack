@@ -1,7 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Transportista = require('../models/transportista');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
 
@@ -86,9 +86,8 @@ app.post('/transportista/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoBucket('temp/', transportista.img, 'clientes/');
-
-  varias.MoverArchivoBucket('temp/', transportista.formatoR1, 'clientes/');
+  variasBucket.MoverArchivoBucket('temp/', transportista.img, 'clientes/');
+  variasBucket.MoverArchivoBucket('temp/', transportista.formatoR1, 'clientes/');
 
   transportista.save((err, transportistaGuardado) => {
     if (err) {
@@ -147,18 +146,18 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
     transportista.fMod = new Date();
 
     if (transportista.formatoR1 != body.formatoR1) {
-      if (varias.MoverArchivoBucket('temp/', body.formatoR1, 'clientes/')) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.formatoR1, 'clientes/')) {
         if (transportista.formatoR1 != null && transportista.formatoR1 != undefined && transportista.formatoR1 != '') { //BORRAR EL ACTUAL
-          varias.BorrarArchivoBucket('clientes/', transportista.formatoR1)
+          variasBucket.BorrarArchivoBucket('clientes/', transportista.formatoR1);
         }
         transportista.formatoR1 = body.formatoR1;
       }
     }
 
     if (transportista.img != body.img) {
-      if (varias.MoverArchivoBucket('temp/', body.img, 'clientes/')) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.img, 'clientes/')) {
         if (transportista.img != null && transportista.img != undefined && transportista.img != '') { //BORRAR EL ACTUAL
-          varias.BorrarArchivoBucket('clientes/', transportista.img)
+          variasBucket.BorrarArchivoBucket('clientes/', transportista.img);
         }
         transportista.img = body.img;
       }
@@ -173,6 +172,7 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
           errors: err
         });
       }
+
       res.status(200).json({
         ok: true,
         mensaje: 'Transportista actualizado con exito',
@@ -203,6 +203,8 @@ app.delete('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe transportista con ese id' }
       });
     }
+    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.img);
+    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.formatoR1);
     res.status(200).json({
       ok: true,
       transportista: transportistaBorrado

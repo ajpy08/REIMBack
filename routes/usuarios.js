@@ -5,7 +5,7 @@ var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var jwt = require('jsonwebtoken');
 var Usuario = require('../models/usuario');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 // Inicializar variables
 var app = express();
 
@@ -108,7 +108,7 @@ app.post('/usuario', mdAutenticacion.verificaToken, (req, res) => {
     usuario.empresas = undefined;
   }
 
-  varias.MoverArchivoBucket('temp/', usuario.img, 'usuarios/');
+  variasBucket.MoverArchivoBucket('temp/', usuario.img, 'usuarios/');
 
   usuario.save((err, usuarioGuardado) => {
     if (err) {
@@ -161,9 +161,9 @@ app.put('/usuario/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verifica
     usuario.fMod = new Date();
 
     if (usuario.img != body.img) {
-      if (varias.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
         if (usuario.img != null && usuario.img != undefined && usuario.img != '') { //BORRAR EL ACTUAL
-          varias.BorrarArchivoBucket('usuarios/', usuario.img)
+          variasBucket.BorrarArchivoBucket('usuarios/', usuario.img);
         }
         usuario.img = body.img;
       }
@@ -215,9 +215,9 @@ app.put('/usuario/:id/perfil', [mdAutenticacion.verificaToken, mdAutenticacion.v
     usuario.fMod = new Date();
 
     if (usuario.img != body.img) {
-      if (varias.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.img, 'usuarios/')) {
         if (usuario.img != null && usuario.img != undefined && usuario.img != '') { //BORRAR EL ACTUAL
-          varias.BorrarArchivoBucket('usuarios/', usuario.img)
+          variasBucket.BorrarArchivoBucket('usuarios/', usuario.img)
         }
         usuario.img = body.img;
       }
