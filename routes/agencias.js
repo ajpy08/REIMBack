@@ -1,7 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Agencia = require('../models/agencia');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
 
@@ -115,8 +115,8 @@ app.post('/agencia/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', agencia.img, './uploads/clientes/', agencia.img);
-  varias.MoverArchivoFromTemp('./uploads/temp/', agencia.formatoR1, './uploads/clientes/', agencia.formatoR1);
+  variasBucket.MoverArchivoBucket('temp/', agencia.img, 'clientes/');
+  variasBucket.MoverArchivoBucket('temp/', agencia.formatoR1, 'clientes/');
 
   agencia.save((err, agenciaGuardado) => {
     if (err) {
@@ -173,18 +173,25 @@ app.put('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
     agencia.usuarioMod = req.usuario._id;
     agencia.fMod = new Date();
 
+
     if (agencia.formatoR1 != body.formatoR1) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.formatoR1, './uploads/clientes/', agencia.formatoR1)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.formatoR1, 'clientes/')) {
+        if (agencia.formatoR1 != null && agencia.formatoR1 != undefined && agencia.formatoR1 != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('clientes/', agencia.formatoR1);
+        }
         agencia.formatoR1 = body.formatoR1;
       }
     }
 
-
     if (agencia.img != body.img) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.img, './uploads/clientes/', agencia.img)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.img, 'clientes/')) {
+        if (agencia.img != null && agencia.img != undefined && agencia.img != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('clientes/', agencia.img);
+        }
         agencia.img = body.img;
       }
     }
+
 
     agencia.save((err, agenciaGuardado) => {
       if (err) {
@@ -224,6 +231,8 @@ app.delete('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe agencia con ese id' }
       });
     }
+    variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.img);
+    variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.formatoR1);
     res.status(200).json({
       ok: true,
       mensaje: 'Agencia borrada con exito',

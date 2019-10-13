@@ -5,7 +5,7 @@ var fs = require('fs');
 var app = express();
 var Viaje = require('../models/viaje');
 var Maniobra = require('../models/maniobra');
-var varias = require('../public/varias');
+
 var variasBucket = require('../public/variasBucket');
 var moment = require('moment');
 
@@ -149,12 +149,8 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', viaje.pdfTemporal, './uploads/viajes/', viaje.pdfTemporal);
-  // if (viaje.pdfTemporal != '' && fs.existsSync('./uploads/temp/' + viaje.pdfTemporal)) {
-  //   fs.rename('./uploads/temp/' + viaje.pdfTemporal, './uploads/viajes/' + viaje.pdfTemporal, (err) => {
-  //     if (err) { console.log(err); }
-  //   });
-  // }
+  variasBucket.MoverArchivoBucket('temp/', viaje.pdfTemporal, 'viajes/');
+
   viaje.save((err, viajeGuardado) => {
     if (err) {
       return res.status(400).json({
@@ -238,11 +234,14 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     viaje.fMod = new Date();
 
     if (viaje.pdfTemporal != body.pdfTemporal) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.pdfTemporal, './uploads/viajes/', viaje.pdfTemporal)) {
-        console.log('entro');
+      if (variasBucket.MoverArchivoBucket('temp/', body.pdfTemporal, 'viajes/')) {
+        if (viaje.pdfTemporal != null && viaje.pdfTemporal != undefined && viaje.pdfTemporal != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('viajes/', viaje.pdfTemporal);
+        }
         viaje.pdfTemporal = body.pdfTemporal;
       }
     }
+
     viaje.save((err, viajeGuardado) => {
       if (err) {
         return res.status(400).json({

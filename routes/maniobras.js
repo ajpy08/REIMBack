@@ -5,7 +5,7 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var fileUpload = require('express-fileupload');
 var uuid = require('uuid/v1');
 app.use(fileUpload());
@@ -398,7 +398,7 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
   var path = 'maniobras/' + id + '/' + LR + '/';
 
-  varias.SubirArchivoBucket(archivo, path, nombreArchivo)
+  variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
     .then((value) => {
       if (value) {
         console.log('ya termino de subir.');
