@@ -72,3 +72,24 @@ exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
     });
   }
 };
+
+exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
+  return new Promise((resolve, reject) => {
+    if (key != null && key != undefined && key != '') {
+      var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+      var paramsDelete = {
+        Bucket: configuracion.BUCKET,
+        Key: key
+      };
+      s3.deleteObject(paramsDelete, function(err, data) {
+        if (err) {
+          console.log("Error", err);
+        }
+        if (data) {
+          console.log("Elemento eliminado:", key);
+          resolve(true);
+        }
+      });
+    }
+  });  
+};

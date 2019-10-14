@@ -373,7 +373,6 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
   variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
     .then((value) => {
       if (value) {
-        console.log('ya termino de subir.');
         res.status(200).json({
           ok: true,
           mensaje: 'Archivo guardado!',
@@ -385,7 +384,6 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
 
 
 // ETAPAS DE LA MANIOBRA EN EL PATIO
-
 
 // =======================================
 // Registra LLegada Contendor
