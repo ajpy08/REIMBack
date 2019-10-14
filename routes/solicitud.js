@@ -2,7 +2,6 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
-var varias = require('../public/varias');
 var mongoose = require('mongoose');
 var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');

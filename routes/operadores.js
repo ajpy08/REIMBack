@@ -4,7 +4,7 @@ var Operador = require('../models/operador');
 var fs = require('fs');
 var app = express();
 var Maniobra = require('../models/maniobra');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var mongoose = require('mongoose');
 
 // ==========================================
@@ -122,9 +122,9 @@ app.post('/operador/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', operador.foto, 'operadores/', operador.foto);
+  variasBucket.MoverArchivoBucket('temp/', operador.foto, 'operadores/');
+  variasBucket.MoverArchivoBucket('temp/', operador.fotoLicencia, 'operadores/');
 
-  varias.MoverArchivoFromTemp('./uploads/temp/', operador.fotoLicencia, 'operadores/', operador.fotoLicencia);
 
   operador.save((err, operadorGuardado) => {
     if (err) {
@@ -172,13 +172,20 @@ app.put('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
     operador.fMod = new Date();
 
     if (operador.foto != body.foto) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.foto, 'operadores/', operador.foto)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.foto, 'operadores/')) {
+        if (operador.foto != null && operador.foto != undefined && operador.foto != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('operadores/', operador.foto);
+        }
         operador.foto = body.foto;
       }
     }
 
+
     if (operador.fotoLicencia != body.fotoLicencia) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.fotoLicencia, 'operadores/', operador.fotoLicencia)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.fotoLicencia, 'operadores/')) {
+        if (operador.fotoLicencia != null && operador.fotoLicencia != undefined && operador.fotoLicencia != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('operadores/', operador.fotoLicencia);
+        }
         operador.fotoLicencia = body.fotoLicencia;
       }
     }
@@ -276,6 +283,8 @@ app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
               errors: { message: 'No existe un operador con ese id' }
             });
           }
+          variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.foto);
+          variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.fotoLicencia);
           res.status(200).json({
             ok: true,
             operador: operadorBorrado

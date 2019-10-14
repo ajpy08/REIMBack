@@ -2,7 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var mongoose = require('mongoose');
 var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
@@ -198,10 +198,10 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
     });
   }
   if (solicitud.tipo == 'D') {
-    varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaBL, './uploads/solicitudes/', solicitud.rutaBL);
+    variasBucket.MoverArchivoBucket('temp/', solicitud.rutaBL, 'solicitudes/');
   }
   if (!solicitud.credito && solicitud.rutaComprobante != '..') {
-    varias.MoverArchivoFromTemp('./uploads/temp/', solicitud.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante);
+    variasBucket.MoverArchivoBucket('temp/', solicitud.rutaComprobante, 'solicitudes/');
   } else {
     solicitud.rutaComprobante = undefined;
   }
@@ -283,17 +283,24 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     if (solicitud.tipo == 'D') {
       if (solicitud.rutaBL != body.rutaBL) {
-        if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaBL, './uploads/solicitudes/', solicitud.rutaBL)) {
+        if (variasBucket.MoverArchivoBucket('temp/', body.rutaBL, 'solicitudes/')) {
+          if (solicitud.rutaBL != null && solicitud.rutaBL != undefined && solicitud.rutaBL != '') { //BORRAR EL ACTUAL
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitud.rutaBL);
+          }
           solicitud.rutaBL = body.rutaBL;
         }
       }
     }
 
     if (!solicitud.credito && body.rutaComprobante != '..' && solicitud.rutaComprobante != body.rutaComprobante) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.rutaComprobante, './uploads/solicitudes/', solicitud.rutaComprobante)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.rutaComprobante, 'solicitudes/')) {
+        if (solicitud.rutaComprobante != null && solicitud.rutaComprobante != undefined && solicitud.rutaComprobante != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('solicitudes/', solicitud.rutaComprobante);
+        }
         solicitud.rutaComprobante = body.rutaComprobante;
       }
     }
+
     solicitud.save((err, solicitudGuardado) => {
 
       if (err) {
@@ -475,8 +482,10 @@ app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'La solicitud no puede ser eliminada porque tiene el estado de ' + solicitudBorrada.estatus }
       });
     }
-    varias.BorrarArchivo('./uploads/solicitudes/', solicitudBorrada.rutaComprobante);
-    varias.BorrarArchivo('./uploads/solicitudes/', solicitudBorrada.rutaBL);
+
+    variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrada.rutaComprobante);
+    variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrada.rutaBL);
+
     solicitudBorrada.remove();
     res.status(200).json({
       ok: true,
