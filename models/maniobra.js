@@ -3,7 +3,6 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var Contador = require('./contador');
-
 var maniobraSchema = new Schema({
 
   cargaDescarga: { type: String, required: true, default: 'D' },
@@ -33,11 +32,11 @@ var maniobraSchema = new Schema({
     costo: { type: String },
   }],
   reparacionesObservacion: { type: String },
-  mostrarFotosRNaviera: {type: Boolean, default: false},
-  mostrarFotosRAA: {type: Boolean, default: false},
-  hSalida: { type: String },
+  mostrarFotosRNaviera: { type: Boolean, default: false },
+  mostrarFotosRAA: { type: Boolean, default: false },
   descargaAutorizada: { type: Boolean, default: false },
   hDescarga: { type: String },
+  hSalida: { type: String },
   fIniLavado: { type: Date },
   hIniLavado: { type: String },
   hFinLavado: { type: String },

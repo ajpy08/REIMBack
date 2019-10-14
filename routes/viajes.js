@@ -185,7 +185,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       }
       maniobra.save((err, maniobraGuardado) => {
         if (err) {
-          console.log(err);
           return res.status(400).json({
             ok: false,
             mensaje: "Error al cargar la maniobra",
