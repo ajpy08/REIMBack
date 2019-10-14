@@ -11,7 +11,7 @@ var uuid = require('uuid/v1');
 app.use(fileUpload());
 
 // =======================================
-// Obtener Maniobras
+// Obtener Maniobras G E N E R A L
 // =======================================
 app.get('', (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
@@ -87,6 +87,83 @@ app.get('', (req, res, netx) => {
     });
 });
 
+// ==========================================
+//  Obtener Maniobra por ID
+// ==========================================
+app.get('/maniobra/:id', (req, res) => {
+  var id = req.params.id;
+  console.log(id)
+  Maniobra.findById(id)
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
+      });
+    });
+});
+
+
+// ==========================================
+//  Obtener Maniobra por ID CON INCLUDES
+// ==========================================
+app.get('/maniobra/:id/includes', (req, res) => {
+  var id = req.params.id;
+  Maniobra.findById(id)
+    .populate('operador', 'nombre foto')
+    .populate('camion', 'placa noEconomico')
+    .populate('operador', 'nombre licencia')
+    .populate('cliente', 'razonSocial')
+    .populate('agencia', 'razonSocial')
+    .populate('transportista', 'razonSocial')
+    .populate('viaje', 'viaje ')
+    .populate('solicitud', 'viaje ')
+    .populate({
+      path: 'viaje',
+      select: 'viaje',
+      populate: {
+        path: 'buque',
+        select: 'nombre'
+      }
+    })
+
+
+  .exec((err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + 'no existe',
+        errors: { message: 'No existe maniobra con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      maniobra: maniobra
+    });
+  });
+});
+
+
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
 // =======================================
@@ -123,7 +200,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
-  //console.log(json);
+  console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
@@ -268,111 +345,6 @@ app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
 
 
 
-// =======================================
-// Obtener Maniobra de hoy
-// =======================================
-app.get('/hoy', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
-  var fechaInicio = string;
-  var myDate = new Date(fechaInicio).now();
-  var y = myDate.getFullYear();
-  var m = myDate.getMonth();
-  m += 1;
-  var d = myDate.getUTCDate();
-  var newdate = (y + "-" + m + "-" + d);
-  //fechaaInicio = new Date(fechaInicio).toISOString();
-  // var inicioDate = fechaInicio + "T00:00:00.000Z";
-  // fechaaFin = new Date(fechaFin).toISOString();
-  var inicioDate = newdate + "T00:00:00.000Z";
-  // fechaaFin = new Date(inicioDate);
-  //    .find({"fecha" : {"$gt" : ISODate("2014-10-18T00:00:00")}})
-  Maniobra.find({ "fechaCreado": { "$gt": inicioDate } })
-    .populate('operador', 'operador')
-    .populate({
-      path: "camiones",
-      select: 'placa numbereconomico',
-      populate: {
-        path: "transportista",
-        select: 'nombre'
-      }
-    })
-    .populate('contenedor', 'contenedor tipo')
-    .populate('cliente', 'cliente')
-    .populate('agencia', 'nombre')
-    .populate('transportista', 'nombre')
-    .populate('viaje', 'viaje')
-    .populate('usuario', 'nombre email')
-    .exec(
-      (err, maniobras) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando maniobras',
-            errors: err
-          });
-        }
-        Maniobra.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            maniobras,
-            total: conteo
-          });
-
-        });
-
-      });
-});
-
-
-// =======================================
-// Obtener Maniobra por rango de fechas
-// =======================================
-app.get('/rangofecha', (req, res, netx) => {
-  var desde = req.query.desde || 0;
-  desde = Number(desde);
-  var fechaInicio = req.query.fechaInicio;
-  var fechaFin = req.query.fechaFin;
-  fechaaInicio = new Date(fechaInicio).toISOString();
-  // var inicioDate = fechaInicio + "T00:00:00.000Z";
-  // fechaaFin = new Date(fechaFin).toISOString();
-  var finDate = fechaFin + "T23:59:59.999Z";
-  fechaaFin = new Date(finDate);
-  Maniobra.find({ "fechaCreado": { "$gte": fechaaInicio, "$lte": fechaaFin } })
-    .populate('operador', 'operador')
-    .populate({
-      path: "camiones",
-      select: 'placa numbereconomico',
-      populate: {
-        path: "transportista",
-        select: 'nombre'
-      }
-    })
-    .populate('cliente', 'cliente')
-    .populate('agencia', 'nombre')
-    .populate('transportista', 'nombre')
-    .populate('viaje', 'viaje')
-    .populate('usuario', 'nombre email')
-    .exec(
-      (err, maniobras) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando maniobras',
-            errors: err
-          });
-        }
-        Maniobra.countDocuments({}, (err, conteo) => {
-          res.status(200).json({
-            ok: true,
-            maniobras,
-            total: conteo
-          });
-
-        });
-
-      });
-});
 
 // ==========================================
 // Subir fotos lavado o Reparacion de la maniobra
@@ -407,11 +379,503 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
           mensaje: 'Archivo guardado!',
         });
       }
-    })
-
+    });
 });
 
 
 
+// ETAPAS DE LA MANIOBRA EN EL PATIO
+
+
+// =======================================
+// Registra LLegada Contendor
+// =======================================
+app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+
+  if (body.transportista === undefined || body.transportista === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el transportista',
+      errors: { message: 'Se debe declarar el transportista' }
+    });
+  }
+  if (body.camion === undefined || body.camion === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el camion',
+      errors: { message: 'Se debe declarar el camion' }
+    });
+  }
+  if (body.operador === undefined || body.operador === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar el operador',
+      errors: { message: 'Se debe declarar el operador' }
+    });
+  }
+  if (body.fLlegada === undefined || body.fLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Fecha de Llegada',
+      errors: { message: 'Se debe declarar la Fecha de Llegada' }
+    });
+  }
+  if (body.hLlegada === undefined || body.hLlegada === '') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Se debe declarar la Hora de Llegada',
+      errors: { message: 'Se debe declarar la Hora de Llegada' }
+    });
+  }
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.transportista = body.transportista;
+    maniobra.camion = body.camion;
+    maniobra.operador = body.operador;
+    maniobra.fLlegada = body.fLlegada;
+    maniobra.hLlegada = body.hLlegada;
+    maniobra.estatus = "ESPERA";
+    if (body.hEntrada) {
+      maniobra.hEntrada = body.hEntrada;
+      if (maniobra.cargaDescarga === 'C') {
+        maniobra.estatus = "XCARGAR";
+      } else {
+        maniobra.estatus = "REVISION";
+      }
+    }
+
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Registra Lavado, reparaciones y descarga
+// =======================================
+app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+
+  if (!body.lavado && body.reparaciones.length == 0 &&
+    body.hDescarga !== '' && body.hDescarga !== undefined &&
+    body.hSalida !== '' && body.hSalida !== undefined &&
+    (body.grado === '' || body.grado === undefined)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR',
+      errors: { message: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR' }
+    });
+  }
+
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.lavado = body.lavado;
+    if (maniobra.lavado) maniobra.lavadoObservacion = body.lavadoObservacion;
+
+    maniobra.reparaciones = body.reparaciones;
+    if (maniobra.reparaciones.length > 0)
+      maniobra.reparacionesObservacion = body.reparacionesObservacion;
+
+    maniobra.grado = body.grado;
+    if (maniobra.descargaAutorizada == true) {
+      maniobra.hDescarga = body.hDescarga;
+      maniobra.hSalida = body.hSalida;
+
+      if (maniobra.hDescarga !== '' && maniobra.hDescarga !== undefined && maniobra.hSalida !== '' && maniobra.hSalida !== undefined) {
+        maniobra.estatus = "LAVADO_REPARACION";
+        if (!body.lavado && body.reparaciones.length == 0)
+          maniobra.estatus = "DISPONIBLE";
+      }
+    }
+
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Registra FINALIZACION DE Lavado, reparaciones 
+// =======================================
+app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+
+  if (body.lavado) {
+    if (body.hIniLavado && (body.fIniLavado === undefined || body.fIniLavado === '')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede asignar hora de Inicio de lavado si no ha asignado Fecha de Inicio',
+        errors: { message: 'No se puede asignar hora de Inicio de lavado si no ha asignado Fecha de Inicio' }
+      });
+    }
+
+    if (body.hFinLavado && (body.fIniLavado === undefined || body.fIniLavado === '')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede asignar hora de finalización de lavado si no ha asignado Fecha de Inicio',
+        errors: { message: 'No se puede asignar hora de finalización de lavado si no ha asignado Fecha de Inicio' }
+      });
+    }
+  }
+
+  if (body.reparaciones.length > 0) {
+    if (body.hIniReparacion && body.hIniReparacion !== '' && (body.fIniReparacion === undefined || body.fIniReparacion === '')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Inicio',
+        errors: { message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Inicio' }
+      });
+    }
+
+    if (body.fFinReparacion && (body.hIniReparacion === undefined || body.hIniReparacion === '')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede asignar Fecha de Finalizacion reparación si no ha asignado Hora de Inicio',
+        errors: { message: 'No se puede asignar Fecha de Finalizacion reparación si no ha asignado Hora de Inicio' }
+      });
+    }
+
+    if (body.hFinReparacion && (body.fFinReparacion === undefined || body.fFinReparacion === '')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede asignar Hora de Finalizacion reparación si no ha asignado Fecha de Finalización',
+        errors: { message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Finalización' }
+      });
+    }
+  }
+
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+
+    maniobra.lavado = body.lavado;
+    if (maniobra.lavado) {
+      maniobra.lavadoObservacion = body.lavadoObservacion;
+      maniobra.fIniLavado = body.fIniLavado;
+      maniobra.hIniLavado = body.hIniLavado;
+      maniobra.hFinLavado = body.hFinLavado;
+    } else {
+      maniobra.lavadoObservacion = undefined;
+      maniobra.fIniLavado = undefined;
+      maniobra.hIniLavado = undefined;
+      maniobra.hFinLavado = undefined;
+    }
+
+    maniobra.reparaciones = body.reparaciones;
+
+    if (maniobra.reparaciones.length > 0) {
+      maniobra.reparacionesObservacion = body.reparacionesObservacion;
+      maniobra.fIniReparacion = body.fIniReparacion;
+      maniobra.hIniReparacion = body.hIniReparacion;
+      maniobra.fFinReparacion = body.fFinReparacion;
+      maniobra.hFinReparacion = body.hFinReparacion;
+    } else {
+      maniobra.reparacionesObservacion = body.reparacionesObservacion;
+      maniobra.fIniReparacion = undefined;
+      maniobra.hIniReparacion = undefined;
+      maniobra.fFinReparacion = undefined;
+      maniobra.hFinReparacion = undefined;
+    }
+
+    maniobra.grado = body.grado;
+
+
+    if (!maniobra.lavado && maniobra.reparaciones.length == 0 && maniobra.grado) {
+      maniobra.estatus = "DISPONIBLE";
+    }
+    if (maniobra.lavado && maniobra.fIniLavado && maniobra.hFinLavado && maniobra.reparaciones.length > 0 && maniobra.fFinReparacion && maniobra.hFinReparacion && maniobra.grado) {
+      maniobra.estatus = "DISPONIBLE";
+    }
+    if (maniobra.lavado && maniobra.fIniLavado && maniobra.hFinLavado && maniobra.reparaciones.length == 0 && maniobra.grado) {
+      maniobra.estatus = "DISPONIBLE";
+    }
+    if (!maniobra.lavado && maniobra.reparaciones.length > 0 && maniobra.fFinReparacion && maniobra.hFinReparacion && maniobra.grado) {
+      maniobra.estatus = "DISPONIBLE";
+    }
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Registra Carga Contenedor
+// =======================================
+app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.maniobraAsociada = body.maniobraAsociada;
+    maniobra.contenedor = body.contenedor;
+    maniobra.tipo = body.tipo;
+    if (body.grado !== '' && body.grado !== undefined) {
+      maniobra.grado = body.grado;
+    }
+
+    maniobra.estatus = "CARGADO";
+
+    maniobra.save((err, maniobraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+
+      Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada) }, {
+        $set: {
+          'estatus': 'CARGADO',
+          'maniobraAsociada': maniobra._id
+        }
+      }, function(err, data) {
+        if (err) {
+          console.log(err);
+        }
+      });
+
+
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
+  });
+});
+
+// =======================================
+// Aprobar descarga    HABILITAR DESHABILITAR
+// =======================================
+app.put('/maniobra/:id/aprueba_descarga', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.descargaAutorizada = body.descargaAutorizada;
+
+    maniobra.save((err, maniobraGuardada) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        mensaje: 'Maniora Actualizada con éxito',
+        maniobra: maniobraGuardada
+      });
+    });
+  });
+});
+
+
 
 module.exports = app;
+
+
+// // =======================================
+// // Obtener Maniobra de hoy
+// // =======================================
+// app.get('/hoy', (req, res, netx) => {
+//   var desde = req.query.desde || 0;
+//   desde = Number(desde);
+//   var fechaInicio = string;
+//   var myDate = new Date(fechaInicio).now();
+//   var y = myDate.getFullYear();
+//   var m = myDate.getMonth();
+//   m += 1;
+//   var d = myDate.getUTCDate();
+//   var newdate = (y + "-" + m + "-" + d);
+//   //fechaaInicio = new Date(fechaInicio).toISOString();
+//   // var inicioDate = fechaInicio + "T00:00:00.000Z";
+//   // fechaaFin = new Date(fechaFin).toISOString();
+//   var inicioDate = newdate + "T00:00:00.000Z";
+//   // fechaaFin = new Date(inicioDate);
+//   //    .find({"fecha" : {"$gt" : ISODate("2014-10-18T00:00:00")}})
+//   Maniobra.find({ "fechaCreado": { "$gt": inicioDate } })
+//     .populate('operador', 'operador')
+//     .populate({
+//       path: "camiones",
+//       select: 'placa numbereconomico',
+//       populate: {
+//         path: "transportista",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('contenedor', 'contenedor tipo')
+//     .populate('cliente', 'cliente')
+//     .populate('agencia', 'nombre')
+//     .populate('transportista', 'nombre')
+//     .populate('viaje', 'viaje')
+//     .populate('usuario', 'nombre email')
+//     .exec(
+//       (err, maniobras) => {
+//         if (err) {
+//           return res.status(500).json({
+//             ok: false,
+//             mensaje: 'Error cargando maniobras',
+//             errors: err
+//           });
+//         }
+//         Maniobra.countDocuments({}, (err, conteo) => {
+//           res.status(200).json({
+//             ok: true,
+//             maniobras,
+//             total: conteo
+//           });
+
+//         });
+
+//       });
+// });
+
+
+// // =======================================
+// // Obtener Maniobra por rango de fechas
+// // =======================================
+// app.get('/rangofecha', (req, res, netx) => {
+//   var desde = req.query.desde || 0;
+//   desde = Number(desde);
+//   var fechaInicio = req.query.fechaInicio;
+//   var fechaFin = req.query.fechaFin;
+//   fechaaInicio = new Date(fechaInicio).toISOString();
+//   // var inicioDate = fechaInicio + "T00:00:00.000Z";
+//   // fechaaFin = new Date(fechaFin).toISOString();
+//   var finDate = fechaFin + "T23:59:59.999Z";
+//   fechaaFin = new Date(finDate);
+//   Maniobra.find({ "fechaCreado": { "$gte": fechaaInicio, "$lte": fechaaFin } })
+//     .populate('operador', 'operador')
+//     .populate({
+//       path: "camiones",
+//       select: 'placa numbereconomico',
+//       populate: {
+//         path: "transportista",
+//         select: 'nombre'
+//       }
+//     })
+//     .populate('cliente', 'cliente')
+//     .populate('agencia', 'nombre')
+//     .populate('transportista', 'nombre')
+//     .populate('viaje', 'viaje')
+//     .populate('usuario', 'nombre email')
+//     .exec(
+//       (err, maniobras) => {
+//         if (err) {
+//           return res.status(500).json({
+//             ok: false,
+//             mensaje: 'Error cargando maniobras',
+//             errors: err
+//           });
+//         }
+//         Maniobra.countDocuments({}, (err, conteo) => {
+//           res.status(200).json({
+//             ok: true,
+//             maniobras,
+//             total: conteo
+//           });
+
+//         });
+
+//       });
+// });
