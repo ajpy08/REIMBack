@@ -3,6 +3,7 @@ var configuracion = require('../config/config');
 var app = express();
 var path = require('path');
 var AWS = require('aws-sdk');
+var variasBucket = require('../public/variasBucket');
 
 app.get('/documentoxtipo/:tipo/:nombre', (req, res, netx) => {
   var tipo = req.params.tipo;
@@ -93,6 +94,22 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
       });
     }
   });
+});
+
+// ============================================
+//   Borrar Foto de Maniobra LR desde Bucket 
+// ============================================
+app.get('/maniobra/eliminaFoto', (req, res, netx) => {
+  var key = req.query.key;
+  variasBucket.BorrarArchivoBucketKey(key)
+  .then((value) => {
+    if (value) {
+      res.status(200).json({
+        ok: true,
+        mensaje: 'Foto Eliminada!',
+      });
+    }
+  });    
 });
 
 module.exports = app;
