@@ -1,7 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Camion = require('../models/camion');
-var varias = require('../public/varias');
+var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
 
@@ -84,11 +84,7 @@ app.post('/camion/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  if (camion.pdfSeguro != '' && fs.existsSync('./uploads/temp/' + camion.pdfSeguro)) {
-    fs.rename('./uploads/temp/' + camion.pdfSeguro, './uploads/camiones/' + camion.pdfSeguro, (err) => {
-      if (err) { console.log(err); }
-    });
-  }
+  variasBucket.MoverArchivoBucket('temp/', camion.pdfSeguro, 'camiones/');
 
   camion.save((err, camionGuardado) => {
     if (err) {
@@ -137,12 +133,15 @@ app.put('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
     camion.usuarioMod = req.usuario._id;
     camion.fMod = new Date();
 
+
     if (camion.pdfSeguro != body.pdfSeguro) {
-      if (varias.MoverArchivoFromTemp('./uploads/temp/', body.pdfSeguro, './uploads/camiones/', camion.pdfSeguro)) {
+      if (variasBucket.MoverArchivoBucket('temp/', body.pdfSeguro, 'camiones/')) {
+        if (camion.pdfSeguro != null && camion.pdfSeguro != undefined && camion.pdfSeguro != '') { //BORRAR EL ACTUAL
+          variasBucket.BorrarArchivoBucket('camiones/', camion.pdfSeguro);
+        }
         camion.pdfSeguro = body.pdfSeguro;
       }
     }
-
     camion.save((err, camionGuardado) => {
       if (err) {
         return res.status(400).json({
@@ -179,6 +178,7 @@ app.delete('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe camion con ese id' }
       });
     }
+    variasBucket.BorrarArchivoBucket('camiones/', camionBorrado.pdfSeguro);
     res.status(200).json({
       ok: true,
       mensaje: 'Camion borrado con exito',
