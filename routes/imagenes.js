@@ -11,7 +11,7 @@ app.get('/:tipo/:img', (req, res, netx) => {
   var img = req.params.img;
   var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
   const params = {
-    Bucket: "bucketcontainerpark",
+    Bucket: configuracion.BUCKET,
     Key: tipo + '/' + img
   };
   if (img === 'xxx') {
