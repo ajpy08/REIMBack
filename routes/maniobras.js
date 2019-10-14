@@ -676,6 +676,17 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
 app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
+  var cambiaManiobraAsociada = false;
+  var maniobraAsociadaTemporal = '';
+
+  if (body.maniobraAsociada === '' || body.maniobraAsociada === undefined ||
+    body.contenedor === '' || body.contenedor === undefined) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Debe asignar un contenedor de la lista de disponibles',
+      errors: { message: 'Debe asignar un contenedor de la lista de disponibles' }
+    });
+  }
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
@@ -691,14 +702,30 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    maniobra.maniobraAsociada = body.maniobraAsociada;
-    maniobra.contenedor = body.contenedor;
-    maniobra.tipo = body.tipo;
+    console.log(cambiaManiobraAsociada);
+    console.log('body' + body.maniobraAsociada);
+    console.log('maniobra' + maniobra.maniobraAsociada);
+    if (body.maniobraAsociada != maniobra.maniobraAsociada) {
+      maniobraAsociadaTemporal = maniobra.maniobraAsociada;
+      if (body.maniobraAsociada !== '' && body.maniobraAsociada !== undefined) {
+        maniobra.maniobraAsociada = body.maniobraAsociada;
+        maniobra.contenedor = body.contenedor;
+        maniobra.tipo = body.tipo;
+        cambiaManiobraAsociada = true;
+      }
+    }
+    maniobra.hDescarga = body.hDescarga;
+    maniobra.hSalida = body.hSalida;
+
     if (body.grado !== '' && body.grado !== undefined) {
       maniobra.grado = body.grado;
     }
-
-    maniobra.estatus = "CARGADO";
+    if (maniobra.hDescarga !== '' && maniobra.hDescarga !== undefined &&
+      maniobra.hSalida !== '' && maniobra.hSalida !== undefined &&
+      maniobra.maniobraAsociada !== '' && maniobra.maniobraAsociada !== undefined &&
+      maniobra.contenedor !== '' && maniobra.contenedor !== undefined) {
+      maniobra.estatus = "CARGADO";
+    }
 
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
@@ -708,18 +735,34 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
           errors: err
         });
       }
-
-      Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada) }, {
-        $set: {
-          'estatus': 'CARGADO',
-          'maniobraAsociada': maniobra._id
+      console.log(cambiaManiobraAsociada);
+      console.log('asociada' + maniobra.maniobraAsociada);
+      console.log('temporal' + maniobraAsociadaTemporal);
+      if (cambiaManiobraAsociada === true) {
+        console.log('entra a cambiar');
+        Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada) }, {
+          $set: {
+            'estatus': 'CARGADO',
+            'maniobraAsociada': maniobra._id
+          }
+        }, function(err, data) {
+          if (err) {
+            console.log(err);
+          }
+        });
+        if (maniobraAsociadaTemporal !== '' && maniobraAsociadaTemporal !== undefined && maniobraAsociadaTemporal !== null) {
+          Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobraAsociadaTemporal) }, {
+            $set: {
+              'estatus': 'DISPONIBLE',
+              'maniobraAsociada': null
+            }
+          }, function(err, data) {
+            if (err) {
+              console.log(err);
+            }
+          });
         }
-      }, function(err, data) {
-        if (err) {
-          console.log(err);
-        }
-      });
-
+      }
 
       res.status(200).json({
         ok: true,

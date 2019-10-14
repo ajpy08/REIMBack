@@ -81,7 +81,7 @@ function obtenerMenu(ROLE) {
 
   //console.log('ROLE', ROLE);
 
-  if (ROLE === 'ADMIN_ROLE') {
+  if (ROLE === 'ADMIN_ROLE' || ROLE === 'REIMADMIN_ROLE') {
     let menu = [{
         titulo: 'Principal',
 
