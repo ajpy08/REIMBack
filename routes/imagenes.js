@@ -1,6 +1,6 @@
 // Requires
 var express = require('express');
-var configuracion = require('../config/config');
+var entorno = require('../config/config').config();
 var app = express();
 var path = require('path');
 const AWS = require('aws-sdk');
@@ -9,9 +9,9 @@ const AWS = require('aws-sdk');
 app.get('/:tipo/:img', (req, res, netx) => {
   var tipo = req.params.tipo;
   var img = req.params.img;
-  var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
   const params = {
-    Bucket: configuracion.BUCKET,
+    Bucket: entorno.BUCKET,
     Key: tipo + '/' + img
   };
   if (img === 'xxx') {
