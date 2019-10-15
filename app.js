@@ -3,7 +3,8 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var configuracion = require('./config/config');
+var entorno = require('./config/config').config();
+
 
 // Inicializar variables
 var app = express();
@@ -79,7 +80,7 @@ mongoose.connection.on('error', (error) => {
 
 const run = async() => {
 
-  await mongoose.connect(configuracion.CONEXION_MONGO, {
+  await mongoose.connect(entorno.CONEXION_MONGO, {
     autoReconnect: true,
     reconnectTries: 1000000,
     reconnectInterval: 3000,
@@ -122,4 +123,6 @@ app.use('/', appRoutes);
 // Escuchar peticiones
 app.listen(3000, () => {
   console.log('Express server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
+  console.log(entorno.CONEXION_MONGO);
+  console.log(process.env.NODE_ENV);
 });
