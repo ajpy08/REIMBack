@@ -3,7 +3,7 @@ var express = require('express');
 var fileUpload = require('express-fileupload');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
-var configuracion = require('../config/config');
+var entorno = require('../config/config').config();
 var uuid = require('uuid/v1');
 var AWS = require('aws-sdk');
 
@@ -35,9 +35,9 @@ app.put('/', (req, res) => {
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
 
   console.log('subiendo: ' + nombreArchivo);
-  var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
   var params = {
-    Bucket: configuracion.BUCKET,
+    Bucket: entorno.BUCKET,
     Body: archivo.data,
     Key: 'temp/' + nombreArchivo,
     ContentType: archivo.mimetype

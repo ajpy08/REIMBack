@@ -1,5 +1,5 @@
 var express = require('express');
-var configuracion = require('../config/config');
+var entorno = require('../config/config').config();
 var app = express();
 var path = require('path');
 var AWS = require('aws-sdk');
@@ -8,12 +8,12 @@ var variasBucket = require('../public/variasBucket');
 app.get('/documentoxtipo/:tipo/:nombre', (req, res, netx) => {
   var tipo = req.params.tipo;
   var nombreArchivo = req.params.nombre;
-  var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
   if (nombreArchivo === 'xxx') {
     res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
   } else {
     var params = {
-      Bucket: configuracion.BUCKET,
+      Bucket: entorno.BUCKET,
       Key: tipo + '/' + nombreArchivo
     };
     s3.getObject(params, (err, data) => {
@@ -36,9 +36,9 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
   if (!img) {
     res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
   } else {
-    var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
     var params = {
-      Bucket: configuracion.BUCKET,
+      Bucket: entorno.BUCKET,
       Key: img
     };
 
@@ -70,9 +70,9 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
     }
   }
 
-  var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
   var params = {
-    Bucket: configuracion.BUCKET,
+    Bucket: entorno.BUCKET,
     Prefix: pathFotos,
   };
 
@@ -102,14 +102,14 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
 app.get('/maniobra/eliminaFoto', (req, res, netx) => {
   var key = req.query.key;
   variasBucket.BorrarArchivoBucketKey(key)
-  .then((value) => {
-    if (value) {
-      res.status(200).json({
-        ok: true,
-        mensaje: 'Foto Eliminada!',
-      });
-    }
-  });    
+    .then((value) => {
+      if (value) {
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Foto Eliminada!',
+        });
+      }
+    });
 });
 
 module.exports = app;
