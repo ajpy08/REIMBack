@@ -1,39 +1,40 @@
 {
-    "name": "backend-server-reim",
-    "version": "1.0.0",
-    "description": "server backend de reim",
-    "main": "index.js",
-    "scripts": {
-        "start": "nodemon app.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "ANGEL ROBERTO PUC DZUL",
-    "license": "ISC",
-    "dependencies": {
-        "aws-sdk": "^2.546.0",
-        "bcryptjs": "^2.4.3",
-        "body-parser": "^1.18.3",
-        "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "express-fileupload": "^0.4.0",
-        "fast-csv": "^2.4.1",
-        "jshint": "^2.10.2",
-        "json2csv": "^4.3.5",
-        "jsonwebtoken": "^8.5.1",
-        "moment": "^2.24.0",
-        "mongoose": "^5.6.9",
-        "mongoose-unique-validator": "^2.0.2",
-        "nodemailer": "^4.7.0",
-        "nodemailer-express-handlebars": "^3.0.0",
-        "uuid": "^3.3.2",
-        "xlsx": "^0.14.2"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Angelus03/REIMBack.git"
-    },
-    "bugs": {
-        "url": "https://github.com/Angelus03/REIMBack/issues"
-    },
-    "homepage": "https://github.com/Angelus03/REIMBack#readme"
+  "name": "backend-server-reim",
+  "version": "1.0.0",
+  "description": "server backend de reim",
+  "main": "index.js",
+  "scripts": {
+    "start": "set NODE_ENV=development&&nodemon app.js",
+    "start_production": "set NODE_ENV=production&&nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ANGEL ROBERTO PUC DZUL",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.546.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-fileupload": "^0.4.0",
+    "fast-csv": "^2.4.1",
+    "jshint": "^2.10.2",
+    "json2csv": "^4.3.5",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.24.0",
+    "mongoose": "^5.6.9",
+    "mongoose-unique-validator": "^2.0.2",
+    "nodemailer": "^4.7.0",
+    "nodemailer-express-handlebars": "^3.0.0",
+    "uuid": "^3.3.2",
+    "xlsx": "^0.14.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Angelus03/REIMBack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Angelus03/REIMBack/issues"
+  },
+  "homepage": "https://github.com/Angelus03/REIMBack#readme"
 }

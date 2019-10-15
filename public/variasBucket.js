@@ -1,11 +1,11 @@
 var AWS = require('aws-sdk');
-var configuracion = require('../config/config');
+var entorno = require('../config/config').config();
 
 exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
   return new Promise((resolve, reject) => {
-    var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
     var params = {
-      Bucket: configuracion.BUCKET,
+      Bucket: entorno.BUCKET,
       Body: archivo.data,
       Key: rutaDestino + nombreArchivo,
       ContentType: archivo.mimetype
@@ -25,10 +25,10 @@ exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, n
 
 exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
   if (nameTmp != null && nameTmp != undefined && nameTmp != '') {
-    var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
     var params = {
-      Bucket: configuracion.BUCKET,
-      CopySource: configuracion.BUCKET + '/' + rutaTmp + nameTmp,
+      Bucket: entorno.BUCKET,
+      CopySource: entorno.BUCKET + '/' + rutaTmp + nameTmp,
       Key: rutaDestino + nameTmp
     };
     s3.copyObject(params, function(err, data) {
@@ -38,7 +38,7 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
         console.log('Archivo movido ' + rutaDestino + nameTmp);
         //Si se mueve, borro el original
         var paramsDelete = {
-          Bucket: configuracion.BUCKET,
+          Bucket: entorno.BUCKET,
           Key: rutaTmp + nameTmp
         };
         s3.deleteObject(paramsDelete, function(err, data) {
@@ -57,9 +57,9 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
 
 exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
   if (name != null && name != undefined && name != '') {
-    var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
     var paramsDelete = {
-      Bucket: configuracion.BUCKET,
+      Bucket: entorno.BUCKET,
       Key: ruta + name
     };
     s3.deleteObject(paramsDelete, function(err, data) {
@@ -76,9 +76,9 @@ exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
 exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
   return new Promise((resolve, reject) => {
     if (key != null && key != undefined && key != '') {
-      var s3 = new AWS.S3(configuracion.CONFIG_BUCKET);
+      var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
       var paramsDelete = {
-        Bucket: configuracion.BUCKET,
+        Bucket: entorno.BUCKET,
         Key: key
       };
       s3.deleteObject(paramsDelete, function(err, data) {
@@ -91,5 +91,5 @@ exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
         }
       });
     }
-  });  
+  });
 };
