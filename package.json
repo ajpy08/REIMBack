@@ -4,7 +4,7 @@
   "description": "server backend de reim",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_ENV=development&&nodemon app.js",
+    "start": "set NODE_ENV=&&nodemon app.js",
     "start_production": "set NODE_ENV=production&&nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
