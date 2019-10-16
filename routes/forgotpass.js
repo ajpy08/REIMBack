@@ -73,14 +73,14 @@ app.post('/', (req, res) => {
             });
         },
         (token, user, done) => {
-            // var url = URL_SERVICIOS + 'reset_password?token=' + token;
+            // var constants = require('../config/config.js')
             var data = {
                 to: user.email,
                 from: email,
                 template: 'forgot-password-email',
                 subject: '¡REIM Container Park Restablecimiento de contraseña!',
                 context: {
-                    url: 'http://localhost:3000/reset_password?token=' + token,
+                    url: 'http://187.210.87.57:3000/reset_password?token=' + token,
                     name: user.nombre.split(' ')[0]
                 }
             };
