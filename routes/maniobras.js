@@ -243,26 +243,26 @@ app.get('/maniobra/:id/includes', (req, res) => {
     })
 
 
-    .exec((err, maniobra) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar la maniobra',
-          errors: err
-        });
-      }
-      if (!maniobra) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'La maniobra con el id ' + id + 'no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        maniobra: maniobra
+  .exec((err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
       });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + 'no existe',
+        errors: { message: 'No existe maniobra con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      maniobra: maniobra
     });
+  });
 });
 
 
@@ -385,8 +385,8 @@ app.get('/LR', (req, res, next) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-    json
-  )
+      json
+    )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial')
@@ -544,9 +544,19 @@ app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, r
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    maniobra.transportista = body.transportista;
-    maniobra.camion = body.camion;
-    maniobra.operador = body.operador;
+
+    if (body.transportista !== undefined && body.transportista !== '') {
+      maniobra.transportista = body.transportista;
+    }
+    if (body.camion !== undefined && body.camion !== '') {
+      maniobra.camion = body.camion;
+    }
+
+    if (body.operador !== undefined && body.operador !== '') {
+      maniobra.operador = body.operador;
+    }
+
+
     maniobra.fLlegada = body.fLlegada;
     maniobra.hLlegada = body.hLlegada;
     maniobra.estatus = "ESPERA";
@@ -616,16 +626,16 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
       maniobra.reparacionesObservacion = body.reparacionesObservacion;
 
     maniobra.grado = body.grado;
-    if (maniobra.descargaAutorizada == true) {
-      maniobra.hDescarga = body.hDescarga;
-      maniobra.hSalida = body.hSalida;
+    // if (maniobra.descargaAutorizada == true) {
+    maniobra.hDescarga = body.hDescarga;
+    maniobra.hSalida = body.hSalida;
 
-      if (maniobra.hDescarga !== '' && maniobra.hDescarga !== undefined && maniobra.hSalida !== '' && maniobra.hSalida !== undefined) {
-        maniobra.estatus = "LAVADO_REPARACION";
-        if (!body.lavado && body.reparaciones.length == 0)
-          maniobra.estatus = "DISPONIBLE";
-      }
+    if (maniobra.hDescarga !== '' && maniobra.hDescarga !== undefined && maniobra.hSalida !== '' && maniobra.hSalida !== undefined) {
+      maniobra.estatus = "LAVADO_REPARACION";
+      if (!body.lavado && body.reparaciones.length == 0)
+        maniobra.estatus = "DISPONIBLE";
     }
+    // }
 
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
@@ -838,7 +848,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
             'estatus': 'CARGADO',
             'maniobraAsociada': maniobra._id
           }
-        }, function (err, data) {
+        }, function(err, data) {
           if (err) {
             console.log(err);
           }
@@ -849,7 +859,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
               'estatus': 'DISPONIBLE',
               'maniobraAsociada': null
             }
-          }, function (err, data) {
+          }, function(err, data) {
             if (err) {
               console.log(err);
             }
