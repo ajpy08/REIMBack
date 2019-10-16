@@ -92,7 +92,6 @@ app.get('', (req, res, netx) => {
 // ==========================================
 app.get('/maniobra/:id', (req, res) => {
   var id = req.params.id;
-  console.log(id)
   Maniobra.findById(id)
     .exec((err, maniobra) => {
       if (err) {
@@ -200,7 +199,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
-  console.log(json);
+  // console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
@@ -386,7 +385,7 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
 // ETAPAS DE LA MANIOBRA EN EL PATIO
 
 // =======================================
-// Registra LLegada Contendor
+// 1   Registra LLegada Contendor
 // =======================================
 app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
@@ -700,9 +699,6 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    console.log(cambiaManiobraAsociada);
-    console.log('body' + body.maniobraAsociada);
-    console.log('maniobra' + maniobra.maniobraAsociada);
     if (body.maniobraAsociada != maniobra.maniobraAsociada) {
       maniobraAsociadaTemporal = maniobra.maniobraAsociada;
       if (body.maniobraAsociada !== '' && body.maniobraAsociada !== undefined) {
@@ -733,11 +729,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
           errors: err
         });
       }
-      console.log(cambiaManiobraAsociada);
-      console.log('asociada' + maniobra.maniobraAsociada);
-      console.log('temporal' + maniobraAsociadaTemporal);
       if (cambiaManiobraAsociada === true) {
-        console.log('entra a cambiar');
         Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada) }, {
           $set: {
             'estatus': 'CARGADO',
