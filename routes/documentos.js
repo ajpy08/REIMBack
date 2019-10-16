@@ -78,17 +78,17 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
 
   s3.listObjects(params, function(err, data) {
     if (err) {
-      console.log(err, err.stack);
+      // console.log(err, err.stack);
       return res.status(400).json({
         ok: false,
         mensaje: 'No se encontraron fotos',
         errors: { message: 'No existen fotos para maniobra con ID: ' + idManiobra }
       });
     } else {
-      //console.log(data.Contents); // successful response
+      // console.log(data.Contents); // successful response
       res.status(200).json({
         ok: true,
-        //fotos: JSON.parse(JSON.stringify(array)),
+        // fotos: JSON.parse(JSON.stringify(array)),
         fotos: data.Contents,
         total: data.Contents.length
       });
