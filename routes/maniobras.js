@@ -391,27 +391,27 @@ app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, r
   var id = req.params.id;
   var body = req.body;
 
-  if (body.transportista === undefined || body.transportista === '') {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'Se debe declarar el transportista',
-      errors: { message: 'Se debe declarar el transportista' }
-    });
-  }
-  if (body.camion === undefined || body.camion === '') {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'Se debe declarar el camion',
-      errors: { message: 'Se debe declarar el camion' }
-    });
-  }
-  if (body.operador === undefined || body.operador === '') {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'Se debe declarar el operador',
-      errors: { message: 'Se debe declarar el operador' }
-    });
-  }
+  // if (body.transportista === undefined || body.transportista === '') {
+  //   return res.status(400).json({
+  //     ok: false,
+  //     mensaje: 'Se debe declarar el transportista',
+  //     errors: { message: 'Se debe declarar el transportista' }
+  //   });
+  // }
+  // if (body.camion === undefined || body.camion === '') {
+  //   return res.status(400).json({
+  //     ok: false,
+  //     mensaje: 'Se debe declarar el camion',
+  //     errors: { message: 'Se debe declarar el camion' }
+  //   });
+  // }
+  // if (body.operador === undefined || body.operador === '') {
+  //   return res.status(400).json({
+  //     ok: false,
+  //     mensaje: 'Se debe declarar el operador',
+  //     errors: { message: 'Se debe declarar el operador' }
+  //   });
+  // }
   if (body.fLlegada === undefined || body.fLlegada === '') {
     return res.status(400).json({
       ok: false,
