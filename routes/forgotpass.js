@@ -73,7 +73,7 @@ app.post('/', (req, res) => {
             });
         },
         (token, user, done) => {
-            // var url = URL_SERVICIOS + 'reset_password?token=' + token;
+            // var constants = require('../config/config.js')
             var data = {
                 to: user.email,
                 from: email,
