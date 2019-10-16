@@ -91,8 +91,9 @@ app.get('', (req, res, netx) => {
 // =======================================
 // Obtener Maniobras NAVIERA
 // =======================================
-app.get('/inventarioLR/:naviera', (req, res, netx) => {
-  var cargadescarga = req.query.cargadescarga || '';
+app.get('/inventarioLR/', (req, res, netx) => {
+  var naviera = req.query.naviera || '';
+  console.log('naviera ' + naviera )
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
   var contenedor = req.query.contenedor || '';
@@ -101,10 +102,11 @@ app.get('/inventarioLR/:naviera', (req, res, netx) => {
   var lavado = req.query.lavado || '';
   var reparacion = req.query.reparacion || '';
 
-  var naviera = req.query.naviera || '';
+  var naviera = req.query.naviera;
   var buque = req.query.buque || '';
 
   var filtro = '{';
+ 
   if (estatus != 'undefined' && estatus != '')
     filtro += '\"estatus\":' + '\"' + estatus + '\",';
   if (transportista != 'undefined' && transportista != '')
@@ -139,7 +141,7 @@ app.get('/inventarioLR/:naviera', (req, res, netx) => {
   if (buque != 'undefined' && buque != '') {
     filtro2 += '\"viaje.buque\":' + '\"' + buque + '\",';
   } else {
-    if (naviera != 'undefined' && naviera != '') {
+    if (naviera != 'undefined' && naviera != '' && naviera != null) {
       filtro2 += '\"naviera\":' + '\"' + naviera + '\",';
     }
   }
@@ -149,8 +151,7 @@ app.get('/inventarioLR/:naviera', (req, res, netx) => {
     filtro2 = filtro2.slice(0, -1);
   filtro2 = filtro2 + '}';
   var json2 = JSON.parse(filtro2);
-
-  //console.log(json2);
+  
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
@@ -186,7 +187,6 @@ app.get('/inventarioLR/:naviera', (req, res, netx) => {
         maniobras: maniobras.filter(x => x.viaje != null),
         total: maniobras.filter(x => x.viaje != null).length
       });
-
     });
 });
 
