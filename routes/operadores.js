@@ -29,7 +29,7 @@ app.get('/', (req, res, next) => {
   Operador.find(json)
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .exec(
       (err, operadores) => {
         if (err) {
@@ -83,7 +83,7 @@ app.get('/operador/:id/includes', (req, res) => {
   Operador.findById(id)
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .exec((err, operadores) => {
       if (err) {
         return res.status(500).json({
