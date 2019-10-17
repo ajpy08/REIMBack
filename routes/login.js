@@ -154,6 +154,79 @@ function obtenerMenu(ROLE) {
 
   }
 
+  if (ROLE === 'REIM_ROLE') {
+    let menu = [{
+        titulo: 'Principal',
+
+        icono: 'fas fa-home',
+
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      // {
+      //   titulo: 'Catálogos',
+      //   icono: 'fas fa-ellipsis-v',
+      //   submenu: []
+      // },
+      // {
+      //   titulo: 'Agencia',
+      //   icono: 'far fa-bookmark',
+      //   submenu: []
+      // },
+      // {
+      //   titulo: 'Naviera',
+      //   icono: 'fas fa-ship',
+      //   submenu: []
+      // },
+      // {
+      //   titulo: 'Transportista',
+      //   icono: 'fas fa-truck-moving',
+      //   submenu: []
+      // },
+      // {
+      //   titulo: 'Facturación',
+      //   icono: 'fas fa-dollar-sign',
+      //   submenu: []
+      // }
+    ];
+    // menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    // menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+    // menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
+    // menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
+
+    // menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
+    // menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
+    // menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
+    // menu[1].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+    // menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
+    // menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
+    // menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
+    // menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
+    // menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+
+    // //AGENCIA ADUANAL
+
+    // menu[2].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes' });
+    // menu[2].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
+
+    // //NAVIERA
+
+    // menu[3].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    // menu[3].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+
+    // //TRANSPORTISTA
+    // menu[4].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
+    // menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
+    // menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+
+    // menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
+    // menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
+    return menu;
+
+  }
+
   if (ROLE === 'AA_ROLE') {
     let menu = [{
         titulo: 'Principal',
