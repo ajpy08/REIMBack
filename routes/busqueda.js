@@ -210,7 +210,7 @@ function buscarManiobrasTransito(busqueda, regex) {
         Maniobra.find({ maniobra: regex })
             .populate('cliente', 'rfc razonSocial')
             .populate('agencia', 'rfc razonSocial')
-            .populate('transportista', 'rfc razonSocial')
+            .populate('transportista', 'rfc razonSocial nombreComercial')
             .exec((err, maniobra) => {
                 if (err) {
                     reject('Error al cargar maniobras', err);

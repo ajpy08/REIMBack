@@ -71,7 +71,7 @@ app.get('/solicitud/:id', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-    .populate('contenedores.transportista', 'razonSocial')
+    .populate('contenedores.transportista', 'razonSocial nombreComercial')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -103,14 +103,14 @@ app.get('/solicitud/:id/includes', (req, res) => {
   Solicitud.findById(id)
     .populate('agencia', 'razonSocial')
     .populate('naviera', 'razonSocial')
-    .populate('transportista', 'razonSocial')
+    .populate('transportista', 'razonSocial nombreComercial')
     .populate('cliente', 'razonSocial')
     .populate('buque', 'nombre _id')
     .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioAprobo', 'nombre email')
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado folio solicitud')
-    .populate('contenedores.transportista', 'razonSocial')
+    .populate('contenedores.transportista', 'razonSocial nombreComercial')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({

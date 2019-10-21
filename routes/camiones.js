@@ -22,7 +22,7 @@ app.get('/', (req, res, next) => {
 
   Camion.find(json)
     .populate('usuarioAlta', 'nombre email')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .exec(
       (err, camiones) => {
         if (err) {
