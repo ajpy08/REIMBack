@@ -8,7 +8,8 @@ var rolesValidos = {
 };
 
 var agenciaSchema = new Schema({
-    rfc: { type: String, unique: true, required: [true, 'El RFC es necesario'] },
+    // rfc: { type: String, unique: true, required: [true, 'El RFC es necesario'] },
+    rfc: { type: String },
     razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesario'] },
     nombreComercial: { type: String, requiered: false },
     calle: { type: String, requiered: false },
