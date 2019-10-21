@@ -59,7 +59,7 @@ app.get('', (req, res, netx) => {
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
     .populate({
@@ -155,7 +155,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
     .populate({
@@ -230,7 +230,7 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('operador', 'nombre licencia')
     .populate('cliente', 'razonSocial')
     .populate('agencia', 'razonSocial')
-    .populate('transportista', 'razonSocial')
+    .populate('transportista', 'razonSocial nombreComercial')
     .populate('viaje', 'viaje ')
     .populate('solicitud', 'viaje ')
     .populate({
@@ -306,7 +306,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
     .populate({
@@ -389,7 +389,7 @@ app.get('/LR', (req, res, next) => {
     )
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate({
       path: 'viaje',
       select: 'viaje buque naviera',
@@ -426,7 +426,7 @@ app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
   Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
     .populate('cliente', 'rfc razonSocial')
     .populate('agencia', 'rfc razonSocial')
-    .populate('transportista', 'rfc razonSocial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, maniobras) => {
       if (err) {
@@ -952,7 +952,7 @@ module.exports = app;
 //     .populate('contenedor', 'contenedor tipo')
 //     .populate('cliente', 'cliente')
 //     .populate('agencia', 'nombre')
-//     .populate('transportista', 'nombre')
+//     .populate('transportista', 'nombre nombreComercial')
 //     .populate('viaje', 'viaje')
 //     .populate('usuario', 'nombre email')
 //     .exec(
@@ -1002,7 +1002,7 @@ module.exports = app;
 //     })
 //     .populate('cliente', 'cliente')
 //     .populate('agencia', 'nombre')
-//     .populate('transportista', 'nombre')
+//     .populate('transportista', 'nombre nombreComercial')
 //     .populate('viaje', 'viaje')
 //     .populate('usuario', 'nombre email')
 //     .exec(
