@@ -426,6 +426,44 @@ app.put('/:id/habilita_deshabilita_mostrarFotosReparacion', mdAutenticacion.veri
   });
 });
 
+app.put('/:id/corrige_contenedor', (req, res) => {
+
+  var id = req.params.id;
+  var body = req.body;
+  Maniobra.findById(id, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    maniobra.contenedor = maniobra.contenedor.replace(/ /g, "");
+    console.log(maniobra.contenedor);
+    maniobra.save((err, maniobraGuardada) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        mensaje: 'Maniora Actualizada con éxito',
+        maniobra: maniobraGuardada
+      });
+    });
+  });
+});
+
 
 // export
 module.exports = app;
