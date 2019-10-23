@@ -190,6 +190,8 @@ app.get('/inventarioLR/', (req, res, netx) => {
     });
 });
 
+
+
 // ==========================================
 //  Obtener Maniobra por ID
 // ==========================================
@@ -482,7 +484,6 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
       }
     });
 });
-
 
 
 // ETAPAS DE LA MANIOBRA EN EL PATIO
@@ -878,7 +879,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
 // =======================================
 // Aprobar descarga    HABILITAR DESHABILITAR
 // =======================================
-app.put('/maniobra/:id/aprueba_descarga', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
+app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
   Maniobra.findById(id, (err, maniobra) => {
@@ -914,6 +915,7 @@ app.put('/maniobra/:id/aprueba_descarga', [mdAutenticacion.verificaToken, mdAute
     });
   });
 });
+
 
 
 
