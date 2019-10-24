@@ -71,7 +71,7 @@ app.post('/', (req, res) => {
       menu: obtenerMenu(usuarioDB.role)
     });
 
-  }).populate('empresas', 'razonSocial');
+  }).populate('empresas', 'razonSocial nombreComercial');
 
 
 });

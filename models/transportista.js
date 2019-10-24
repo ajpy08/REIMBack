@@ -11,7 +11,7 @@ var transportistaSchema = new Schema({
   // rfc: { type: String, required: [true, 'El RFC es necesario'] },
   rfc: { type: String },
   razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesario'] },
-  nombreComercial: { type: String, requiered: false },
+  nombreComercial: { type: String, requiered: [true, 'La nombre comercial o ALIAS es necesario'] },
   calle: { type: String, requiered: false },
   noExterior: { type: String, required: false },
   noInterior: { type: String, required: false },
