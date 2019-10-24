@@ -57,8 +57,8 @@ app.get('', (req, res, netx) => {
 
   //console.log(json);
   Maniobra.find(json)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
@@ -153,8 +153,8 @@ app.get('/inventarioLR/', (req, res, netx) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(json)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
@@ -230,8 +230,8 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('operador', 'nombre foto')
     .populate('camion', 'placa noEconomico')
     .populate('operador', 'nombre licencia')
-    .populate('cliente', 'razonSocial')
-    .populate('agencia', 'razonSocial')
+    .populate('cliente', 'razonSocial nombreComercial')
+    .populate('agencia', 'razonSocial nombreComercial')
     .populate('transportista', 'razonSocial nombreComercial')
     .populate('viaje', 'viaje ')
     .populate('solicitud', 'viaje ')
@@ -306,8 +306,8 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
 
   // console.log(json);
   Maniobra.find(json)
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
@@ -389,8 +389,8 @@ app.get('/LR', (req, res, next) => {
   Maniobra.find(
       json
     )
-    .populate('cliente', 'rfc razonSocial')
-    .populate('agencia', 'rfc razonSocial')
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate({
       path: 'viaje',
@@ -426,7 +426,7 @@ app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   var idViaje = req.params.idviaje;
   Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
-    .populate('cliente', 'rfc razonSocial')
+    .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')

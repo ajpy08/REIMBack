@@ -8,7 +8,7 @@ var Buque = require('../models/buque');
 // ==========================================
 app.get('/', (req, res, next) => {
   Buque.find({})
-    .populate('naviera', 'razonSocial')
+    .populate('naviera', 'razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, buques) => {
       if (err) {
@@ -32,7 +32,7 @@ app.get('/', (req, res, next) => {
 app.get('/naviera/:id', (req, res, next) => {
   var id = req.params.id;
   Buque.find({ naviera: id })
-    .populate('naviera', 'naviera')
+    .populate('naviera', 'naviera nombreComercial')
     .populate('usuario', 'nombre email')
     .exec((err, buques) => {
       if (err) {
