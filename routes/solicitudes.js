@@ -38,9 +38,9 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
   var json = JSON.parse(filtro);
   // console.log(json);
   Solicitud.find(json)
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
-    .populate('cliente', 'razonSocial')
+    .populate('agencia', 'razonSocial nombreComercial')
+    .populate('naviera', 'razonSocial nombreComercial')
+    .populate('cliente', 'razonSocial nombreComercial')
     .populate('buque', 'nombre')
     .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')

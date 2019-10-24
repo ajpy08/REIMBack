@@ -14,7 +14,7 @@ var app = express();
 // =======================================
 app.get('/', (req, res, netx) => {
   Usuario.find({})
-    .populate('empresas', 'razonSocial')
+    .populate('empresas', 'razonSocial nombreComercial')
     .exec(
       (err, usuarios) => {
         if (err) {
@@ -65,7 +65,7 @@ app.get('/usuario/:id', (req, res) => {
 app.get('/usuario/:id/includes', (req, res) => {
   var id = req.params.id;
   Usuario.findById(id)
-    .populate('empresas', 'razonSocial')
+    .populate('empresas', 'razonSocial nombreComercial')
     .exec((err, usuario) => {
       if (err) {
         return res.status(500).json({
