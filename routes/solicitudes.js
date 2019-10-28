@@ -101,10 +101,10 @@ app.get('/solicitud/:id', (req, res) => {
 app.get('/solicitud/:id/includes', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
-    .populate('agencia', 'razonSocial')
-    .populate('naviera', 'razonSocial')
+    .populate('agencia', 'razonSocial nombreComercial')
+    .populate('naviera', 'razonSocial nombreComercial')
     .populate('transportista', 'razonSocial nombreComercial')
-    .populate('cliente', 'razonSocial')
+    .populate('cliente', 'razonSocial nombreComercial')
     .populate('buque', 'nombre _id')
     .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
