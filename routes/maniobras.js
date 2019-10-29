@@ -691,15 +691,15 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
     if (body.fFinReparacion && (body.hIniReparacion === undefined || body.hIniReparacion === '')) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No se puede asignar Fecha de Finalizacion reparación si no ha asignado Hora de Inicio',
-        errors: { message: 'No se puede asignar Fecha de Finalizacion reparación si no ha asignado Hora de Inicio' }
+        mensaje: 'No se puede asignar Fecha de Finalización reparación si no ha asignado Hora de Inicio',
+        errors: { message: 'No se puede asignar Fecha de Finalización reparación si no ha asignado Hora de Inicio' }
       });
     }
 
     if (body.hFinReparacion && (body.fFinReparacion === undefined || body.fFinReparacion === '')) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No se puede asignar Hora de Finalizacion reparación si no ha asignado Fecha de Finalización',
+        mensaje: 'No se puede asignar Hora de Finalización reparación si no ha asignado Fecha de Finalización',
         errors: { message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Finalización' }
       });
     }
@@ -917,113 +917,4 @@ app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, r
 });
 
 
-
-
 module.exports = app;
-
-
-// // =======================================
-// // Obtener Maniobra de hoy
-// // =======================================
-// app.get('/hoy', (req, res, netx) => {
-//   var desde = req.query.desde || 0;
-//   desde = Number(desde);
-//   var fechaInicio = string;
-//   var myDate = new Date(fechaInicio).now();
-//   var y = myDate.getFullYear();
-//   var m = myDate.getMonth();
-//   m += 1;
-//   var d = myDate.getUTCDate();
-//   var newdate = (y + "-" + m + "-" + d);
-//   //fechaaInicio = new Date(fechaInicio).toISOString();
-//   // var inicioDate = fechaInicio + "T00:00:00.000Z";
-//   // fechaaFin = new Date(fechaFin).toISOString();
-//   var inicioDate = newdate + "T00:00:00.000Z";
-//   // fechaaFin = new Date(inicioDate);
-//   //    .find({"fecha" : {"$gt" : ISODate("2014-10-18T00:00:00")}})
-//   Maniobra.find({ "fechaCreado": { "$gt": inicioDate } })
-//     .populate('operador', 'operador')
-//     .populate({
-//       path: "camiones",
-//       select: 'placa numbereconomico',
-//       populate: {
-//         path: "transportista",
-//         select: 'nombre'
-//       }
-//     })
-//     .populate('contenedor', 'contenedor tipo')
-//     .populate('cliente', 'cliente')
-//     .populate('agencia', 'nombre')
-//     .populate('transportista', 'nombre nombreComercial')
-//     .populate('viaje', 'viaje')
-//     .populate('usuario', 'nombre email')
-//     .exec(
-//       (err, maniobras) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando maniobras',
-//             errors: err
-//           });
-//         }
-//         Maniobra.countDocuments({}, (err, conteo) => {
-//           res.status(200).json({
-//             ok: true,
-//             maniobras,
-//             total: conteo
-//           });
-
-//         });
-
-//       });
-// });
-
-
-// // =======================================
-// // Obtener Maniobra por rango de fechas
-// // =======================================
-// app.get('/rangofecha', (req, res, netx) => {
-//   var desde = req.query.desde || 0;
-//   desde = Number(desde);
-//   var fechaInicio = req.query.fechaInicio;
-//   var fechaFin = req.query.fechaFin;
-//   fechaaInicio = new Date(fechaInicio).toISOString();
-//   // var inicioDate = fechaInicio + "T00:00:00.000Z";
-//   // fechaaFin = new Date(fechaFin).toISOString();
-//   var finDate = fechaFin + "T23:59:59.999Z";
-//   fechaaFin = new Date(finDate);
-//   Maniobra.find({ "fechaCreado": { "$gte": fechaaInicio, "$lte": fechaaFin } })
-//     .populate('operador', 'operador')
-//     .populate({
-//       path: "camiones",
-//       select: 'placa numbereconomico',
-//       populate: {
-//         path: "transportista",
-//         select: 'nombre'
-//       }
-//     })
-//     .populate('cliente', 'cliente')
-//     .populate('agencia', 'nombre')
-//     .populate('transportista', 'nombre nombreComercial')
-//     .populate('viaje', 'viaje')
-//     .populate('usuario', 'nombre email')
-//     .exec(
-//       (err, maniobras) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando maniobras',
-//             errors: err
-//           });
-//         }
-//         Maniobra.countDocuments({}, (err, conteo) => {
-//           res.status(200).json({
-//             ok: true,
-//             maniobras,
-//             total: conteo
-//           });
-
-//         });
-
-//       });
-// });
