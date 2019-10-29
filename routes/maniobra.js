@@ -235,66 +235,68 @@ app.put('/reasigna_transportista/:id', mdAutenticacion.verificaToken, (req, res)
 // // =======================================
 // // Actualizar Maniobra
 // // =======================================
-// app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
-//   var id = req.params.id;
-//   var body = req.body;
+app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
 
-//   Maniobra.findById(id, (err, maniobra) => {
+  Maniobra.findById(id, (err, maniobra) => {
 
-//     if (err) {
-//       return res.status(500).json({
-//         ok: false,
-//         mensaje: 'Error al buscar maniobra',
-//         errors: err
-//       });
-//     }
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar maniobra',
+        errors: err
+      });
+    }
 
-//     if (!maniobra) {
-//       return res.status(400).json({
-//         ok: false,
-//         mensaje: 'La maniobra con el id ' + id + ' no existe',
-//         errors: { message: 'No existe una maniobra con ese ID' }
-//       });
-//     }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+      maniobra.camion = body.camion,
+      maniobra.operador = body.operador,
+      maniobra.estatus = body.estatus,
+      maniobra.fLlegada = body.fLlegada,
+      maniobra.hLlegada = body.hLlegada,
+      maniobra.hEntrada = body.hEntrada,
+      maniobra.hSalida = body.hSalida,
+      maniobra.hDescarga = body.hDescarga,
+      maniobra.grado = body.grado,
+      maniobra.lavado = body.lavado,
+      maniobra.lavadoObservacion = body.lavadoObservacion,
+      maniobra.reparaciones = body.reparaciones,
+      maniobra.reparacionesObservacion = body.reparacionesObservacion,
+      maniobra.fIniLavado = body.fIniLavado,
+      maniobra.hIniLavado = body.hIniLavado,
+      maniobra.hFinLavado = body.hFinLavado,
+      maniobra.fIniReparacion = body.fIniReparacion,
+      maniobra.hIniReparacion = body.hIniReparacion,
+      maniobra.fFinReparacion = body.fFinReparacion,
+      maniobra.hFinReparacion = body.hFinReparacion
 
-//     maniobra.entrada = body.entrada,
-//       maniobra.salida = body.salida,
-//       maniobra.inicio = body.inicio,
-//       maniobra.fin = body.fin,
-//       maniobra.transporte = body.transporte,
-//       maniobra.lavado = body.lavado,
-//       maniobra.rep = body.rep,
-//       maniobra.grado = body.grado,
-//       maniobra.fechaModificado = Date.now(),
-//       maniobra.operador = body.operador,
-//       maniobra.placas = body.placas,
-//       maniobra.contenedor = body.contenedor,
-//       maniobra.cliente = body.cliente,
-//       maniobra.agencia = body.agencia,
-//       maniobra.viaje = body.viaje,
-//       maniobra.usuario = req.usuario._id;
+    maniobra.save((err, maniobraGuardado) => {
+
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar la maniobra',
+          errors: err
+        });
+      }
 
 
-//     maniobra.save((err, maniobraGuardado) => {
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobraGuardado
+      });
+    });
 
-//       if (err) {
-//         return res.status(400).json({
-//           ok: false,
-//           mensaje: 'Error al actualizar la maniobra',
-//           errors: err
-//         });
-//       }
+  });
 
-
-//       res.status(200).json({
-//         ok: true,
-//         maniobra: maniobraGuardado
-//       });
-//     });
-
-//   });
-
-// });
+});
 
 // // =======================================
 // // Borrar Maniobra por id
