@@ -30,6 +30,7 @@ app.get('/', (req, res, next) => {
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
     .populate('transportista', 'rfc razonSocial nombreComercial')
+    .sort({ nombre: 1 })
     .exec(
       (err, operadores) => {
         if (err) {
