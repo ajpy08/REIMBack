@@ -13,7 +13,6 @@ app.get('/', (req, res, next) => {
   Transportista.find({ role: role })
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
-    .sort({ nombreComercial: 1 })
     .exec(
       (err, transportistas) => {
         if (err) {
