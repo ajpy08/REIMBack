@@ -22,6 +22,8 @@ app.get('', (req, res, netx) => {
   var peso = req.query.peso || '';
   var lavado = req.query.lavado || '';
   var reparacion = req.query.reparacion || '';
+  var finillegada = req.query.finillegada || '';
+  var ffinllegada = req.query.ffinllegada || '';
 
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
@@ -48,6 +50,12 @@ app.get('', (req, res, netx) => {
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (finillegada != '' && ffinllegada) {
+    fIni = moment(finillegada, 'DD-MM-YYYY', true).utc().startOf('day').format();
+    fFin = moment(ffinllegada, 'DD-MM-YYYY', true).utc().endOf('day').format();
+    filtro += '\"fLlegada\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
   }
 
   if (filtro != '{')
@@ -93,7 +101,6 @@ app.get('', (req, res, netx) => {
 // =======================================
 app.get('/inventarioLR/', (req, res, netx) => {
   var naviera = req.query.naviera || '';
-  console.log('naviera ' + naviera)
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
   var contenedor = req.query.contenedor || '';
