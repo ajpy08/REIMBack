@@ -63,7 +63,7 @@ app.get('', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
-  //console.log(json);
+  // console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
