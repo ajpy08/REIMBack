@@ -10,6 +10,7 @@ app.get('/', (req, res, next) => {
 
   Reparacion.find({})
     .populate('usuarioAlta', 'nombre email')
+    .sort({ descripcion: 1 })
     .exec(
       (err, reparaciones) => {
         if (err) {

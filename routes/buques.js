@@ -10,6 +10,7 @@ app.get('/', (req, res, next) => {
   Buque.find({})
     .populate('naviera', 'razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
+    .sort({ nombre: 1 })
     .exec((err, buques) => {
       if (err) {
         return res.status(500).json({
@@ -34,6 +35,7 @@ app.get('/naviera/:id', (req, res, next) => {
   Buque.find({ naviera: id })
     .populate('naviera', 'naviera nombreComercial')
     .populate('usuario', 'nombre email')
+    .sort({ nombre: 1 })
     .exec((err, buques) => {
       if (err) {
         return res.status(500).json({

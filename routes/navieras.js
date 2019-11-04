@@ -13,6 +13,7 @@ app.get('/', (req, res, next) => {
   Naviera.find({ role: role })
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
+    .sort({ nombreComercial: 1 })
     .exec(
       (err, navieras) => {
         if (err) {
