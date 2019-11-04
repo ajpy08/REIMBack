@@ -15,6 +15,7 @@ var app = express();
 app.get('/', (req, res, netx) => {
   Usuario.find({})
     .populate('empresas', 'razonSocial nombreComercial')
+    .sort({ nombre: 1 })
     .exec(
       (err, usuarios) => {
         if (err) {

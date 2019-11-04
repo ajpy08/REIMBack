@@ -18,6 +18,7 @@ app.get('/', (req, res, next) => {
     // .limit(10)
     .populate('empresas', 'razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
+    .sort({ nombreComercial: 1 })
     .exec(
       (err, clientes) => {
         if (err) {
@@ -45,6 +46,7 @@ app.get('/role/:role?', (req, res) => {
   //console.log({filtro})
   Cliente.find(filtro)
     .populate('cliente', 'role')
+    .sort({ nombreComercial: 1 })
     .exec((err, clientes) => {
       if (err) {
         return res.status(500).json({
@@ -106,6 +108,7 @@ app.get('/empresa/:id', (req, res) => {
   desde = Number(desde);
   var id = req.params.id;
   Cliente.find({ 'empresas': new mongoose.Types.ObjectId(id) })
+    .sort({ nombreComercial: 1 })
     .exec(
       (err, clientes) => {
         if (err) {

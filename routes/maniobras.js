@@ -80,6 +80,7 @@ app.get('', (req, res, netx) => {
     })
     .populate('naviera', 'rfc razonSocial')
     .populate('usuarioAlta', 'nombre email')
+    .sort({ contenedor: 1 })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -180,6 +181,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
     })
     .populate('naviera', 'rfc razonSocial')
     .populate('usuarioAlta', 'nombre email')
+    .sort({ contenedor: 1 })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -437,6 +439,7 @@ app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
+    .sort({ contenedor: 1 })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
