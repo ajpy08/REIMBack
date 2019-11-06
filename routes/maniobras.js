@@ -241,7 +241,7 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('agencia', 'razonSocial nombreComercial')
     .populate('transportista', 'razonSocial nombreComercial')
     .populate('viaje', 'viaje ')
-    .populate('solicitud', 'viaje ')
+    .populate('solicitud', 'viaje blBooking')
     .populate({
       path: 'viaje',
       select: 'viaje',
