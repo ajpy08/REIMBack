@@ -6,6 +6,7 @@ var variasBucket = require('../public/variasBucket');
 var mongoose = require('mongoose');
 var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
+var moment = require('moment');
 
 // =======================================
 // Obtener solicitudes TODAS
@@ -27,16 +28,20 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
   agencias = agencias.replace(/,/g, '\",\"');
   if (agencias != 'undefined' && agencias != '')
     filtro += '\"agencia\":{\"$in\":[\"' + agencias + '\"]},';
-  // if (finialta != '' && ffinalta) {
-  //   fIni = moment(finialta, 'DD-MM-YYYY', true).utc().startOf('day').format();
-  //   fFin = moment(ffinalta, 'DD-MM-YYYY', true).utc().endOf('day').format();
-  //   filtro += '\"fArribo\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
-  // }
+  if (finialta != '' && ffinalta) {
+    fIni = moment(finialta, 'DD-MM-YYYY', true).utc().startOf('day').format();
+    fFin = moment(ffinalta, 'DD-MM-YYYY', true).utc().endOf('day').format();
+
+    console.log(fIni);
+    console.log(fFin);
+
+    filtro += '\"fAlta\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
+  }
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  // console.log(json);
+  console.log(json);
   Solicitud.find(json)
     .populate('agencia', 'razonSocial nombreComercial')
     .populate('naviera', 'razonSocial nombreComercial')
