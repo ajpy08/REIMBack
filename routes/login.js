@@ -123,9 +123,10 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
-    
-    
 
+
+
+    menu[1].submenu.unshift({ titulo: 'Tipos Contenedores', url: '/tipos_contenedores' });
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
     menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });

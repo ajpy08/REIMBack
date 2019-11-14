@@ -1,8 +1,11 @@
 var express = require('express');
 var app = express();
 var TipoContenedor = require('../models/tipoContenedor');
+var mdAutenticacion = require('../middlewares/autenticacion');
 
-
+// ==========================================
+//  Obtener todos los tipos Contenedores
+// ==========================================
 app.get('/', (req, res, next) => {
   TipoContenedor.find({})
     .exec(
@@ -51,7 +54,7 @@ app.get('/tipoContenedor/:id', (req, res) => {
 });
 
 // ==========================================
-//  Obtener tipo por ID
+//  Obtener tipo Contenedor por Tipo
 // ==========================================
 app.get('/tipoCont/:tipo', (req, res) => {
   var tipo = req.params.tipo;
@@ -91,6 +94,102 @@ app.get('/tipoCont/:tipo', (req, res) => {
   //       tipo: tipo
   //     });
   //   });
+});
+
+// ==========================================
+// Crear nuevo Tipo Contenedor
+// ==========================================
+app.post('/tipo_contenedor/', mdAutenticacion.verificaToken, (req, res) => {
+  var body = req.body;
+  var tipoContenedor = new TipoContenedor({
+    tipo: body.tipo,
+    descripcion: body.descripcion,
+    pies: body.pies,
+    codigoISO: body.codigoISO
+  });
+  tipoContenedor.save((err, tipoGuardado) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al crear el Tipo Contenedor',
+        errors: err
+      });
+    }
+    res.status(201).json({
+      ok: true,
+      tipoContenedor: tipoGuardado
+    });
+  });
+});
+
+// ==========================================
+// Actualizar Tipo Contenedor
+// ==========================================
+app.put('/tipo_contenedor/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  TipoContenedor.findById(id, (err, tipoContenedor) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar Tipo Contenedor',
+        errors: err
+      });
+    }
+    if (!tipoContenedor) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El Tipo Contenedor con el id ' + id + ' no existe',
+        errors: { message: 'No existe Tipo Contenedor con ese ID' }
+      });
+    }
+
+    tipoContenedor.tipo = body.tipo;
+    tipoContenedor.descripcion = body.descripcion;
+    tipoContenedor.pies = body.pies;
+    tipoContenedor.codigoISO = body.codigoISO;
+
+    tipoContenedor.save((err, tipoGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar Tipo Contenedor',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        tipoContenedor: tipoGuardado
+      });
+    });
+  });
+});
+
+// ============================================
+//   Borrar Tipo Contenedor por el id
+// ============================================
+app.delete('/tipo_contenedor/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  TipoContenedor.findByIdAndRemove(id, (err, tipoBorrado) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al borrar Tipo Contenedor',
+        errors: err
+      });
+    }
+    if (!tipoBorrado) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No existe Tipo Contenedor con ese id',
+        errors: { message: 'No existe Tipo Contenedor con ese id' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      TipoContenedor: tipoBorrado
+    });
+  });
 });
 
 module.exports = app;
