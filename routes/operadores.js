@@ -262,6 +262,7 @@ app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
             errors: err
           });
         }
+        console.log(maniobra)
         if (maniobra && maniobra.length > 0) {
           return res.status(400).json({
             ok: false,
@@ -269,6 +270,7 @@ app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
             errors: { message: 'El operador ya tiene operaciones registradas, por lo tanto no puede eliminarse.' }
           });
         }
+
         Operador.findByIdAndRemove(id, (err, operadorBorrado) => {
           if (err) {
             return res.status(500).json({

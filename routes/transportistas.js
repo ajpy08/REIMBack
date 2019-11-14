@@ -1,6 +1,8 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Transportista = require('../models/transportista');
+var Operador = require('../models/operador');
+var Camion = require('../models/camion');
 var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
@@ -189,29 +191,76 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Transportista.findByIdAndRemove(id, (err, transportistaBorrado) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al borrar transportista',
-        errors: err
-      });
-    }
-    if (!transportistaBorrado) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'No existe transportista con ese id',
-        errors: { message: 'No existe transportista con ese id' }
-      });
-    }
-    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.img);
-    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.formatoR1);
-    res.status(200).json({
-      ok: true,
-      transportista: transportistaBorrado
-    });
-  });
+  Operador.find({
+      $or: [
+        { "transportista": id }
+      ]
+    })
+    .exec(
+      (err, operadores) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al intentar cargar operadores asociados.',
+            errors: err
+          });
+        }
+        console.log(operadores)
+        if (operadores && operadores.length > 0) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'Existen ' + operadores.length + ' asociados, por lo tanto no se permite eliminar.',
+            errors: { message: 'Existen ' + operadores.length + ' operadores asociados a trasportistas, por lo tanto no se puede eliminar.' }
+          });
+        } else {
+          Camion.find({
+              $or: [
+                { "transportista": id }
+              ]
+            })
+            .exec(
+              (err, camiones) => {
+                if (err) {
+                  return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al intentar cargar camiones asociados.',
+                    errors: err
+                  });
+                }
+                console.log(camiones)
+                if (camiones && camiones.length > 0) {
+                  return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Existen ' + camiones.length + ' asociados, por lo tanto no se permite eliminar.',
+                    errors: { message: 'Existen ' + camiones.length + ' camiones asociados a trasportistas, por lo tanto no se puede eliminar.' }
+                  });
+                } else {
+                  Transportista.findByIdAndRemove(id, (err, transportistaBorrado) => {
+                    if (err) {
+                      return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al borrar transportista',
+                        errors: err
+                      });
+                    }
+                    if (!transportistaBorrado) {
+                      return res.status(400).json({
+                        ok: false,
+                        mensaje: 'No existe transportista con ese id',
+                        errors: { message: 'No existe transportista con ese id' }
+                      });
+                    }
+                    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.img);
+                    variasBucket.BorrarArchivoBucket('clientes/', transportistaBorrado.formatoR1);
+                    res.status(200).json({
+                      ok: true,
+                      transportista: transportistaBorrado
+                    });
+                  });
+                }
+              });
+        }
+      })
 });
-
 
 module.exports = app;
