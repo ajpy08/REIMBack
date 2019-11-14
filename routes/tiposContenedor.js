@@ -128,7 +128,6 @@ app.post('/tipo_contenedor/', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/tipo_contenedor/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
-  console.log(id)
   TipoContenedor.findById(id, (err, tipoContenedor) => {
     if (err) {
       return res.status(500).json({
