@@ -1,9 +1,11 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Camion = require('../models/camion');
+var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
+var mongoose = require('mongoose');
 
 // ==========================================
 // Obtener todos los camiones
@@ -164,28 +166,91 @@ app.put('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Camion.findByIdAndRemove(id, (err, camionBorrado) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al borrar camion',
-        errors: err
+  Maniobra.find({ "camion": new mongoose.Types.ObjectId(id) })
+    .exec(
+      (err, maniobra) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al intentar validar la eliminacion el camion',
+            errors: err
+          });
+        }
+        if (maniobra && maniobra.length > 0) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'El camión ya tiene operaciones registradas, por lo tanto no puede eliminarse.',
+            errors: { message: 'El camión ya tiene operaciones registradas, por lo tanto no puede eliminarse.' }
+          });
+        }
+        // Operador.find({
+        //     $or: [
+        //       { "operador": id }
+        //     ]
+        //   })
+        //   .exec(
+        //     (err, operadores) => {
+        //       if (err) {
+        //         return res.status(500).jason({
+        //           ok: false,
+        //           mensaje: 'Error al intentar cargar los operadores asociados.',
+        //           errors: err
+        //         });
+        //       }
+        //       if (operadores && operadores.length > 0) {
+        //         return res.status(400).json({
+        //           ok: false,
+        //           mensaje: 'Existen' + operadores.length + 'asociados, por lo tanto no se permite eliminar',
+        //           errors: { message: 'Existen' + operadores.length + 'operadores asociados, por lo tanto no se permite eliminar los camiones' }
+        //         });
+        // } else {
+        //   transportista.find({
+        //       $or: [
+        //         { "transportista": id }
+        //       ]
+        //     })
+        //     .exec(
+        //       (err, transportistas) => {
+        //         if (err) {
+        //           return res.status(500).json({
+        //             ok: false,
+        //             mensaje: 'Error al intentar cargar transportistas asociados',
+        //             errors: err
+        //           });
+        //         }
+        //         if (transportistas && transportistas.length > 0) {
+        //           return res.status(400).json({
+        //             ok: false,
+        //             mensaje: 'Existen' + transportistas.length + ' asociados, por lo tanto no se permite eliminar',
+        //             errors: { message: 'Existen' + transportistas.length + 'transportistas asoaciados, por lo tanto no se permite elinar los transportistas' }
+        //           });
+        //         } else {
+        Camion.findByIdAndRemove(id, (err, camionBorrado) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al borrar camion',
+              errors: err
+            });
+          }
+          if (!camionBorrado) {
+            return res.status(400).json({
+              ok: false,
+              mensaje: 'No existe camion con ese id',
+              errors: { message: 'No existe camion con ese id' }
+            });
+          }
+          variasBucket.BorrarArchivoBucket('camiones/', camionBorrado.pdfSeguro);
+          res.status(200).json({
+            ok: true,
+            mensaje: 'Camion borrado con exito',
+            camion: camionBorrado
+          });
+        });
+        //}
+        // });
+        //}
+        // })
       });
-    }
-    if (!camionBorrado) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'No existe camion con ese id',
-        errors: { message: 'No existe camion con ese id' }
-      });
-    }
-    variasBucket.BorrarArchivoBucket('camiones/', camionBorrado.pdfSeguro);
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Camion borrado con exito',
-      camion: camionBorrado
-    });
-  });
 });
-
 module.exports = app;
