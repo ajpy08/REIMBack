@@ -254,26 +254,26 @@ app.get('/maniobra/:id/includes', (req, res) => {
     })
 
 
-  .exec((err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
       });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + 'no existe',
-        errors: { message: 'No existe maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      maniobra: maniobra
     });
-  });
 });
 
 
@@ -396,8 +396,8 @@ app.get('/LR', (req, res, next) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-      json
-    )
+    json
+  )
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
@@ -859,7 +859,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
             'estatus': 'CARGADO',
             'maniobraAsociada': maniobra._id
           }
-        }, function(err, data) {
+        }, function (err, data) {
           if (err) {
             console.log(err);
           }
@@ -870,7 +870,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
               'estatus': 'DISPONIBLE',
               'maniobraAsociada': null
             }
-          }, function(err, data) {
+          }, function (err, data) {
             if (err) {
               console.log(err);
             }
@@ -926,5 +926,95 @@ app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, r
   });
 });
 
+// ============================================
+// Obtener Maniobras que tuvieron lavado  (de alguna naviera o de todas las navieras)
+// ============================================
+app.get('/Lavado/Reparacion', (req, res, next) => {
+  var naviera = req.query.naviera || '';
+  var buque = req.query.buque || '';
+  var viaje = req.query.viaje || '';
+  var fechaLlegadaInicio = req.query.fechaLlegadaInicio || '';
+  var fechaLlegadaFin = req.query.fechaLlegadaFin || '';
+
+  var LR = req.query.LR;
+
+
+  var filtro = '{';
+  //filtro += '\"$or\": [';
+  // filtro += '{\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]} },';
+  // filtro += '{\"reparaciones.0\"' + ': {\"$exists\"' + ': true} }';
+  // filtro += '],';
+  if (LR === 'L') {
+    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},'
+  } else if (LR === 'R') {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  }
+
+
+  if (viaje != 'undefined' && viaje != '')
+    filtro += '\"viaje\":' + '\"' + viaje + '\",';
+
+  if (fechaLlegadaInicio != '' && fechaLlegadaInicio) {
+    fIni = moment(fechaLlegadaInicio, 'DD-MM-YYYY', true).utc().startOf('day').format();
+    fFin = moment(fechaLlegadaFin, 'DD-MM-YYYY', true).utc().endOf('day').format();
+    filtro += '\"fLlegada\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
+  }
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  var filtro2 = '{';
+
+
+  if (buque != 'undefined' && buque != '') {
+    filtro2 += '\"viaje.buque\":' + '\"' + buque + '\",';
+  } else {
+    if (naviera != 'undefined' && naviera != '') {
+      filtro2 += '\"naviera\":' + '\"' + naviera + '\",';
+    }
+  }
+
+  //Sirve para el populate de abajo
+  if (filtro2 != '{')
+    filtro2 = filtro2.slice(0, -1);
+  filtro2 = filtro2 + '}';
+  var json2 = JSON.parse(filtro2);
+
+  Maniobra.find(
+    json
+  )
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
+    .populate({
+      path: 'viaje',
+      select: 'viaje buque naviera',
+      match: json2,
+      populate: {
+        path: "naviera",
+        select: 'razonSocial'
+      }
+    })
+    .populate('naviera', 'rfc razonSocial')
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        // maniobras: maniobras,
+        // total: maniobras.length
+        maniobras: maniobras.filter(x => x.viaje != null),
+        total: maniobras.filter(x => x.viaje != null).length
+      });
+    });
+});
 
 module.exports = app;
