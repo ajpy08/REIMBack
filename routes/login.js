@@ -62,7 +62,7 @@ app.post('/', (req, res) => {
     // Crear token
     usuarioDB.password = '=)';
     var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
-    //sentMail(usuarioDB.nombre, usuarioDB.email, 'Prueba de Correo');
+    //sentMail(usuarioDB.nombre, usuarioDB.email, 'Prueba de Correo', 'Acabas de iniciar sesion en el sitio de REIM Container Park. ' + new Date());
     res.status(200).json({
       ok: true,
       usuario: usuarioDB,
