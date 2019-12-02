@@ -447,6 +447,10 @@ app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res)
           errors: err
         });
       }
+      
+      // sentMail(req.usuario.nombre, req.usuario.email, 'Solicitud de Carga Aprobada', 
+      // 'Se aprobó la solicitud de carga a las ' + new Date());
+      
       res.status(200).json({
         ok: true,
         solicitud: solicitudGuardado
