@@ -264,7 +264,7 @@ function obtenerMenu(ROLE) {
     ];
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
-    menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
     return menu;
   }
 
