@@ -262,7 +262,6 @@ app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
             errors: err
           });
         }
-        console.log(maniobra)
         if (maniobra && maniobra.length > 0) {
           return res.status(400).json({
             ok: false,

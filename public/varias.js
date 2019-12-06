@@ -1,41 +1,7 @@
 var fs = require('fs');
 
-// exports.MoverArchivoFromTemp = function MoverArchivoFromTemp(rutaTmp, nametmp, rutaDestino, nameActual) {
-//   if (nametmp != null && nametmp != undefined && nametmp != '' && fs.existsSync(rutaTmp + nametmp)) {
-//     if (nameActual != null && nameActual != undefined && nameActual != '' && fs.existsSync(rutaDestino + nameActual)) {
-//       fs.unlink(rutaDestino + nameActual, (err) => {
-//         if (err) {
-//           // console.log(err);
-//         } else {
-//           // console.log('Documento anterior borrado con éxito');
-//         }
-//       });
-//     }
-//     if (!fs.existsSync(rutaDestino)) { // CHECAMOS SI EXISTE LA CARPETA CORRESPONDIENTE.. SI NO, LO CREAMOS.
-//       fs.mkdirSync(rutaDestino);
-//     }
-//     fs.rename(rutaTmp + nametmp, rutaDestino + nametmp, (err) => {
-//       if (err) { console.log(err); throw err; }
-//     });
-//     return (true);
-//   }
-//   return false;
-// };
-
-// exports.BorrarArchivo = function BorrarArchivo(ruta, nameFile) {
-//   if (nameFile != null && nameFile != undefined && nameFile != '' && fs.existsSync(ruta + nameFile)) {
-//     fs.unlink(ruta + nameFile, (err) => {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         console.log('Documento borrado con éxito');
-//       }
-//     });
-//   }
-// };
-
-
-
+var Maniobra = require('../models/maniobra');
+var maniobras = require('../routes/maniobras');
 
 exports.ParamsToJSON = function ParamsToJSON(req) {
   var json;
@@ -73,3 +39,21 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
 
   return json;
 }
+
+//Función para agrupa desde un array siempre y cuando agrupes por _id de alguna entidad.
+// exports.agrupaArray = function agrupaArray(array) {
+//   const arrayAgrupado =  array.reduce((acc, item) => {
+//     (acc[item._id] = acc[item._id] || []).push(item);
+//     return acc;
+//   }, {});
+
+//   return arrayAgrupado;
+// }
+
+//Función para agrupa desde un array pasando data y el campo a filtrar, si es un objeto puede pasar el objeto completo
+exports.groupArray = function groupArray(dataSource, field) {
+  return dataSource.reduce(function(groups, x) {
+    (groups[x[field]] = groups[x[field]] || []).push(x);
+    return groups;
+  }, {});
+};

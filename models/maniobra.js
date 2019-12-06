@@ -3,8 +3,8 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var Contador = require('./contador');
-var maniobraSchema = new Schema({
 
+var maniobraSchema = new Schema({
   cargaDescarga: { type: String, required: true, default: 'D' },
   folio: { type: Number },
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
@@ -52,7 +52,6 @@ var maniobraSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
-
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });

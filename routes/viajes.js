@@ -17,7 +17,6 @@ app.use(fileUpload());
 // ==========================================
 app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
   var viaje = req.query.viaje || '';
-  console.log(viaje)
   var buque = req.query.buque || '';
   var finiarribo = req.query.finiarribo || '';
   var ffinarribo = req.query.ffinarribo || '';
@@ -326,7 +325,6 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   var tipo = req.query.tipo;
   var peso = req.query.peso;
   var destinatario = req.query.destinatario;
-  console.log(contenedor);
   if (peso == 'VACIO') {
     maniobra = new Maniobra({
       viaje: id,

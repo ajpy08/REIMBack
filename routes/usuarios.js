@@ -9,6 +9,8 @@ var variasBucket = require('../public/variasBucket');
 // Inicializar variables
 var app = express();
 
+var varias = require('../public/varias');
+
 // =======================================
 // Obtener Usuarios
 // =======================================
