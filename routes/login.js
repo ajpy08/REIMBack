@@ -253,6 +253,21 @@ function obtenerMenu(ROLE) {
     return menu;
   }
 
+  if (ROLE === 'PATIO_ROLE') {
+    let menu = [{
+        titulo: 'Principal',
+        icono: 'fas fa-home',
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+    ];
+    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
+    return menu;
+  }
+
   if (ROLE === 'NAVIERA_ROLE') {
     let menu = [{
         titulo: 'Principal',
