@@ -2,11 +2,13 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var fs = require('fs');
 var app = express();
+var varias = require('../public/varias');
 var variasBucket = require('../public/variasBucket');
 var mongoose = require('mongoose');
 var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
 var moment = require('moment');
+const sentMail = require('../routes/sendAlert');
 
 // =======================================
 // Obtener solicitudes TODAS
@@ -32,16 +34,12 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
     fIni = moment(finialta, 'DD-MM-YYYY', true).utc().startOf('day').format();
     fFin = moment(ffinalta, 'DD-MM-YYYY', true).utc().endOf('day').format();
 
-    console.log(fIni);
-    console.log(fFin);
-
     filtro += '\"fAlta\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
   }
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  console.log(json);
   Solicitud.find(json)
     .populate('agencia', 'razonSocial nombreComercial')
     .populate('naviera', 'razonSocial nombreComercial')
@@ -94,6 +92,96 @@ app.get('/solicitud/:id', (req, res) => {
       }
       res.status(200).json({
         ok: true,
+        solicitud: solicitud
+      });
+    });
+});
+
+// ==========================================
+//  Envia correo 
+// ==========================================
+app.get('/solicitud/:id/enviacorreo', (req, res) => {
+  var id = req.params.id;
+  Solicitud.findById(id)
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial correo')
+    .populate('contenedores.maniobra', 'folio')
+    .populate('contenedores.transportista', 'razonSocial nombreComercial correo')
+    .exec((err, solicitud) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar solicitud',
+          errors: err
+        });
+      }
+      if (!solicitud) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La solicitud con el id ' + id + 'no existe',
+          errors: { message: 'No existe una solicitud con ese ID' }
+        });
+      } else {
+        if (solicitud.estatus === 'APROBADA') {
+          var tipo = solicitud.tipo == 'D' ? 'Descarga' : solicitud.tipo == 'C' ? 'Carga' : 'TIPO';
+         
+          //Agrupo por transportista
+          var agrupado = varias.groupArray(solicitud.contenedores, 'transportista');
+
+          //for a cada grupo 
+          for (var g in agrupado) {
+            var cuerpoCorreo = `${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
+            
+            `;
+
+            agrupado[g].forEach(contenedor => {
+              // cuerpoCorreo += '<div><span>Folio:' + contenedor.maniobra.folio+ '</span></div>';
+            cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} Contenedor: ${contenedor.contenedor} Tipo: ${contenedor.tipo}
+            
+            `;
+
+            });
+            //console.log(cuerpoCorreo);
+
+            var correos = '';
+            var error = '';
+            if (solicitud.correo === '' || solicitud.correo === undefined) {
+              error += 'Solicitud - '
+            } else { correos += solicitud.correo + ','; }
+
+            if (agrupado[g][0].transportista.correo === '' || agrupado[g][0].transportista.correo === undefined) {
+              error += 'Transportista - '
+            } else { correos += agrupado[g][0].transportista.correo + ','; }
+
+            if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
+              error += 'Agencia - '
+            } else { correos += solicitud.agencia.correo; }
+
+            if (correos != null) {
+              if (correos.endsWith(",")) {
+                correos = correos.substring(0, correos.length - 1);
+              }              
+ 
+              sentMail(agrupado[g][0].transportista.razonSocial, correos,
+              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+            }
+          }
+        }
+      }
+
+      if (error.trim().endsWith("-")) {
+        error = error.trim().substring(0, error.length - 3);
+      }
+
+      var mensaje = '';
+      if (error.length > 0) {
+        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo';
+      }
+      // console.log(mensaje);
+
+      res.status(200).json({
+        ok: true,
+        mensaje: mensaje,
         solicitud: solicitud
       });
     });
@@ -330,7 +418,6 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/solicitud/:id/guarda_buque_viaje', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
-  console.log('guarda viaje buque');
   Solicitud.findById(id, (err, solicitud) => {
     if (err) {
       return res.status(500).json({
@@ -447,10 +534,10 @@ app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res)
           errors: err
         });
       }
-      
+
       // sentMail(req.usuario.nombre, req.usuario.email, 'Solicitud de Carga Aprobada', 
       // 'Se aprobó la solicitud de carga a las ' + new Date());
-      
+
       res.status(200).json({
         ok: true,
         solicitud: solicitudGuardado

@@ -205,7 +205,6 @@ app.delete('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
             errors: err
           });
         }
-        console.log(operadores)
         if (operadores && operadores.length > 0) {
           return res.status(400).json({
             ok: false,
@@ -227,7 +226,6 @@ app.delete('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
                     errors: err
                   });
                 }
-                console.log(camiones)
                 if (camiones && camiones.length > 0) {
                   return res.status(400).json({
                     ok: false,

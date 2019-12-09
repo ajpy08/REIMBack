@@ -400,7 +400,6 @@ app.put('/:id/habilita_deshabilita_mostrarFotosReparacion', mdAutenticacion.veri
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    console.log(body.tipo)
     if (body.tipo === 'Naviera') {
       maniobra.mostrarFotosRNaviera = body.mostrarFotosRNaviera;
     } else if (body.tipo === 'AA') {
@@ -448,7 +447,6 @@ app.put('/:id/corrige_contenedor', (req, res) => {
       });
     }
     maniobra.contenedor = maniobra.contenedor.replace(/ /g, "");
-    console.log(maniobra.contenedor);
     maniobra.save((err, maniobraGuardada) => {
       if (err) {
         return res.status(400).json({

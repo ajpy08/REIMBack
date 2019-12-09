@@ -19,7 +19,7 @@ var solicitudScheme = new Schema({
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
   rutaComprobante: { type: String },
-  correo: { type: String, requiered: [true, 'EL correo es necesario'] },
+  correo: { type: String, requiered: [true, 'El correo es necesario'] },
   contenedores: [{
     maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
     patio: { type: String, default: 'POLIGONO INDUSTRIAL' },
