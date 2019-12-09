@@ -40,16 +40,6 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
   return json;
 }
 
-//Función para agrupa desde un array siempre y cuando agrupes por _id de alguna entidad.
-// exports.agrupaArray = function agrupaArray(array) {
-//   const arrayAgrupado =  array.reduce((acc, item) => {
-//     (acc[item._id] = acc[item._id] || []).push(item);
-//     return acc;
-//   }, {});
-
-//   return arrayAgrupado;
-// }
-
 //Función para agrupa desde un array pasando data y el campo a filtrar, si es un objeto puede pasar el objeto completo
 exports.groupArray = function groupArray(dataSource, field) {
   return dataSource.reduce(function(groups, x) {
