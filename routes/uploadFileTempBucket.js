@@ -34,7 +34,7 @@ app.put('/', (req, res) => {
   }
   var nombreArchivo = `${uuid()}.${extensionArchivo}`;
 
-  console.log('subiendo: ' + nombreArchivo);
+  // console.log('subiendo: ' + nombreArchivo);
   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
   var params = {
     Bucket: entorno.BUCKET,
