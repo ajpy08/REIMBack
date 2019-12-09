@@ -24,7 +24,7 @@ app.put('/', (req, res) => {
   var archivo = req.files.file;
   var nombreCortado = archivo.name.split('.');
   var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-  var extensionesValidas = ['pdf', 'png', 'jpg', 'gif', 'jpeg'];
+  var extensionesValidas = ['pdf', 'png', 'jpg', 'gif', 'jpeg', 'PDF'];
   if (extensionesValidas.indexOf(extensionArchivo) < 0) {
     return res.status(400).json({
       ok: false,

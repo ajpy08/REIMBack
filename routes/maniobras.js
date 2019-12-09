@@ -71,6 +71,7 @@ app.get('', (req, res, netx) => {
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
+    .populate('solicitud', 'blBooking')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',
@@ -300,6 +301,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
     });
 });
 
+
 // ==========================================
 //  Obtener Maniobra por ID CON INCLUDES
 // ==========================================
@@ -310,6 +312,7 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('camion', 'placa noEconomico')
     .populate('operador', 'nombre licencia')
     .populate('cliente', 'razonSocial nombreComercial')
+    .populate('solicitud', 'blBooking')
     .populate('agencia', 'razonSocial nombreComercial')
     .populate('transportista', 'razonSocial nombreComercial')
     .populate('viaje', 'viaje ')
@@ -389,6 +392,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
+    .populate('solicitud', 'blBooking')
     .populate('camion', 'placa noEconomico')
     .populate({
       path: "viaje",
