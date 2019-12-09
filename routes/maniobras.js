@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
+const sentMail = require('../routes/sendAlert');
 var fileUpload = require('express-fileupload');
 var uuid = require('uuid/v1');
 app.use(fileUpload());
@@ -94,6 +95,106 @@ app.get('', (req, res, netx) => {
         ok: true,
         maniobras: maniobras,
         total: maniobras.length
+      });
+    });
+});
+
+// ==========================================
+//  Obtener Maniobra por ID
+// ==========================================
+app.get('/maniobra/:id', (req, res) => {
+  var id = req.params.id;
+  Maniobra.findById(id)
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
+      });
+    });
+});
+
+// ==========================================
+//  Envia Correo
+// ==========================================
+app.get('/maniobra/:id/enviacorreo', (req, res) => {
+  var id = req.params.id;
+  Maniobra.findById(id)
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial correo')
+    .populate('transportista', 'rfc razonSocial nombreComercial correo')
+    .populate('maniobra.solicitud', 'correo ')
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + ' no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      } else {
+        var correos = '';
+        var error = '';
+        if (maniobra.solicitud.correo === '' || maniobra.solicitud.correo === undefined) {
+          error += 'Solicitud - '
+        } else { correos += maniobra.solicitud.correo + ','; }
+
+        if (maniobra.transportista.correo === '' || maniobra.transportista.correo === undefined) {
+          error += 'Transportista - '
+        } else { correos += maniobra.transportista.correo + ','; }
+
+        if (maniobra.agencia.correo === '' || maniobra.agencia.correo === undefined) {
+          error += 'Agencia - '
+        } else { correos += maniobra.agencia.correo; }
+
+        if (correos != null) {
+          if (correos.endsWith(",")) {
+            correos = correos.substring(0, correos.length - 1);
+          }
+
+          // sentMail(maniobra.transportista.razonSocial, correos, 'Solicitud de Descarga Aprobada',
+          //   'Se aprobó la solicitud de descarga del Folio' + maniobra.folio + ' a las ' + new Date());
+
+        } else {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'No existe correo de destino',
+            errors: err
+          });
+        }
+      }
+      if (error.trim().endsWith("-")) {
+        error = error.trim().substring(0, error.length - 3);
+      }
+
+      var mensaje = '';
+      if (error.length > 0) {
+        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo';
+      }
+
+      res.status(200).json({
+        ok: true,
+        mensaje: mensaje,
+        maniobra: maniobra
       });
     });
 });
@@ -196,37 +297,6 @@ app.get('/inventarioLR/', (req, res, netx) => {
         ok: true,
         maniobras: maniobras.filter(x => x.viaje != null),
         total: maniobras.filter(x => x.viaje != null).length
-      });
-    });
-});
-
-
-
-// ==========================================
-//  Obtener Maniobra por ID
-// ==========================================
-app.get('/maniobra/:id', (req, res) => {
-  var id = req.params.id;
-  Maniobra.findById(id)
-  .populate('solicitud', 'blBooking')
-    .exec((err, maniobra) => { 
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar la maniobra',
-          errors: err
-        });
-      }
-      if (!maniobra) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'La maniobra con el id ' + id + 'no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        maniobra: maniobra
       });
     });
 });

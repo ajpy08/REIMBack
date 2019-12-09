@@ -28,8 +28,9 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo) => {
 
     smtpTransport.use('compile', hbs(handlebarsOptions));
 
+    console.log(correoReceptor);
     var data = {
-        to: correoReceptor,
+        to: 'jpuc@mieryteran.com.mx',
         from: email,
         template: 'emailAlert',
         subject: asunto,
@@ -42,7 +43,7 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo) => {
 
     smtpTransport.sendMail(data, (error, info) => {
         if (!error) {
-            console.log(info);
+            //console.log(info);
             //return res.json({ message: 'Email Enviado!' });
         } else {
             console.log(error);
