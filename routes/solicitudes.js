@@ -123,52 +123,24 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
         });
       } else {
         if (solicitud.estatus === 'APROBADA') {
-          var cuerpoCorreo = `La Agencia Aduanal ${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes C/D:
-          `;
-
-          // var groupBy = function(dataSource, field) {
-          //   return dataSource.reduce(function(groups, x) {
-          //     (groups[x[field]] = groups[x[field]] || []).push(x);
-          //     return groups;
-          //   }, {});
-          // };
-
+          var tipo = solicitud.tipo == 'D' ? 'Descarga' : solicitud.tipo == 'C' ? 'Carga' : 'TIPO';
+         
           //Agrupo por transportista
           var agrupado = varias.groupArray(solicitud.contenedores, 'transportista');
-          // console.log('------------------------------------------------------------------------------');
-          // console.log(agrupado);
-          // console.log('------------------------------------------------------------------------------');
-          //for a cada grupo     
-          var i = 1; 
-          for (var g in agrupado) {            
-            if (1 == 1) {
-            // console.log('------------------------------------------------------------------------------');
-            // console.log(agrupado[g]);
-            // console.log(agrupado[g]);
-            // console.log('------------------------------------------------------------------------------');
-              i = i+1;
 
-              agrupado[g].forEach(contenedor => {
-                console.log(contenedor.tipo)
-              });
-            } 
-            //console.log(agrupado[g])           
+          //for a cada grupo 
+          for (var g in agrupado) {
+            var cuerpoCorreo = `${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
+            
+            `;
 
-            // solicitud.contenedores.forEach(contenedor => {
+            agrupado[g].forEach(contenedor => {
+              // cuerpoCorreo += '<div><span>Folio:' + contenedor.maniobra.folio+ '</span></div>';
+            cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} Contenedor: ${contenedor.contenedor} Tipo: ${contenedor.tipo}
+            
+            `;
 
-            // console.log(contenedor.transportista._id);
-            // var x = JSON.parse(g)
-            // console.log(x["_id"]);
-
-
-            // if (contenedor.transportista._id == g["_id"]) {
-            //   console.log('------------------------------------------------------------------------------');
-            //   cuerpoCorreo += `
-            // Folio: ${contenedor.maniobra.folio}
-            // `;
-            // }
-            // });
-
+            });
             //console.log(cuerpoCorreo);
 
             var correos = '';
@@ -177,9 +149,9 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               error += 'Solicitud - '
             } else { correos += solicitud.correo + ','; }
 
-            if (solicitud.contenedores[0].transportista.correo === '' || solicitud.contenedores[0].transportista.correo === undefined) {
+            if (agrupado[g][0].transportista.correo === '' || agrupado[g][0].transportista.correo === undefined) {
               error += 'Transportista - '
-            } else { correos += solicitud.contenedores[0].transportista.correo + ','; }
+            } else { correos += agrupado[g][0].transportista.correo + ','; }
 
             if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
               error += 'Agencia - '
@@ -188,11 +160,10 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
             if (correos != null) {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
-              }
-
-              // sentMail(solicitud.contenedores[0].transportista.razonSocial, correos,
-              //   'Solicitud de Descarga Aprobada', cuerpoCorreo);
-
+              }              
+ 
+              sentMail(agrupado[g][0].transportista.razonSocial, correos,
+              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
             }
           }
         }
@@ -206,6 +177,7 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
       if (error.length > 0) {
         mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo';
       }
+      // console.log(mensaje);
 
       res.status(200).json({
         ok: true,
