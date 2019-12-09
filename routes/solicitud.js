@@ -7,8 +7,6 @@ var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
 const sentMail = require('./sendAlert');
 
-
-
 // ==========================================
 // Aprobar Solicitud con maniobra
 // ==========================================
@@ -42,9 +40,6 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
           errors: err
         });
       }
-      
-      // sentMail(req.usuario.nombre, req.usuario.email, 'Solicitud de Descarga Aprobada', 
-      // 'Se aprobó la solicitud de descarga a las ' + new Date());
       
       res.status(200).json({
         ok: true,
