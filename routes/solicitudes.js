@@ -74,7 +74,7 @@ app.get('/solicitud/:id', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
-    .populate('contenedores.transportista', 'razonSocial nombreComercial')
+    .populate('contenedores.transportista', 'razonSocial nombreComercial correo')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -105,8 +105,16 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
   Solicitud.findById(id)
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial correo')
-    .populate('contenedores.maniobra', 'folio')
-    .populate('contenedores.transportista', 'razonSocial nombreComercial correo')
+    // .populate('contenedores.maniobra', 'folio grado transportista')
+    .populate({
+      path: "contenedores.maniobra",
+      select: 'folio grado',
+      populate: {
+        path: "transportista",
+        select: 'razonSocial nombreComercial correo'
+      }
+    })
+    // .populate('contenedores.maniobra.transportista', 'razonSocial nombreComercial correo')
     .exec((err, solicitud) => {
       if (err) {
         return res.status(500).json({
@@ -124,24 +132,37 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
       } else {
         if (solicitud.estatus === 'APROBADA') {
           var tipo = solicitud.tipo == 'D' ? 'Descarga' : solicitud.tipo == 'C' ? 'Carga' : 'TIPO';
-         
+
           //Agrupo por transportista
-          var agrupado = varias.groupArray(solicitud.contenedores, 'transportista');
+          var agrupado = varias.groupArray2(solicitud.contenedores, 'maniobra', 'transportista');
 
           //for a cada grupo 
           for (var g in agrupado) {
+            // cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} Contenedor: ${contenedor.contenedor} Tipo: ${contenedor.tipo}
+
+            // `;
             var cuerpoCorreo = `${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
             
             `;
 
             agrupado[g].forEach(contenedor => {
-              // cuerpoCorreo += '<div><span>Folio:' + contenedor.maniobra.folio+ '</span></div>';
-            cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} Contenedor: ${contenedor.contenedor} Tipo: ${contenedor.tipo}
+              if (contenedor.maniobra.folio) {
+                cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} `;
+              }
+              if (contenedor.contenedor) {
+                cuerpoCorreo += `Contenedor: ${contenedor.contenedor} `;
+              }
+              if (contenedor.tipo) {
+                cuerpoCorreo += `Tipo: ${contenedor.tipo} `;
+              }
+
+              if (contenedor.maniobra.grado) {
+                cuerpoCorreo += `Grado: ${contenedor.maniobra.grado} `;
+              }
+              cuerpoCorreo += `
             
             `;
-
             });
-            //console.log(cuerpoCorreo);
 
             var correos = '';
             var error = '';
@@ -153,31 +174,31 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               error += 'Transportista - '
             } else { correos += agrupado[g][0].transportista.correo + ','; }
 
-            if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
-              error += 'Agencia - '
-            } else { correos += solicitud.agencia.correo; }
+            // if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
+            //   error += 'Agencia - '
+            // } else { correos += solicitud.agencia.correo; }
 
             if (correos != null) {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
-              }              
- 
-              sentMail(agrupado[g][0].transportista.razonSocial, correos,
-              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+              }
+              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
+                'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
             }
           }
         }
       }
 
-      if (error.trim().endsWith("-")) {
-        error = error.trim().substring(0, error.length - 3);
+      if (error != '' && error != undefined) {
+        if (error.trim().endsWith("-")) {
+          error = error.trim().substring(0, error.length - 3);
+        }
       }
 
       var mensaje = '';
-      if (error.length > 0) {
-        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo';
+      if (error != '' && error != undefined && error.length > 0) {
+        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo y solo se enviará a ' + correos;
       }
-      // console.log(mensaje);
 
       res.status(200).json({
         ok: true,
@@ -471,7 +492,6 @@ app.put('/solicitud/:id/guarda_buque_viaje', mdAutenticacion.verificaToken, (req
 // Aprobar Solicitud con maniobra
 // ==========================================
 app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res) => {
-
   var id = req.params.id;
   var body = req.body;
   Solicitud.findById(id, (err, solicitud) => {
