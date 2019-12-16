@@ -42,6 +42,7 @@ var operadorRoutes = require('./routes/operadores');
 var camionRoutes = require('./routes/camiones');
 
 var tiposContenedorRoutes = require('./routes/tiposContenedor');
+var registroRoutes = require('./routes/registros');
 
 var uploadRoutes = require('./routes/upload');
 var dropzoneRoutes = require('./routes/dropzone');
@@ -105,6 +106,7 @@ app.use('/agencias', agenciaRoutes);
 app.use('/transportistas', transportistaRoutes);
 app.use('/buques', buqueRoutes);
 app.use('/operadores', operadorRoutes);
+app.use('/registros', registroRoutes);
 app.use('/camiones', camionRoutes);
 app.use('/tipos_contenedores', tiposContenedorRoutes);
 app.use('/reset_password', resetpass);
