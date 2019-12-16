@@ -172,6 +172,12 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
           if (maniobra.grado) {
             cuerpoCorreo += `Grado: ${maniobra.grado} `;
           }
+
+          if (maniobra.tipo === 'C') {
+            cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_carga/' + maniobra.solicitud;
+          } else if(maniobra.tipo === 'D'){
+            cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_descarga/' + maniobra.solicitud;
+          }
           cuerpoCorreo += `
       
         `;
@@ -194,10 +200,6 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
             if (correos.endsWith(",")) {
               correos = correos.substring(0, correos.length - 1);
             }
-
-            var array = correos.split(',');
-            array.
-
 
             sentMail(maniobra.transportista.razonSocial, correos,
               'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
