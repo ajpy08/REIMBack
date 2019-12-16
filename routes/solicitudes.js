@@ -138,9 +138,6 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
 
           //for a cada grupo 
           for (var g in agrupado) {
-            // cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} Contenedor: ${contenedor.contenedor} Tipo: ${contenedor.tipo}
-
-            // `;
             var cuerpoCorreo = `${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
             
             `;
@@ -157,11 +154,14 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               }
 
               if (contenedor.maniobra.grado) {
-                cuerpoCorreo += `Grado: ${contenedor.maniobra.grado} `;
+                cuerpoCorreo += `Grado: ${contenedor.maniobra.grado} 
+                `;
               }
+              cuerpoCorreo += `http://reimcontainerpark.com.mx/#/solicitud_transportista/${solicitud._id}`;
+              
               cuerpoCorreo += `
             
-            `;
+            `;            
             });
 
             var correos = '';
