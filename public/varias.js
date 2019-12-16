@@ -47,3 +47,13 @@ exports.groupArray = function groupArray(dataSource, field) {
     return groups;
   }, {});
 };
+
+//Función para agrupa desde un array pasando data, el campo padre y un subcampo hijo, si es un objeto el campo hijo
+//se puede pasar el objeto completo. (Este metodo sirve para cuando tienes que agrupar por un campo que esta un populate dentro de otro populate)
+// Ej. solicitud.maniobra.transportista (datasource, maniobra, transportista).
+exports.groupArray2 = function groupArray(dataSource, field, subfield) {
+  return dataSource.reduce(function(groups, x) {
+    (groups[x[field][subfield]] = groups[x[field][subfield]] || []).push(x);
+    return groups;
+  }, {});
+};
