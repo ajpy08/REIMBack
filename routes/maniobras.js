@@ -136,7 +136,7 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial correo')
     .populate('transportista', 'rfc razonSocial nombreComercial correo')
-    .populate('maniobra.solicitud', 'correo ')
+    .populate('solicitud', 'correo estatus tipo correo')
     .exec((err, maniobra) => {
       if (err) {
         return res.status(500).json({
@@ -152,43 +152,76 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
           errors: { message: 'No existe maniobra con ese ID' }
         });
       } else {
-        var correos = '';
-        var error = '';
-        if (maniobra.solicitud.correo === '' || maniobra.solicitud.correo === undefined) {
-          error += 'Solicitud - '
-        } else { correos += maniobra.solicitud.correo + ','; }
+        if (maniobra.solicitud.estatus === 'APROBADA') {
+          var tipo = maniobra.solicitud.tipo == 'D' ? 'Descarga' : maniobra.solicitud.tipo == 'C' ? 'Carga' : 'TIPO';
 
-        if (maniobra.transportista.correo === '' || maniobra.transportista.correo === undefined) {
-          error += 'Transportista - '
-        } else { correos += maniobra.transportista.correo + ','; }
+          var cuerpoCorreo = `${maniobra.agencia.razonSocial} ha solicitado en nombre de ${maniobra.cliente.razonSocial} las siguientes ${tipo}s: 
+            
+        `;
 
-        if (maniobra.agencia.correo === '' || maniobra.agencia.correo === undefined) {
-          error += 'Agencia - '
-        } else { correos += maniobra.agencia.correo; }
-
-        if (correos != null) {
-          if (correos.endsWith(",")) {
-            correos = correos.substring(0, correos.length - 1);
+          if (maniobra.folio) {
+            cuerpoCorreo += `Folio: ${maniobra.folio} `;
+          }
+          if (maniobra.contenedor) {
+            cuerpoCorreo += `Contenedor: ${maniobra.contenedor} `;
+          }
+          if (maniobra.tipo) {
+            cuerpoCorreo += `Tipo: ${maniobra.tipo} `;
           }
 
-          // sentMail(maniobra.transportista.razonSocial, correos, 'Solicitud de Descarga Aprobada',
-          //   'Se aprobó la solicitud de descarga del Folio' + maniobra.folio + ' a las ' + new Date());
+          if (maniobra.grado) {
+            cuerpoCorreo += `Grado: ${maniobra.grado} `;
+          }
 
-        } else {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'No existe correo de destino',
-            errors: err
-          });
+          if (maniobra.tipo === 'C') {
+            cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_carga/' + maniobra.solicitud;
+          } else if(maniobra.tipo === 'D'){
+            cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_descarga/' + maniobra.solicitud;
+          }
+          cuerpoCorreo += `
+      
+        `;
+
+          var correos = '';
+          var error = '';
+          if (maniobra.solicitud.correo === '' || maniobra.solicitud.correo === undefined) {
+            error += 'Solicitud - '
+          } else { correos += maniobra.solicitud.correo + ','; }
+
+          if (maniobra.transportista.correo === '' || maniobra.transportista.correo === undefined) {
+            error += 'Transportista - '
+          } else { correos += maniobra.transportista.correo + ','; }
+
+          // if (maniobra.agencia.correo === '' || maniobra.agencia.correo === undefined) {
+          //   error += 'Agencia - '
+          // } else { correos += maniobra.agencia.correo; }
+
+          if (correos != null) {
+            if (correos.endsWith(",")) {
+              correos = correos.substring(0, correos.length - 1);
+            }
+
+            sentMail(maniobra.transportista.razonSocial, correos,
+              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+
+          } else {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'No existe correo de destino',
+              errors: err
+            });
+          }
         }
       }
-      if (error.trim().endsWith("-")) {
-        error = error.trim().substring(0, error.length - 3);
+      if (error != '' && error != undefined) {
+        if (error.trim().endsWith("-")) {
+          error = error.trim().substring(0, error.length - 3);
+        }
       }
 
       var mensaje = '';
-      if (error.length > 0) {
-        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo';
+      if (error != '' && error != undefined && error.length > 0) {
+        mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo y solo se enviará a ' + correos;
       }
 
       res.status(200).json({
