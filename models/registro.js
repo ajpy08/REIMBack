@@ -13,7 +13,8 @@ var registroSchema = new Schema({
     datosPersonales: { type: [{}] },
     correoFacturacion: { type: [{}] },
     correoOperativo: { type: [{}] },
-    codigo: { type: String, requiered: [true, 'Es necesario'] }
+    codigo: { type: String, requiered: [true, 'Es necesario'] },
+    fAlta: { type: Date, default: Date.now }
 
 }, { collection: 'registro' });
 
