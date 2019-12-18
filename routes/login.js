@@ -135,7 +135,11 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
-    menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    
+    //Solo Admin puede entrar a los siguiente
+    if (ROLE === 'ADMIN_ROLE'){
+      menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    }
 
     //AGENCIA ADUANAL
 
