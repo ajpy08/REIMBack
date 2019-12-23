@@ -48,6 +48,9 @@ var maniobraSchema = new Schema({
   facturaManiobra: { type: String },
   fAsignacionPapeleta: { type: Date },
   fExpiracionPapeleta: { type: Date },
+  historial: [{
+    posicion: { type: Schema.Types.Array, ref: 'coordenada' }
+  }],
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
