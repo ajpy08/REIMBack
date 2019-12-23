@@ -56,6 +56,7 @@ var resetpass = require('./routes/resetpass');
 var UploadFile = require('./routes/uploadfile');
 var solicitudRoute = require('./routes/solicitud');
 var solicitudesRoute = require('./routes/solicitudes');
+var coordenadasRoutes = require('./routes/coordenadas');
 
 
 // Conexión a la base de datos Mongoose
@@ -120,6 +121,7 @@ app.use('/solicitud', solicitudRoute);
 app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);
 app.use('/upload', uploadRoutes);
+app.use('/coordenadas', coordenadasRoutes);
 app.use('/', appRoutes);
 
 // Escuchar peticiones
