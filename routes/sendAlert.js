@@ -30,7 +30,7 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo) => {
 
     console.log(correoReceptor);
     var data = {
-        to: 'jpuc@mieryteran.com.mx',
+        to: 'rgarcia@tlreim.com.mx',
         from: email,
         template: 'emailAlert',
         subject: asunto,
