@@ -4,7 +4,10 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var jwt = require('jsonwebtoken');
+var bcrypt = require('bcryptjs');
+var crypto = require('crypto');
 var Usuario = require('../models/usuario');
+var SEED = require('../config/config').SEED;
 const sentMail = require('../routes/sendAlert');
 var variasBucket = require('../public/variasBucket');
 // Inicializar variables
@@ -319,54 +322,54 @@ app.put('/usuario/:id/habilita_deshabilita', [mdAutenticacion.verificaToken, mdA
 // // Enviar Correo
 // // =======================================
 
-app.get('/usuario/:id/enviacorreo',  (req, res) => {
+app.get('/usuario/:id/enviacorreo', (req, res) => {
   var id = req.params.id;
   Usuario.findById(id)
-  .exec((err, usuario) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar usuario',
-        errors: err
-      });
-    }
-    if (!usuario) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'El usuario con el id ' + id + ' no existe',
-        errors: { message: 'No existe un usuario con ese ID' }
-      });
-    } else {
-      if (usuario.id){
-        var cuerpoCorreo = ` Hola ${usuario.nombre} Usted está recibiendo esto porque usted (u otra persona) ha solicitado que se restablezca la contraseña de su cuenta. Haga clic en el siguiente enlace
-        LICK. para restablecer su contraseña ` ; 
-
-      
-    
-      if (usuario.email != null) {
-        sentMail(usuario.nombre, usuario.email, 'Restablecer Correo', cuerpoCorreo )
-
-      } else {
+    .exec((err, usuario) => {
+      if (err) {
         return res.status(500).json({
           ok: false,
-          mensaje: 'No existe correo de destino',
+          mensaje: 'Error al buscar usuario',
           errors: err
         });
       }
-      usuario.save((err, usuarioGuardado) => {
-      res.status(200).json({
-        ok:true,
-        mensaje: 'enviado',
-        usuario: usuarioGuardado
-      });
-      });
-    }
-  }
-  
-});
-});
+      if (!usuario) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El usuario con el id ' + id + ' no existe',
+          errors: { message: 'No existe un usuario con ese ID' }
+        });
+      } else {
+        if (usuario.id) {
+          var token = jwt.sign({ usuario: id }, SEED, { expiresIn: 14400 })
+          var requestURL = 'http://ec2-54-167-155-50.compute-1.amazonaws.com:3000/reset_password?token=' + token;
+
+          var cuerpoCorreo = ` Hola ${usuario.nombre} Usted está recibiendo esto porque usted (u otra persona) ha solicitado que se restablezca la contraseña de su cuenta. Haga clic en el siguiente enlace ${requestURL}
+        para restablecer su contraseña ` ;
 
 
+
+          if (usuario.email != null) {
+            sentMail(usuario.nombre, usuario.email, 'Restablecer Correo', cuerpoCorreo)
+
+          } else {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'No existe correo de destino',
+              errors: err
+            });
+          }
+          usuario.save((err, usuarioGuardado) => {
+            res.status(200).json({
+              ok: true,
+              mensaje: 'enviado',
+              usuario: usuarioGuardado
+            });
+          });
+        }
+      }
+    });
+});
 
 
 module.exports = app;
