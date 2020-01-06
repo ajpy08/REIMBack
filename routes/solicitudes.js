@@ -182,8 +182,12 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
               }
-              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
-                'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+
+              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, 'rgarcia@tlreim.com.mx',
+                'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
+
+              // sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
+              //   'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
             }
           }
         }
