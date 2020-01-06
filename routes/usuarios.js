@@ -4,7 +4,11 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var jwt = require('jsonwebtoken');
+var bcrypt = require('bcryptjs');
+var crypto = require('crypto');
 var Usuario = require('../models/usuario');
+var SEED = require('../config/config').SEED;
+const sentMail = require('../routes/sendAlert');
 var variasBucket = require('../public/variasBucket');
 // Inicializar variables
 var app = express();
@@ -313,4 +317,65 @@ app.put('/usuario/:id/habilita_deshabilita', [mdAutenticacion.verificaToken, mdA
 // });
 
 // export
+
+// // =======================================
+// // Enviar Correo
+// // =======================================
+
+app.get('/usuario/:id/enviacorreo', (req, res) => {
+  var id = req.params.id;
+  var token = req.params.reset_password_token;
+  Usuario.findById(id, token)
+    .exec((err, usuario) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar usuario',
+          errors: err
+        });
+      }
+      if (!usuario) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El usuario con el id ' + id + ' no existe',
+          errors: { message: 'No existe un usuario con ese ID' }
+        });
+      } else {
+        if (usuario.id) {
+          crypto.randomBytes(20, (err, buffer) => {
+            var token = buffer.toString('hex');
+
+            Usuario.findByIdAndUpdate({ _id: usuario._id }, { reset_password_token: token, reset_password_expires: Date.now() + 3600000 }, { upsert: true, new: true }).exec(function (err, new_usuario) {
+               
+            });
+            
+            var url = 'http://ec2-54-167-155-50.compute-1.amazonaws.com:3000/reset_password?token' + token;
+            var cuerpoCorreo = ` Usted está recibiendo este correo porque se ha solicitado que se restablezca la contraseña de su cuenta.` ;
+
+            
+            if (usuario.email != null) {
+              sentMail(usuario.nombre, usuario.email, 'Restablecer Correo', cuerpoCorreo, 'emailPass', url)
+              
+            } else {
+              return res.status(500).json({
+                ok: false,
+                mensaje: 'No existe correo de destino',
+                errors: err
+              });
+              
+            }
+            usuario.save((err, usuarioGuardado) => {
+              res.status(200).json({
+                ok: true,
+                mensaje: 'enviado',
+                usuario: usuarioGuardado
+              });
+            });
+          });
+      }
+    }
+  });
+  });
+
+
 module.exports = app;
