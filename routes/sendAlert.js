@@ -8,7 +8,7 @@ var path = require('path'),
     nodemailer = require('nodemailer');
 
 // module.exports = (formulario) => {
-module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo) => {
+module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url) => {
     var smtpTransport = nodemailer.createTransport({
         //service: process.env.MAILER_SERVICE_PROVIDER || '192.168.2.246',
         host: '192.168.2.246',
@@ -30,14 +30,15 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo) => {
 
     console.log(correoReceptor);
     var data = {
-        to: 'rgarcia@tlreim.com.mx',
+        to: correoReceptor,
         from: email,
-        template: 'emailAlert',
+        template: template,
         subject: asunto,
         context: {
             subject: asunto,
             body: cuerpo,
-            name: nombreReceptor
+            name: nombreReceptor,
+            url: url
         }
     };
 
