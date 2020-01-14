@@ -72,12 +72,17 @@ app.get('', (req, res, netx) => {
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
     .populate('solicitud', 'blBooking')
+    .populate('naviera', 'naviera nombreComercial')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',
       populate: {
         path: "buque",
         select: 'nombre'
+      },
+      populate: {
+        path: "naviera",
+        select: 'nombreComercial'
       }
     })
     .populate('naviera', 'rfc razonSocial')
@@ -301,7 +306,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
-    .populate({
+       .populate({
       path: "viaje",
       select: 'viaje buque naviera fechaArribo',
       match: json2,
@@ -356,6 +361,10 @@ app.get('/maniobra/:id/includes', (req, res) => {
       populate: {
         path: 'buque',
         select: 'nombre'
+      }, 
+      populate: {
+        path: "naviera",
+        select: 'nombreComercial'
       }
     })
 
@@ -427,6 +436,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
     .populate('operador', 'nombre')
     .populate('solicitud', 'blBooking')
     .populate('camion', 'placa noEconomico')
+    .populate('solicitud', 'viaje blBooking')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo',
@@ -508,6 +518,7 @@ app.get('/LR', (req, res, next) => {
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
+    .populate('solicitud', 'viaje blBooking')
     .populate({
       path: 'viaje',
       select: 'viaje buque naviera',
@@ -515,6 +526,10 @@ app.get('/LR', (req, res, next) => {
       populate: {
         path: "naviera",
         select: 'razonSocial'
+      },
+      populate: {
+        path: "naviera",
+        select: 'nombreComercial'
       }
     })
     .populate('naviera', 'rfc razonSocial')
@@ -1101,10 +1116,10 @@ app.get('/Lavado/Reparacion', (req, res, next) => {
       match: json2,
       populate: {
         path: "naviera",
-        select: 'razonSocial'
+        select: 'nombreComercial'
       }
     })
-    .populate('naviera', 'rfc razonSocial')
+    .populate('naviera', 'rfc nombreComercial')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, maniobras) => {
       if (err) {
