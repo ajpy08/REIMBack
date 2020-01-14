@@ -741,7 +741,9 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
 
     maniobra.reparaciones = body.reparaciones;
     if (maniobra.reparaciones.length > 0)
-      maniobra.reparacionesObservacion = body.reparacionesObservacion;
+    maniobra.reparacionesObservacion = body.reparacionesObservacion;
+    
+    maniobra.historial = body.historial;
 
     maniobra.grado = body.grado;
     // if (maniobra.descargaAutorizada == true) {
@@ -754,7 +756,7 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
         maniobra.estatus = "DISPONIBLE";
     }
     // }
-
+    
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
         return res.status(400).json({
