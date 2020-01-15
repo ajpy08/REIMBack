@@ -37,6 +37,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
   //  console.log(json);
   Viaje.find(json)
     .populate('buque', 'nombre')
+    .populate('naviera', 'nombreComercial')
     .exec(
       (err, viajes) => {
         if (err) {
