@@ -31,6 +31,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     lavado: body.lavado,
     rep: body.rep,
     grado: body.grado,
+    sello: body.sello,
     operador: body.operador,
     camiones: body.camion,
     contenedor: body.contenedor,
@@ -275,7 +276,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
       maniobra.fIniReparacion = body.fIniReparacion,
       maniobra.hIniReparacion = body.hIniReparacion,
       maniobra.fFinReparacion = body.fFinReparacion,
-      maniobra.hFinReparacion = body.hFinReparacion
+      maniobra.hFinReparacion = body.hFinReparacion,
+      maniobra.sello = body.sello
 
     maniobra.save((err, maniobraGuardado) => {
 
