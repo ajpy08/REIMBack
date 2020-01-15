@@ -109,34 +109,83 @@ app.get('/disponibles', (req, res, next) => {
 
             //for a cada grupo 
             for (var g in coordenadasAgrupadas) {
-                var letraAnterior = '';
+                //var letraAnterior = '';
                 coordenadasAgrupadas[g].forEach(c => {
-                    var letraPosicion = c.posicion.substring(0, 1);
+                    //var letraPosicion = c.posicion.substring(0, 1);
 
-                    if (letraAnterior != letraPosicion) {
-                        coord.push({
-                            bahia: c.bahia,
-                            posicion: c.posicion,
-                            tipo: c.tipo,
-                            maniobras: c.maniobras.length > 0 ? c.maniobras : undefined
-                        });
-                        letraAnterior = letraPosicion;
-                    }
+                    // if (letraAnterior != letraPosicion) {
+                    coord.push({
+                        bahia: c.bahia,
+                        posicion: c.posicion,
+                        tipo: c.tipo,
+                        maniobras: c.maniobras.length > 0 ? c.maniobras : undefined
+                    });
+                    //letraAnterior = letraPosicion;
+                    // }
                 });
             }
+
+            ///////////////////////////////////////////////////////////////////////////////////////
+            //Saco las coordenadas que tienen maniobras (Que estan total o parcialmente ocupadas)//
+            ///////////////////////////////////////////////////////////////////////////////////////
             var coordenadasDisponibles = coord;
+            var coordenadasOcupadas = [];
             coord.forEach(c => {
-                if (c.maniobras) {
+                if (c.maniobras && c.maniobras.length > 0) {
                     c.maniobras.forEach(m => {
                         var restante = c.tipo - parseInt(m.maniobra.tipo.substring(0, 2));
                         if (restante <= 0) {
+                            coordenadasOcupadas.push(c);
                             var indice = coordenadasDisponibles.indexOf(c); // obtenemos el indice
                             coordenadasDisponibles.splice(indice, 1);
                         } else {
+                            if (c.tipo != restante) {
+                                coordenadasOcupadas.push(c);
+                            }
                             c.tipo = restante;
                         }
                     });
                 }
+            });
+
+            var coordenadasFinal = [];
+            //var letraAnterior = '';
+
+            coordenadasDisponibles.forEach(c => {               
+
+                var letraPosicion = c.posicion.substring(0, 1);
+                var nivelPosicion = c.posicion.substring(1, c.posicion.length)
+
+                // if (letraAnterior != letraPosicion) {
+                var coordenadaAnt = new Coordenada({
+                    bahia: c.bahia,
+                    posicion: letraPosicion + (parseInt(nivelPosicion) - 1)
+                });
+                var coordenadaNivelInferior = coordenadasOcupadas.filter(cor => cor.bahia == coordenadaAnt.bahia &&
+                    cor.posicion == coordenadaAnt.posicion)[0];
+
+                var tipoNivelAnterior = 0;
+                var insertar = true;
+                if (nivelPosicion > 1) {
+                    if (coordenadaNivelInferior && coordenadaNivelInferior.maniobras) {
+                        coordenadaNivelInferior.maniobras.forEach(m => {
+                            tipoNivelAnterior += parseInt(m.maniobra.tipo.substring(0, 2));
+                        });
+                        insertar = true;
+                    } else {
+                        insertar = false;
+                    }
+                }
+                if (insertar) {
+                    coordenadasFinal.push({
+                        bahia: c.bahia,
+                        posicion: c.posicion,
+                        tipo: tipoNivelAnterior > 0 ? tipoNivelAnterior : c.tipo,
+                        maniobras: c.maniobras ? c.maniobras : undefined
+                    });
+                }
+                //letraAnterior = letraPosicion;
+                // }
             });
 
             if (err) {
@@ -149,8 +198,8 @@ app.get('/disponibles', (req, res, next) => {
             res.status(200).json({
                 ok: true,
                 //coordenadas: coordenadasAgrupadas,
-                coordenadas: varias.groupArray(coordenadasDisponibles, 'bahia'),
-                total: coordenadas.length
+                coordenadas: varias.groupArray(coordenadasFinal, 'bahia'),
+                total: coordenadasFinal.length
             });
         });
 });
@@ -204,7 +253,7 @@ app.get('/disponibles', (req, res, next) => {
 // // Actualizar Coordenada (maniobra)
 // // =======================================
 
-app.put('/coordenada/:id/actualiza_maniobra', mdAutenticacion.verificaToken, (req, res) => {    
+app.put('/coordenada/:id/actualiza_maniobra', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
     var body = req.body;
     Coordenada.findById(id, (err, coordenada) => {
