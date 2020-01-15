@@ -111,13 +111,7 @@ app.get('/disponibles', (req, res, next) => {
             for (var g in coordenadasAgrupadas) {
                 var letraAnterior = '';
                 coordenadasAgrupadas[g].forEach(c => {
-                    // var regex = /(\d+)/g;
                     var letraPosicion = c.posicion.substring(0, 1);
-                    // var numeroPosicion = c.posicion.match(regex);
-                    // console.log(`
-                    // bahia: ${c.bahia}
-                    // La letra de esta posicion es ${letraPosicion} 
-                    // El numero de esta posicion es ${numeroPosicion} `);
 
                     if (letraAnterior != letraPosicion) {
                         coord.push({
