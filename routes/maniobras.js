@@ -689,7 +689,7 @@ app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, r
       maniobra.operador = body.operador;
     }
 
-
+    maniobra.sello = body.sello;
     maniobra.fLlegada = body.fLlegada;
     maniobra.hLlegada = body.hLlegada;
     maniobra.estatus = "ESPERA";
