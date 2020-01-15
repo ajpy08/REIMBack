@@ -395,7 +395,7 @@ app.get('/maniobra/:id/includes', (req, res) => {
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
 // =======================================
-app.get('/facturacion-maniobras', (req, res, netx) => {
+app.get('/facturacion-maniobras', (req, res, netx) => { 
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';

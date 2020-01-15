@@ -40,6 +40,7 @@ var maniobraSchema = new Schema({
   fIniLavado: { type: Date },
   hIniLavado: { type: String },
   hFinLavado: { type: String },
+  sello: {type: String},
   fIniReparacion: { type: Date },
   hIniReparacion: { type: String },
   fFinReparacion: { type: Date },
