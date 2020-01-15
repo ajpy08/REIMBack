@@ -97,47 +97,26 @@ app.get('/coordenada/bahia_posicion', (req, res) => {
 //  Obtener coordenadas Disponibles
 // ==========================================
 app.get('/disponibles', (req, res, next) => {
-    var coord = [];
-    // Coordenada.find({ maniobras: { $exists: false }, activo: true })
     Coordenada.find({ activo: true })
         .populate('maniobras.maniobra', '_id contenedor tipo grado')
         // .populate('usuarioAlta', 'nombre email')
         .sort({ bahia: 1, posicion: 1 })
         .exec((err, coordenadas) => {
 
-            var coordenadasAgrupadas = varias.groupArray(coordenadas, 'bahia');
-
-            //for a cada grupo 
-            for (var g in coordenadasAgrupadas) {
-                //var letraAnterior = '';
-                coordenadasAgrupadas[g].forEach(c => {
-                    //var letraPosicion = c.posicion.substring(0, 1);
-
-                    // if (letraAnterior != letraPosicion) {
-                    coord.push({
-                        bahia: c.bahia,
-                        posicion: c.posicion,
-                        tipo: c.tipo,
-                        maniobras: c.maniobras.length > 0 ? c.maniobras : undefined
-                    });
-                    //letraAnterior = letraPosicion;
-                    // }
-                });
-            }
-
             ///////////////////////////////////////////////////////////////////////////////////////
             //Saco las coordenadas que tienen maniobras (Que estan total o parcialmente ocupadas)//
             ///////////////////////////////////////////////////////////////////////////////////////
-            var coordenadasDisponibles = coord;
+
             var coordenadasOcupadas = [];
-            coord.forEach(c => {
+            var coordenadasTemp = coordenadas;
+            coordenadas.forEach(c => {
                 if (c.maniobras && c.maniobras.length > 0) {
                     c.maniobras.forEach(m => {
                         var restante = c.tipo - parseInt(m.maniobra.tipo.substring(0, 2));
                         if (restante <= 0) {
                             coordenadasOcupadas.push(c);
-                            var indice = coordenadasDisponibles.indexOf(c); // obtenemos el indice
-                            coordenadasDisponibles.splice(indice, 1);
+                            var indice = coordenadasTemp.indexOf(c); // obtenemos el indice
+                            coordenadasTemp.splice(indice, 1);
                         } else {
                             if (c.tipo != restante) {
                                 coordenadasOcupadas.push(c);
@@ -148,15 +127,20 @@ app.get('/disponibles', (req, res, next) => {
                 }
             });
 
-            var coordenadasFinal = [];
-            //var letraAnterior = '';
+            ///////////////////////////////////////////////////////////////////////////////////////
+            //De las coordenadas resultantes obtengo su posicion anterior para obtener su tamaño //
+            //y las maniobras que contiene, hago una suma de los tamaños de las maniobras y veo  //
+            //si esta total o parcialmente ocupado, dependiendo de eso asigno el tamaño de la    //
+            //posicion de arriba, tambien si tiene ocupada la posicion del nivel anterior pongo  //
+            //como disponible la posicion pero con el tamaño de abajo                            //
+            ///////////////////////////////////////////////////////////////////////////////////////
 
-            coordenadasDisponibles.forEach(c => {               
+            var coordenadasDisponibles = [];
+
+            coordenadasTemp.forEach(c => {
 
                 var letraPosicion = c.posicion.substring(0, 1);
                 var nivelPosicion = c.posicion.substring(1, c.posicion.length)
-
-                // if (letraAnterior != letraPosicion) {
                 var coordenadaAnt = new Coordenada({
                     bahia: c.bahia,
                     posicion: letraPosicion + (parseInt(nivelPosicion) - 1)
@@ -176,16 +160,19 @@ app.get('/disponibles', (req, res, next) => {
                         insertar = false;
                     }
                 }
+
+                ///////////////////////////////////////////////////////////////////////////////////////
+                //Inserto las coordenadas disponibles despues de todas las validaciones.             //
+                ///////////////////////////////////////////////////////////////////////////////////////
+
                 if (insertar) {
-                    coordenadasFinal.push({
+                    coordenadasDisponibles.push({
                         bahia: c.bahia,
                         posicion: c.posicion,
                         tipo: tipoNivelAnterior > 0 ? tipoNivelAnterior : c.tipo,
                         maniobras: c.maniobras ? c.maniobras : undefined
                     });
                 }
-                //letraAnterior = letraPosicion;
-                // }
             });
 
             if (err) {
@@ -197,9 +184,8 @@ app.get('/disponibles', (req, res, next) => {
             }
             res.status(200).json({
                 ok: true,
-                //coordenadas: coordenadasAgrupadas,
-                coordenadas: varias.groupArray(coordenadasFinal, 'bahia'),
-                total: coordenadasFinal.length
+                coordenadas: varias.groupArray(coordenadasDisponibles, 'bahia'),
+                total: coordenadasDisponibles.length
             });
         });
 });
