@@ -778,7 +778,7 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
     maniobra.reparacionesObservacion = body.reparacionesObservacion;
     
     maniobra.historial = body.historial;
-
+    maniobra.sello = body.sello;
     maniobra.grado = body.grado;
     // if (maniobra.descargaAutorizada == true) {
     maniobra.hDescarga = body.hDescarga;
@@ -904,6 +904,7 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
     }
 
     maniobra.grado = body.grado;
+    maniobra.sello = body.sello;
 
 
     if (!maniobra.lavado && maniobra.reparaciones.length == 0 && maniobra.grado) {
@@ -977,6 +978,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
     }
     maniobra.hDescarga = body.hDescarga;
     maniobra.hSalida = body.hSalida;
+    maniobra.sello = body.sello;
 
     if (body.grado !== '' && body.grado !== undefined) {
       maniobra.grado = body.grado;
