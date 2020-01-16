@@ -38,6 +38,7 @@ app.get('', (req, res, netx) => {
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
 
+
   // if (peso != 'undefined' && peso != '')
   //   filtro += '\"peso\":' + '\"' + peso + '\",';
   peso = peso.replace(/,/g, '\",\"');
@@ -76,6 +77,7 @@ app.get('', (req, res, netx) => {
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',
+
       populate: {
         path: "buque",
         select: 'nombre'
@@ -83,6 +85,15 @@ app.get('', (req, res, netx) => {
       populate: {
         path: "naviera",
         select: 'nombreComercial'
+      }
+    })
+    .populate({
+      path: "viaje",
+      select: 'viaje',
+
+      populate: {
+        path: "buque",
+        select: 'nombre'  
       }
     })
     .populate('naviera', 'rfc razonSocial')
@@ -180,7 +191,7 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
 
           if (maniobra.tipo === 'C') {
             cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_carga/' + maniobra.solicitud;
-          } else if(maniobra.tipo === 'D'){
+          } else if (maniobra.tipo === 'D') {
             cuerpoCorreo += 'http://reimcontainerpark.com.mx/#/solicitudes/solicitud_descarga/' + maniobra.solicitud;
           }
           cuerpoCorreo += `
@@ -306,7 +317,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
-       .populate({
+    .populate({
       path: "viaje",
       select: 'viaje buque naviera fechaArribo',
       match: json2,
@@ -355,13 +366,14 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('transportista', 'razonSocial nombreComercial')
     .populate('viaje', 'viaje ')
     .populate('solicitud', 'viaje blBooking')
+    .populate('buque', 'nombre')
     .populate({
       path: 'viaje',
       select: 'viaje',
       populate: {
         path: 'buque',
         select: 'nombre'
-      }, 
+      },
       populate: {
         path: "naviera",
         select: 'nombreComercial'
@@ -395,7 +407,7 @@ app.get('/maniobra/:id/includes', (req, res) => {
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
 // =======================================
-app.get('/facturacion-maniobras', (req, res, netx) => { 
+app.get('/facturacion-maniobras', (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
@@ -437,6 +449,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
     .populate('solicitud', 'blBooking')
     .populate('camion', 'placa noEconomico')
     .populate('solicitud', 'viaje blBooking')
+    .populate('viaje', 'buque nombre')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo',
@@ -445,6 +458,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
         select: 'nombre'
       }
     })
+    .populate('buque', 'nombre')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, maniobras) => {
       if (err) {
@@ -530,8 +544,13 @@ app.get('/LR', (req, res, next) => {
       populate: {
         path: "naviera",
         select: 'nombreComercial'
+      },
+      populate: {
+        path: "buque",
+        select: 'nombre'
       }
     })
+    .populate('buque', 'nombre')
     .populate('naviera', 'rfc razonSocial')
     .populate('usuarioAlta', 'nombre email')
     .exec((err, maniobras) => {
