@@ -50,7 +50,8 @@ var maniobraSchema = new Schema({
   fAsignacionPapeleta: { type: Date },
   fExpiracionPapeleta: { type: Date },
   historial: [{
-    posicion: { type: Schema.Types.Array, ref: 'coordenada' }
+    bahia: { type: String, required: [true, 'La bahia es necesaria'] },
+    posicion: { type: String, required: [true, 'La posicion es necesaria'] }
   }],
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
