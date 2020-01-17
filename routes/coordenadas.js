@@ -69,7 +69,7 @@ app.get('/coordenada/bahia_posicion', (req, res) => {
 
 
     Coordenada.find(json)
-        //.populate('maniobras.maniobra', '_id contenedor tipo grado')
+        .populate('maniobras.maniobra', '_id contenedor tipo grado')
         .exec((err, coordenada) => {
             if (err) {
                 return res.status(500).json({
@@ -96,8 +96,22 @@ app.get('/coordenada/bahia_posicion', (req, res) => {
 // ==========================================
 //  Obtener coordenadas Disponibles
 // ==========================================
-app.get('/disponibles', (req, res, next) => {
-    Coordenada.find({ activo: true })
+app.get('/disponibles/:maniobra?', (req, res, next) => {
+    var maniobra = req.query.maniobra || '';
+    var activo = true;
+
+    var filtro = '{';
+    // if (maniobra != 'undefined' && maniobra != '')
+    //     filtro += '\"maniobra\":' + '\"' + maniobra + '\",';
+    if (activo != 'undefined' && activo != '')
+        filtro += '\"activo\":' + '\"' + activo + '\",';
+
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+
+    Coordenada.find(json)
         .populate('maniobras.maniobra', '_id contenedor tipo grado')
         // .populate('usuarioAlta', 'nombre email')
         .sort({ bahia: 1, posicion: 1 })
@@ -108,8 +122,10 @@ app.get('/disponibles', (req, res, next) => {
             ///////////////////////////////////////////////////////////////////////////////////////
 
             var coordenadasOcupadas = [];
-            var coordenadasTemp = coordenadas;
+            var coordenadasTemp = [];
+
             coordenadas.forEach(c => {
+                coordenadasTemp.push(c)
                 if (c.maniobras && c.maniobras.length > 0) {
                     c.maniobras.forEach(m => {
                         var restante = c.tipo - parseInt(m.maniobra.tipo.substring(0, 2));
@@ -150,12 +166,24 @@ app.get('/disponibles', (req, res, next) => {
 
                 var tipoNivelAnterior = 0;
                 var insertar = true;
+                var soyYO = false;
                 if (nivelPosicion > 1) {
                     if (coordenadaNivelInferior && coordenadaNivelInferior.maniobras) {
                         coordenadaNivelInferior.maniobras.forEach(m => {
+                            if (m.maniobra.id == maniobra) {
+                                soyYO = true;
+                            }
                             tipoNivelAnterior += parseInt(m.maniobra.tipo.substring(0, 2));
                         });
-                        insertar = true;
+                        if (soyYO) {
+                            insertar = !soyYO;
+                        } else {
+                            if (tipoNivelAnterior < c.tipo) {
+                                insertar = true;      
+                            } else {
+                                insertar = false;                                
+                            }
+                        }
                     } else {
                         insertar = false;
                     }
