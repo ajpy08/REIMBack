@@ -417,6 +417,7 @@ app.get('/anio/:anio', (req, res, next) => {
 
   Viaje.find({ "anio": { "$gte": fechaInicio.getFullYear(), "$lte": fechaFin.getFullYear() } })
     .populate('buque', 'nombre')
+    .sort({ fArribo: -1 })
     .exec(
       (err, viajes) => {
         if (err) {
