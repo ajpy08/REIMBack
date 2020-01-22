@@ -166,6 +166,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         maniobra = new Maniobra({
           viaje: viaje._id,
           cliente: viaje.naviera,
+          naviera: viaje.naviera,
           contenedor: element.contenedor,
           tipo: element.tipo,
           peso: 'VACIO',
