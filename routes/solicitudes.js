@@ -291,6 +291,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
   } else {
     solicitud = new Solicitud({
       agencia: body.agencia,
+      naviera: body.naviera,
       transportista: body.transportista,
       cliente: body.cliente,
       observaciones: body.observaciones,
