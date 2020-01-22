@@ -25,6 +25,7 @@ app.get('', (req, res, netx) => {
   var reparacion = req.query.reparacion || '';
   var finillegada = req.query.finillegada || '';
   var ffinllegada = req.query.ffinllegada || '';
+  var naviera = req.query.naviera || '';
 
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
@@ -37,6 +38,8 @@ app.get('', (req, res, netx) => {
     filtro += '\"contenedor\":{ \"$regex\":' + '\".*' + contenedor + '\",\"$options\":\"i\"},';
   if (viaje != 'undefined' && viaje != '')
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
+  if (naviera != 'undefined' && naviera != '')
+    filtro += '\"naviera\":' + '\"' + naviera + '\",';
 
 
   // if (peso != 'undefined' && peso != '')
@@ -73,7 +76,6 @@ app.get('', (req, res, netx) => {
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
     .populate('solicitud', 'blBooking')
-    .populate('naviera', 'naviera nombreComercial')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',
@@ -96,7 +98,7 @@ app.get('', (req, res, netx) => {
         select: 'nombre'  
       }
     })
-    .populate('naviera', 'rfc razonSocial')
+    .populate('naviera', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
     .sort({ contenedor: 1 })
     .exec((err, maniobras) => {
