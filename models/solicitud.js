@@ -66,6 +66,7 @@ solicitudScheme.pre('save', function(next) {
           cargaDescarga: doc.tipo,
           cliente: doc.cliente,
           agencia: doc.agencia,
+          naviera: doc.naviera,
           transportista: element.transportista,
           correo: doc.correo,
           tipo: element.tipo,
