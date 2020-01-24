@@ -170,6 +170,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
           contenedor: element.contenedor,
           tipo: element.tipo,
           peso: 'VACIO',
+          patio: element.patio,
           estatus: 'TRANSITO',
           usuarioAlta: req.usuario._id
         });
@@ -179,6 +180,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
           contenedor: element.contenedor,
           tipo: element.tipo,
           peso: 'VACIO_IMPORT',
+          patio: element.patio,
           estatus: 'APROBACION',
           destinatario: element.destinatario,
           usuarioAlta: req.usuario._id
@@ -326,6 +328,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   var contenedor = req.query.contenedor;
   var tipo = req.query.tipo;
   var peso = req.query.peso;
+  var patio = req.query.patio;
   var destinatario = req.query.destinatario;
   if (peso == 'VACIO') {
     maniobra = new Maniobra({
@@ -333,6 +336,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
       contenedor: contenedor,
       tipo: tipo,
       peso: peso,
+      patio: patio,
       estatus: 'TRANSITO',
       destinatario: destinatario,
       usuarioAlta: req.usuario._id
@@ -343,6 +347,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
       contenedor: contenedor,
       tipo: tipo,
       peso: peso,
+      patio: patio,
       estatus: 'APROBACION',
       destinatario: destinatario,
       usuarioAlta: req.usuario._id

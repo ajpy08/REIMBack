@@ -16,7 +16,7 @@ var maniobraSchema = new Schema({
   transportista: { type: Schema.Types.ObjectId, ref: 'Cliente' },
   camion: { type: Schema.Types.ObjectId, ref: 'Camion' },
   operador: { type: Schema.Types.ObjectId, ref: 'Operador' },
-  patio: { type: String, default: 'POLIGONO INDUSTRIAL' },
+  patio: { type: String },
   contenedor: { type: String },
   tipo: { type: String },
   grado: { type: String },
