@@ -117,6 +117,7 @@ function obtenerMenu(ROLE) {
         submenu: []
       }
     ];
+    menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/liberaciones_bk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
@@ -148,6 +149,7 @@ function obtenerMenu(ROLE) {
 
     //NAVIERA
 
+    menu[3].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/liberaciones_bk' });
     menu[3].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[3].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
 
@@ -288,7 +290,7 @@ function obtenerMenu(ROLE) {
         ]
       },
     ];
-
+    menu[1].submenu.unshift({ titulo: 'Liberacion Booking', url: '/liberaciones_bk' });
     menu[1].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[1].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     return menu;
