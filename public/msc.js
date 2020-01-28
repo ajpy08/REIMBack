@@ -1,6 +1,6 @@
 const varias = require('../public/varias');
 const sentMail = require('../routes/sendAlert');
-var correosTI = require('../config/config').correosTI;
+var CODE_MYT_MSC = require('../config/config').CODE_MYT_MSC;
 
 ////////////////////////////////////////////////////////////////////////
 ////                            VARIABLES                           ////
@@ -165,8 +165,6 @@ exports.CreaCODECO = function CreaCODECO(maniobra, referenceNumber) {
         • Marca = (${marca})`;
         error = true;
     }
-
-
 
     if (error) {
         cuerpoCorreo += `

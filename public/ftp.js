@@ -4,19 +4,22 @@ var fs = require('fs');
 var envJSON = require("../config/env.variables.json");
 
 
-var config = envJSON["development"]["configFTP_MSC"];
+var configMSC = envJSON["development"]["configFTP_MSC"];
 
-exports.UploadFile = function UploadFile(ruta, nombreArchivo, eliminarDespues) {
-    ftp.connect(config);
-    // console.log('FTP CONNECTED:' + ftp.client.isConnect)
+exports.UploadFile = function UploadFile(ruta, empresa, eliminarDespues) {
+    if (empresa == 'MSC') {
+        ftp.connect(configMSC);        
+    }
 
-    ftp.upload(ruta + nombreArchivo, "/Test_MYT/" + nombreArchivo, function (err) {
-        if (fs.existsSync(ruta + nombreArchivo)) {
+    var nombreArchivo = ruta.replace(/^.*[\\\/]/, '');
+
+    ftp.upload(ruta, "/Test_MYT/" + nombreArchivo, function (err) {
+        if (fs.existsSync(ruta)) {
             if (err) {
                 console.log(err)
             } else {
                 if (eliminarDespues) {
-                    fs.unlink(ruta + nombreArchivo, (err) => {
+                    fs.unlink(ruta, (err) => {
                         if (err) {
                             console.error(err)
                             // return
