@@ -79,7 +79,7 @@ solicitudScheme.pre('save', function(next) {
         doc.contenedores[index].maniobra = maniobra._id;
         maniobra.save((err) => {
           if (err) {
-            console.log(err);
+            // console.log(err);
             return next(err);
           }
         });

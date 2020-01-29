@@ -19,7 +19,7 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
     var busqueda = req.params.busqueda;
     var tabla = req.params.tabla;
     var regex = new RegExp(busqueda, 'i');
-    console.log('busqueda: ' + busqueda + ' en tabla: ' + tabla + ' Y regex : ' + regex)
+    // console.log('busqueda: ' + busqueda + ' en tabla: ' + tabla + ' Y regex : ' + regex)
     var promesa;
     switch (tabla) {
         case 'usuarios':
