@@ -5,17 +5,17 @@ var Schema = mongoose.Schema;
 
 var Maniobra = require('./maniobra');
 
-var liberacionBLScheme = new Schema({
+var liberacionScheme = new Schema({
 
-//   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Agencia Aduanal es necesaria'] },
+  agencia: { type: Schema.Types.ObjectId, ref: 'Cliente'},
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Naviera es necesaria'] },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'El Cliente es necesario'] },
 //   buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
 //   nombreBuque: { type: String },
   blBooking: { type: String },
-//   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
-//   noViaje: { type: String },
-//   observaciones: { type: String },
+  viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
+  noViaje: { type: String },
+  observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
   rutaComprobante: { type: String },
@@ -30,7 +30,7 @@ var liberacionBLScheme = new Schema({
     grado: { type: String }
   }],
   tipo: { type: String, default: 'C' },
-  estatus: { type: String, default: 'NA' },
+  estatus: { type: String, default: 'ESPERA' },
   facturarA: { type: String },
   // rfc: { type: String, required: [true, 'El RFC para Facturación es necesario'] },
   rfc: { type: String },
@@ -51,11 +51,11 @@ var liberacionBLScheme = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date }
-}, { collection: 'liberacionBL' });
+}, { collection: 'solicitudes' });
 
-liberacionBLScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
+liberacionScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
 
-liberacionBLScheme.pre('save', function(next) {
+liberacionScheme.pre('save', function(next) {
   var doc = this;
   if (doc.estatus === 'APROBADA' && doc.tipo === 'C') {
     doc.contenedores.forEach(function(element, index) {
@@ -65,7 +65,6 @@ liberacionBLScheme.pre('save', function(next) {
           solicitud: doc._id,
           cargaDescarga: doc.tipo,
           cliente: doc.cliente,
-          agencia: doc.agencia,
           naviera: doc.naviera,
           transportista: element.transportista,
           correo: doc.correo,
@@ -90,4 +89,4 @@ liberacionBLScheme.pre('save', function(next) {
 });
 
 
-module.exports = mongoose.model('liberacionBL', liberacionBLScheme);
+module.exports = mongoose.model('Liberacion', liberacionScheme);
