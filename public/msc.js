@@ -1,6 +1,6 @@
 const varias = require('../public/varias');
 const sentMail = require('../routes/sendAlert');
-var CODE_MYT_MSC = require('../config/config').CODE_MYT_MSC;
+var correosTI = require('../config/config').correosTI;
 
 ////////////////////////////////////////////////////////////////////////
 ////                            VARIABLES                           ////

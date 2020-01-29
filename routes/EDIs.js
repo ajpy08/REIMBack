@@ -10,6 +10,8 @@ const varias = require('../public/varias');
 var IdMSC = require('../config/config').IdMSC;
 const FTP = require('../public/ftp');
 var CODE_MYT_MSC = require('../config/config').CODE_MYT_MSC;
+const sentMail = require('../routes/sendAlert');
+var correosTI = require('../config/config').correosTI;
 
 // ==========================================
 // Crear nuevo EDI
@@ -145,8 +147,7 @@ app.post('/nuevo/', mdAutenticacion.verificaToken, (req, res) => {
 // ================================================
 //  Servicio para Subir a FTP el EDI CODECO de MSC
 // ================================================
-app.get('/upload/CODECO/', (req, res) => {
-
+app.put('/upload/CODECO/', mdAutenticacion.verificaToken, (req, res) => {
   var d = new Date(),
     month = '' + (d.getMonth() + 1),
     day = '' + d.getDate(),
@@ -158,7 +159,7 @@ app.get('/upload/CODECO/', (req, res) => {
   var horaEnvio = varias.zFill(hr.toString(), 2) + varias.zFill(min.toString(), 2);
 
   var idManiobra = req.query.maniobra;
-  var ruta = req.query.ruta;
+  var rutaTMP = req.query.rutaTMP;
   var elimina = (req.query.elimina === 'true');
 
   EDI.find({ maniobra: idManiobra })
@@ -176,7 +177,6 @@ app.get('/upload/CODECO/', (req, res) => {
       if (EDIS && EDIS.length > 0) {
         var EDI = EDIS[0];
 
-
         if (EDI.maniobra.naviera && EDI.maniobra.naviera == IdMSC) {
 
           if (EDI.edi != '') {
@@ -190,11 +190,63 @@ app.get('/upload/CODECO/', (req, res) => {
               }
             }
 
-            var nombreArchivo = gate + '_'+ CODE_MYT_MSC + '_' + fechaEnvioYYYY + horaEnvio + '_' + EDI.noReferencia + '.txt';
-            ruta += nombreArchivo;
+            var nombreArchivo = gate + '_' + CODE_MYT_MSC + '_' + fechaEnvioYYYY + horaEnvio + '_' + EDI.noReferencia + '.txt';
+            rutaTMP += nombreArchivo;
 
-            varias.creaArchivoTXT(ruta, EDI.edi.replace(/\n/g, '').trim());
+            varias.creaArchivoTXT(rutaTMP, EDI.edi.replace(/\n/g, '').trim()).then(
+              function (ok) {
+                if (ok) {
+                  FTP.UploadFile(rutaTMP, 'MSC', elimina).then(
+                    function (ok) {
+                      if (ok) {
+                        FTP.ExistFile(nombreArchivo, 'MSC').then(
+                          function (ok) {
+                            if (ok) {
+                              EDI.generado = ok;
+                              EDI.fEnvio = new Date();
+                              EDI.usuarioMod = req.usuario._id;
+                              EDI.fMod = new Date();
+                              EDI.save((err, EDI) => {
+                                if (err) {
+                                  return res.status(400).json({
+                                    ok: false,
+                                    mensaje: 'Error al actualizar EDI',
+                                    errors: err
+                                  });
+                                }
+                                res.status(200).json({
+                                  ok: true,
+                                  maniobra: EDI.maniobra,
+                                  EDI: EDI.edi,
+                                  // rutaTMP: rutaTMP,
+                                  referenceNumber: EDI.noReferencia,
+                                  generado : ok
+                                });
+                              });                              
+                            } else {
+                              var cuerpoCorreo = 'No se pudo subir al FTP de MSC el archivo con referencia ' + EDI.noReferencia;
+                              sentMail('Compañero de TI', correosTI, 'Error Upload FTP', cuerpoCorreo, 'emailAlert');
 
+                              return res.status(500).json({
+                                ok: false,
+                                mensaje: 'Error al subir EDI a FTP',
+                                errors: err
+                              });
+                            }
+                          }
+                        );
+                      }
+                    },
+                    function (err) {
+                      console.log("ERROR: ", err);
+                    }
+                  );
+                }
+              },
+              function (err) {
+                console.log("ERROR: ", err);
+              }
+            );
           } else {
             return res.status(400).json({
               ok: false,
@@ -202,16 +254,6 @@ app.get('/upload/CODECO/', (req, res) => {
               errors: { message: 'El ContenidoEDI es VACIO' }
             });
           }
-
-          FTP.UploadFile(ruta, 'MSC', elimina);
-
-          res.status(200).json({
-            ok: true,
-            maniobra: EDI.maniobra,
-            EDI: EDI.edi,
-            ruta: ruta,
-            referenceNumber: EDI.noReferencia
-          });
         } else {
           return res.status(400).json({
             ok: false,
@@ -226,7 +268,6 @@ app.get('/upload/CODECO/', (req, res) => {
           errors: err
         });
       }
-
     });
 });
 
@@ -248,7 +289,7 @@ app.get('/CODECO/', (req, res) => {
 
   var idManiobra = req.query.maniobra;
   var referenceNumber = req.query.referenceNumber;
-  var rutaCompleta = req.query.ruta;
+  var rutaTMPCompleta = req.query.ruta;
 
   Maniobra.findById(idManiobra)
     .populate('solicitud', '_id blBooking facturarA')
