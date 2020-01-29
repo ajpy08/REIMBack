@@ -1,40 +1,91 @@
 var EasyFtp = require("easy-ftp");
 var ftp = new EasyFtp();
 var fs = require('fs');
-var envJSON = require("../config/env.variables.json");
+var entorno = require('../config/config').config();
 
+exports.UploadFile = function UploadFile(ruta, empresa, eliminarDespues) {
 
-var config = envJSON["development"]["configFTP_MSC"];
+    return new Promise((resolve, reject) => {
 
-exports.UploadFile = function UploadFile(ruta, nombreArchivo, eliminarDespues) {
-    ftp.connect(config);
-    // console.log('FTP CONNECTED:' + ftp.client.isConnect)
+        if (empresa == 'MSC') {
+            ftp.connect(entorno.configFTP_MSC);
+        }
 
-    ftp.upload(ruta + nombreArchivo, "/Test_MYT/" + nombreArchivo, function (err) {
-        if (fs.existsSync(ruta + nombreArchivo)) {
-            if (err) {
-                console.log(err)
-            } else {
-                if (eliminarDespues) {
-                    fs.unlink(ruta + nombreArchivo, (err) => {
-                        if (err) {
-                            console.error(err)
-                            // return
-                        }
-                    })
+        var nombreArchivo = ruta.replace(/^.*[\\\/]/, '');
+
+        ftp.upload(ruta, "/" + nombreArchivo, function (err) {
+            if (fs.existsSync(ruta)) {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (eliminarDespues) {
+                        fs.unlink(ruta, (err) => {
+                            if (err) {
+                                reject(err);
+                                // return
+                            } else {
+                                resolve(ok = true);
+                            }
+                        })
+                    }
+                    resolve(ok = true);
                 }
             }
-        }
+        });
+        //ftp.close();
     });
-    //ftp.close();
 }
 
-exports.DeleteFile = function DeleteFile(nombreArchivo) {
+exports.DeleteFile = function DeleteFile(nombreArchivo, empresa) {
+    return new Promise((resolve, reject) => {
+        if (empresa == 'MSC') {
+            ftp.connect(entorno.configFTP_MSC);
+        }
+        // console.log('FTP CONNECTED:' + ftp.client.isConnect)
 
-    ftp.connect(config);
-    // console.log('FTP CONNECTED:' + ftp.client.isConnect)
+        ftp.rm("\\" + nombreArchivo, function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(ok = true);
+            }
+        });
 
-    ftp.rm("/Test_MYT/" + nombreArchivo, function (err) { });
+        //ftp.close();
+    });
+}
 
-    //ftp.close();
+exports.ExistFile = function ExistFile(nombreArchivo, empresa) {
+     return new Promise((resolve, reject) => {
+        if (!ftp.isConnect) {
+            if (empresa == 'MSC') {
+                ftp.connect(entorno.configFTP_MSC);
+            }            
+        }
+        ftp.exist('/' + nombreArchivo, function (exist) {  
+            if (exist) {
+                //console.log('Si existe')
+                resolve(ok = true);
+            } else {
+                //console.log('No existe')
+                resolve(ok = false);
+            }
+        });
+     });
+}
+
+exports.ListFiles = function ListFiles(empresa) {
+    return new Promise((resolve, reject) => {
+        if (empresa == 'MSC') {
+            ftp.connect(entorno.configFTP_MSC);
+        }
+
+        ftp.ls("\\", function (err, list) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(list = list);
+            }
+        });
+    });
 }

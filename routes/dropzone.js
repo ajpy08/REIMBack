@@ -29,7 +29,7 @@ app.put('/:id', (req, res, next) => {
 
         // Obtener nombre del archivo
         var archivo = req.files[key];
-        console.log(req.files[key].name);
+        // console.log(req.files[key].name);
         var nombreCortado = req.files[key].name.split('.');
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
 
