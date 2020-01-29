@@ -9,6 +9,7 @@ var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
 var moment = require('moment');
 const sentMail = require('../routes/sendAlert');
+var correosTI = require('../config/config').correosTI;
 
 // =======================================
 // Obtener solicitudes TODAS
@@ -183,7 +184,7 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
                 correos = correos.substring(0, correos.length - 1);
               }
 
-              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, 'rgarcia@tlreim.com.mx',
+              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correosTI,
                 'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
 
               // sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
