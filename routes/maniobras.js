@@ -415,6 +415,9 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   var peso = req.query.peso || '';
   var lavado = req.query.lavado || '';
   var reparacion = req.query.reparacion || '';
+  var sinFactura = req.query.sinFactura || '';
+  var descargados = req.query.descargados || '';
+  var yaLavados = req.query.yaLavados || '';
 
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
@@ -435,6 +438,18 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (sinFactura === 'true') {
+    filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (descargados === 'true') {
+    filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (yaLavados === 'true') {
+    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
   }
 
   if (filtro != '{')
