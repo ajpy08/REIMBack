@@ -55,6 +55,8 @@ app.get('', (req, res, netx) => {
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+  } else {
+      filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false},';
   }
 
   if (finillegada != '' && ffinllegada) {
@@ -95,7 +97,7 @@ app.get('', (req, res, netx) => {
 
       populate: {
         path: "buque",
-        select: 'nombre'  
+        select: 'nombre'
       }
     })
     .populate('naviera', 'rfc razonSocial nombreComercial')
@@ -405,6 +407,95 @@ app.get('/maniobra/:id/includes', (req, res) => {
     });
 });
 
+// =======================================
+// Obtener maniobras que son VACIOS
+// =======================================
+app.get('/facturacion-vacios', (req, res, netx) => {
+  var cargadescarga = req.query.cargadescarga || '';
+  var viaje = req.query.viaje || '';
+  var peso = req.query.peso || '';
+  var lavado = req.query.lavado || '';
+  var reparacion = req.query.reparacion || '';
+  var sinFactura = req.query.sinFactura || '';
+  var descargados = req.query.descargados || '';
+  var yaLavados = req.query.yaLavados || '';
+
+  var filtro = '{';
+  if (cargadescarga != 'undefined' && cargadescarga != '')
+    filtro += '\"cargaDescarga\":' + '\"' + cargadescarga + '\",';
+
+  if (viaje != 'undefined' && viaje != '')
+    filtro += '\"viaje\":' + '\"' + viaje + '\",';
+
+  peso = peso.replace(/,/g, '\",\"');
+
+  if (peso != 'undefined' && peso != '')
+  filtro += '\"peso\":' + '\"' + peso + '\",';
+
+
+  if (lavado === 'true') {
+    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
+  }
+
+  if (reparacion === 'true') {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  } else {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+  }
+
+  if (sinFactura === 'true') {
+    filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
+  }
+
+  if (descargados === 'true') {
+    filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (yaLavados === 'true') {
+    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  //console.log(json);
+  Maniobra.find(json)
+    .populate('cliente', 'rfc razonSocial nombreComercial')
+    .populate('agencia', 'rfc razonSocial nombreComercial')
+    .populate('transportista', 'rfc razonSocial nombreComercial')
+    .populate('operador', 'nombre')
+    .populate('solicitud', 'blBooking')
+    .populate('camion', 'placa noEconomico')
+    .populate('solicitud', 'viaje blBooking')
+    .populate('viaje', 'buque nombre')
+    .populate({
+      path: "viaje",
+      select: 'viaje fechaArribo',
+      populate: {
+        path: "buque",
+        select: 'nombre'
+      }
+    })
+    .populate('buque', 'nombre')
+    .populate('usuarioAlta', 'nombre email')
+    .exec((err, maniobras) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando Facturacion Maniobras',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobras: maniobras,
+        total: maniobras.length
+      });
+    });
+});
+
 
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
@@ -415,6 +506,9 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   var peso = req.query.peso || '';
   var lavado = req.query.lavado || '';
   var reparacion = req.query.reparacion || '';
+  var sinFactura = req.query.sinFactura || '';
+  var descargados = req.query.descargados || '';
+  var yaLavados = req.query.yaLavados || '';
 
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
@@ -434,7 +528,22 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   }
 
   if (reparacion === 'true') {
-    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
+    // filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  } else {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+  }
+
+  if (sinFactura === 'true') {
+    filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
+  }
+
+  if (descargados === 'true') {
+    filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': true},';
+  }
+
+  if (yaLavados === 'true') {
+    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
   }
 
   if (filtro != '{')
@@ -442,7 +551,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
 
-  // console.log(json);
+  //console.log(json);
   Maniobra.find(json)
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
@@ -777,8 +886,8 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
 
     maniobra.reparaciones = body.reparaciones;
     if (maniobra.reparaciones.length > 0)
-    maniobra.reparacionesObservacion = body.reparacionesObservacion;
-    
+      maniobra.reparacionesObservacion = body.reparacionesObservacion;
+
     maniobra.historial = body.historial;
     maniobra.sello = body.sello;
     maniobra.grado = body.grado;
@@ -792,7 +901,7 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
         maniobra.estatus = "DISPONIBLE";
     }
     // }
-    
+
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
         return res.status(400).json({
