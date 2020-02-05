@@ -534,6 +534,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
   }
 
+
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
   }
