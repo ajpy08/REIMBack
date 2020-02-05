@@ -439,7 +439,9 @@ app.get('/facturacion-vacios', (req, res, netx) => {
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
-  } 
+  } else {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+  }
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
@@ -528,10 +530,9 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
   if (reparacion === 'true') {
     // filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  } else {
+    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
   }
-  // } else {
-  //     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false},';
-  // }
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
