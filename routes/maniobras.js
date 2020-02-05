@@ -55,9 +55,7 @@ app.get('', (req, res, netx) => {
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
-  } else {
-      filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false},';
-  }
+  } 
 
   if (finillegada != '' && ffinllegada) {
     fIni = moment(finillegada, 'DD-MM-YYYY', true).utc().startOf('day').format();
