@@ -89,9 +89,4 @@ exports.creaArchivoTXT = function creaArchivoTXT(ruta, contenido) {
       }
     });
   });
-
-  // fs.writeFile(ruta, contenido, function (err) {
-  //   if (err)
-  //     throw err;
-  // });
 }
