@@ -42,7 +42,7 @@ exports.ParamsToJSON = function ParamsToJSON(req) {
 
 //Función para agrupa desde un array pasando data y el campo a filtrar, si es un objeto puede pasar el objeto completo
 exports.groupArray = function groupArray(dataSource, field) {
-  return dataSource.reduce(function(groups, x) {
+  return dataSource.reduce(function (groups, x) {
     (groups[x[field]] = groups[x[field]] || []).push(x);
     return groups;
   }, {});
@@ -52,7 +52,7 @@ exports.groupArray = function groupArray(dataSource, field) {
 //se puede pasar el objeto completo. (Este metodo sirve para cuando tienes que agrupar por un campo que esta un populate dentro de otro populate)
 // Ej. solicitud.maniobra.transportista (datasource, maniobra, transportista).
 exports.groupArray2 = function groupArray(dataSource, field, subfield) {
-  return dataSource.reduce(function(groups, x) {
+  return dataSource.reduce(function (groups, x) {
     (groups[x[field][subfield]] = groups[x[field][subfield]] || []).push(x);
     return groups;
   }, {});
@@ -60,27 +60,33 @@ exports.groupArray2 = function groupArray(dataSource, field, subfield) {
 
 exports.zFill = function zfill(number, width) {
   var numberOutput = Math.abs(number); /* Valor absoluto del número */
-  var length = number.toString().length; /* Largo del número */ 
-  var zero = "0"; /* String de cero */  
-  
+  var length = number.toString().length; /* Largo del número */
+  var zero = "0"; /* String de cero */
+
   if (width <= length) {
-      if (number < 0) {
-           return ("-" + numberOutput.toString()); 
-      } else {
-           return numberOutput.toString(); 
-      }
+    if (number < 0) {
+      return ("-" + numberOutput.toString());
+    } else {
+      return numberOutput.toString();
+    }
   } else {
-      if (number < 0) {
-          return ("-" + (zero.repeat(width - length)) + numberOutput.toString()); 
-      } else {
-          return ((zero.repeat(width - length)) + numberOutput.toString()); 
-      }
+    if (number < 0) {
+      return ("-" + (zero.repeat(width - length)) + numberOutput.toString());
+    } else {
+      return ((zero.repeat(width - length)) + numberOutput.toString());
+    }
   }
 }
 
-exports.creaArchivoTXT = function creaArchivoTXT(ruta, contenido){
-  fs.writeFile(ruta, contenido, function (err) {
-    if (err)
-      throw err;
+exports.creaArchivoTXT = function creaArchivoTXT(ruta, contenido) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(ruta, contenido, function (err) {
+      if (err) {
+        reject(err);
+      }
+      else {
+        resolve(ok = true)
+      }
+    });
   });
 }

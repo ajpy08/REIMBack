@@ -166,8 +166,6 @@ exports.CreaCODECO = function CreaCODECO(maniobra, referenceNumber) {
         error = true;
     }
 
-
-
     if (error) {
         cuerpoCorreo += `
 

@@ -59,7 +59,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 //  Obtener viaje por ID
 // ==========================================
 app.get('/viaje/:id', (req, res) => {
-  var id = req.req.id;
+  var id = req.params.id;
   Viaje.findById(id)
     .exec((err, viaje) => {
       if (err) {
@@ -355,7 +355,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   }
   maniobra.save((err, maniobraGuardado) => {
     if (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(400).json({
         ok: false,
         mensaje: "Error al darde alta la maniobra maniobra",

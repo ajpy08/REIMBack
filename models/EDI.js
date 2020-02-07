@@ -6,11 +6,12 @@ var Contador = require('./contador');
 var EDISchema = new Schema({
     noReferencia: { type: String, unique: true },
     edi: { type: String },
-    ruta: { type: String },
+    //ruta: { type: String },
     tipo: { type: String, required: [true, 'El Tipo es necesario'] },
     naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', required: [true, 'La Naviera es necesaria'] },
     maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
     generado: { type: Boolean, default: false, required: [true, 'Generado es necesario'] },
+    fEnvio: { type: Date },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
     usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
@@ -21,7 +22,7 @@ EDISchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
 EDISchema.pre('save', function(next) {
     var doc = this;
-    if (this._id && this.generado == false) {
+    if (this.noReferencia == undefined) {
       Contador.findByIdAndUpdate({ _id: 'EDIsCODECO' }, { $inc: { seq: 1 } }, function(error, cont) {
         if (error)
           return next(error);
