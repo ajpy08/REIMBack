@@ -7,14 +7,11 @@ var Maniobra = require('./maniobra');
 
 var liberacionScheme = new Schema({
 
-  agencia: { type: Schema.Types.ObjectId, ref: 'Cliente'},
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Naviera es necesaria'] },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'El Cliente es necesario'] },
 //   buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
 //   nombreBuque: { type: String },
   blBooking: { type: String },
-  viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
-  noViaje: { type: String },
   observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
