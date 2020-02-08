@@ -57,7 +57,11 @@ var UploadFile = require('./routes/uploadfile');
 var solicitudRoute = require('./routes/solicitud');
 var solicitudesRoute = require('./routes/solicitudes');
 var coordenadasRoutes = require('./routes/coordenadas');
+
 var liberacionesRoute = require('./routes/liberacionesBL');
+
+
+var EDIRoutes = require('./routes/EDIs');
 
 
 // Conexión a la base de datos Mongoose
@@ -123,7 +127,11 @@ app.use('/img', imagenesRoutes);
 app.use('/dropzone', dropzoneRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/coordenadas', coordenadasRoutes);
+
 app.use('/liberaciones', liberacionesRoute);
+
+app.use('/EDI', EDIRoutes);
+
 app.use('/', appRoutes);
 
 // Escuchar peticiones
