@@ -79,7 +79,7 @@ app.post('/', (req, res) => {
                 template: 'forgot-password-email',
                 subject: '¡REIM Container Park Restablecimiento de contraseña!',
                 context: {
-                    url: 'http://ec2-54-167-155-50.compute-1.amazonaws.com:3000/reset_password?token=' + token,
+                    url: 'https://app.reimcontainerpark.com.mx/reset_password?token=' + token,
                     name: user.nombre.split(' ')[0]
                 }
             };
