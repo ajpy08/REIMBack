@@ -621,6 +621,61 @@ app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 
+// =======================================
+// Borrar Solicitud de Maniobra
+// =======================================
+
+app.delete('/solicitud/maniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  Maniobra.find({
+    $or: [
+      {"solicitud": id, "estatus": {$ne: "TRANSITO"} }
+    ]
+  })
+  .exec(
+    (err, maniobras) => {
+      if(err){
+        return err.status(500).json ({
+          ok: false,
+          mensaje: 'Error al intentar cargar maniobras asociadas',
+          errors: err
+        });
+      }
+      if(maniobras && maniobras.length > 0) {
+        return res.status(400).json ({
+          ok: false,
+          mensaje: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud ' ,
+          errors: { message: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud'}
+        });
+      } else {
+        Solicitud.findById(id, (err, solicitudBorrado) => {
+          if(err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al intentar borrar el viaje',
+              errors: err
+            });
+          }
+            if(!solicitudBorrado) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'No exite solicitud con ese id',
+                errors: {message: 'No existe solicitud con ese id'}
+              });
+            }
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaComprobante);
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaBL);
+            solicitudBorrado.remove();
+            res.status(200).json ({
+              ok: true,
+              solicitud: solicitudBorrado
+            });
+        });
+      }
+    });
+});
+
+
 
 
 // export

@@ -89,5 +89,10 @@ solicitudScheme.pre('save', function(next) {
   next();
 });
 
+solicitudScheme.pre('remove', function(next) {
+  Maniobra.remove({'solicitud': this._id }).exec()
+  next();
+});
+
 
 module.exports = mongoose.model('Solicitud', solicitudScheme);
