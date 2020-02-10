@@ -13,6 +13,7 @@ var usuarioSchema = new Schema({
   img: { type: String, required: false },
   role: { type: String, required: true, enum: rolesValidos },
   empresas: [{ type: Schema.Types.ObjectId, ref: 'Cliente' }],
+  permiso: { type: String, require: [true, 'El permiso es necesario para la naviera MSC'] },
   activo: { type: Boolean, default: true, required: [true, 'El campo es obligatorio'] },
   observaciones: { type: String },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
