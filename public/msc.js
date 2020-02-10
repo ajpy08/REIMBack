@@ -13,7 +13,7 @@ var d = new Date(),
     hr = d.getHours(),
     min = d.getMinutes();
 
-var fechaEnvio = year.toString().substring(2, year.toString().length) + varias.zFill(month, 2) + day;
+var fechaEnvio = year.toString().substring(2, year.toString().length) + varias.zFill(month, 2) + varias.zFill(day, 2);
 var fechaEnvioYYYY = year.toString() + varias.zFill(month, 2) + varias.zFill(day, 2);
 var horaEnvio = varias.zFill(hr.toString(), 2) + varias.zFill(min.toString(), 2);
 
