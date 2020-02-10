@@ -352,7 +352,7 @@ app.get('/usuario/:id/enviacorreo', (req, res) => {
                
             });
             
-            var url = 'http://ec2-54-167-155-50.compute-1.amazonaws.com:3000/reset_password?token' + token;
+            var url = 'https://app.reimcontainerpark.com.mx/reset_password?token' + token;
             var cuerpoCorreo = ` Usted está recibiendo este correo porque se ha solicitado que se restablezca la contraseña de su cuenta.` ;
 
             
