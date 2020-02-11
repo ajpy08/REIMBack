@@ -263,7 +263,7 @@ app.get('/inventarioLR/', (req, res, netx) => {
   var lavado = req.query.lavado || '';
   var reparacion = req.query.reparacion || '';
 
-  var naviera = req.query.naviera;
+  var naviera = req.query.naviera || '';
   var buque = req.query.buque || '';
 
   var filtro = '{';
