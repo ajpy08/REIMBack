@@ -5,16 +5,13 @@ var Schema = mongoose.Schema;
 
 var Maniobra = require('./maniobra');
 
-var solicitudScheme = new Schema({
+var liberacionScheme = new Schema({
 
-  agencia: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Agencia Aduanal es necesaria'] },
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'La Naviera es necesaria'] },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente', requiered: [true, 'El Cliente es necesario'] },
-  buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
-  nombreBuque: { type: String },
+//   buque: { type: Schema.Types.ObjectId, ref: 'Buque' },
+//   nombreBuque: { type: String },
   blBooking: { type: String },
-  viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
-  noViaje: { type: String },
   observaciones: { type: String },
   rutaBL: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
@@ -22,15 +19,15 @@ var solicitudScheme = new Schema({
   correo: { type: String, requiered: [true, 'El correo es necesario'] },
   contenedores: [{
     maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
-    patio: { type: String, default: 'POLIGONO INDUSTRIAL' },
+    patio: { type: String },
     transportista: { type: Schema.Types.ObjectId, ref: 'Transportista' },
     contenedor: { type: String },
     tipo: { type: String },
     peso: { type: String },
     grado: { type: String }
   }],
-  tipo: { type: String, default: 'D' },
-  estatus: { type: String, default: 'NA' },
+  tipo: { type: String, default: 'C' },
+  estatus: { type: String, default: 'ESPERA' },
   facturarA: { type: String },
   // rfc: { type: String, required: [true, 'El RFC para Facturación es necesario'] },
   rfc: { type: String },
@@ -53,9 +50,9 @@ var solicitudScheme = new Schema({
   fMod: { type: Date }
 }, { collection: 'solicitudes' });
 
-solicitudScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
+liberacionScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
 
-solicitudScheme.pre('save', function(next) {
+liberacionScheme.pre('save', function(next) {
   var doc = this;
   if (doc.estatus === 'APROBADA' && doc.tipo === 'C') {
     doc.contenedores.forEach(function(element, index) {
@@ -65,7 +62,6 @@ solicitudScheme.pre('save', function(next) {
           solicitud: doc._id,
           cargaDescarga: doc.tipo,
           cliente: doc.cliente,
-          agencia: doc.agencia,
           naviera: doc.naviera,
           transportista: element.transportista,
           correo: doc.correo,
@@ -79,7 +75,7 @@ solicitudScheme.pre('save', function(next) {
         doc.contenedores[index].maniobra = maniobra._id;
         maniobra.save((err) => {
           if (err) {
-            // console.log(err);
+            console.log(err);
             return next(err);
           }
         });
@@ -89,10 +85,5 @@ solicitudScheme.pre('save', function(next) {
   next();
 });
 
-solicitudScheme.pre('remove', function(next) {
-  Maniobra.remove({'solicitud': this._id }).exec()
-  next();
-});
 
-
-module.exports = mongoose.model('Solicitud', solicitudScheme);
+module.exports = mongoose.model('Liberacion', liberacionScheme);

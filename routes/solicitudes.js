@@ -139,7 +139,7 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
 
           //for a cada grupo 
           for (var g in agrupado) {
-            var cuerpoCorreo = `${solicitud.agencia.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
+            var cuerpoCorreo = `${solicitud.razonSocial} ha solicitado en nombre de ${solicitud.cliente.razonSocial} las siguientes ${tipo}s: 
             
             `;
 
@@ -349,6 +349,8 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
 
   Solicitud.findById(id, (err, solicitud) => {
+
+    console.log('entre en solicitud');
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -395,6 +397,7 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     solicitud.municipio = body.municipio;
     solicitud.ciudad = body.ciudad;
     solicitud.estado = body.estado;
+    solicitud.estatus = body.estatus;
     solicitud.cp = body.cp;
     solicitud.credito = body.credito;
     correoFac = body.correoFac;
@@ -422,6 +425,7 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
 
     solicitud.save((err, solicitudGuardado) => {
+      solicitud.estatus = 'NA'
 
       if (err) {
         return res.status(400).json({
@@ -614,6 +618,61 @@ app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
       viaje: solicitudBorrada
     });
   });
+});
+
+
+// =======================================
+// Borrar Solicitud de Maniobra
+// =======================================
+
+app.delete('/solicitud/maniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  Maniobra.find({
+    $or: [
+      {"solicitud": id, "estatus": {$ne: "TRANSITO"} }
+    ]
+  })
+  .exec(
+    (err, maniobras) => {
+      if(err){
+        return err.status(500).json ({
+          ok: false,
+          mensaje: 'Error al intentar cargar maniobras asociadas',
+          errors: err
+        });
+      }
+      if(maniobras && maniobras.length > 0) {
+        return res.status(400).json ({
+          ok: false,
+          mensaje: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud ' ,
+          errors: { message: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud'}
+        });
+      } else {
+        Solicitud.findById(id, (err, solicitudBorrado) => {
+          if(err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al intentar borrar el viaje',
+              errors: err
+            });
+          }
+            if(!solicitudBorrado) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'No exite solicitud con ese id',
+                errors: {message: 'No existe solicitud con ese id'}
+              });
+            }
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaComprobante);
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaBL);
+            solicitudBorrado.remove();
+            res.status(200).json ({
+              ok: true,
+              solicitud: solicitudBorrado
+            });
+        });
+      }
+    });
 });
 
 
