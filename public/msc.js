@@ -346,7 +346,7 @@ exports.CreaCODECO = function CreaCODECO(maniobra, referenceNumber) {
             if (cadenaCODECO[i].toLowerCase() === "\n") contadorSegmentos.push(i);
         }
 
-        cadenaCODECO += 'UNT+' + contadorSegmentos.length + ':' + CODECO.UNT.MESSAGE_REFERENCE_NUMBER + "'" + '\n' +
+        cadenaCODECO += 'UNT+' + contadorSegmentos.length + '+' + CODECO.UNT.MESSAGE_REFERENCE_NUMBER + "'" + '\n' +
             'UNZ+' + CODECO.UNZ.INTERCHANGE_CONTROL_COUNT + '+' + CODECO.UNZ.INTERCHANGE_CONTROL_REFERENCE + "'";
 
         return cadenaCODECO;
