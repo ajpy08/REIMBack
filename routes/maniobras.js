@@ -123,6 +123,8 @@ app.get('', (req, res, netx) => {
 app.get('/maniobra/:id', (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
+  .populate('solicitud', 'blBooking')
+  .populate('naviera', 'nombreComercial')
     .exec((err, maniobra) => {
       if (err) {
         return res.status(500).json({
