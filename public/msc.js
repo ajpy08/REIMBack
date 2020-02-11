@@ -13,7 +13,7 @@ var d = new Date(),
     hr = d.getHours(),
     min = d.getMinutes();
 
-var fechaEnvio = year.toString().substring(2, year.toString().length) + varias.zFill(month, 2) + day;
+var fechaEnvio = year.toString().substring(2, year.toString().length) + varias.zFill(month, 2) + varias.zFill(day, 2);
 var fechaEnvioYYYY = year.toString() + varias.zFill(month, 2) + varias.zFill(day, 2);
 var horaEnvio = varias.zFill(hr.toString(), 2) + varias.zFill(min.toString(), 2);
 
@@ -346,7 +346,7 @@ exports.CreaCODECO = function CreaCODECO(maniobra, referenceNumber) {
             if (cadenaCODECO[i].toLowerCase() === "\n") contadorSegmentos.push(i);
         }
 
-        cadenaCODECO += 'UNT+' + contadorSegmentos.length + ':' + CODECO.UNT.MESSAGE_REFERENCE_NUMBER + "'" + '\n' +
+        cadenaCODECO += 'UNT+' + contadorSegmentos.length + '+' + CODECO.UNT.MESSAGE_REFERENCE_NUMBER + "'" + '\n' +
             'UNZ+' + CODECO.UNZ.INTERCHANGE_CONTROL_COUNT + '+' + CODECO.UNZ.INTERCHANGE_CONTROL_REFERENCE + "'";
 
         return cadenaCODECO;

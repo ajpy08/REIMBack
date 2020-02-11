@@ -106,6 +106,7 @@ app.post('/usuario', mdAutenticacion.verificaToken, (req, res) => {
     password: bcrypt.hashSync(body.password, 10),
     role: body.role,
     empresas: body.empresas,
+    permiso: body.permiso,
     img: body.img,
     observaciones: body.observaciones,
     usuarioAlta: req.usuario._id
@@ -160,8 +161,10 @@ app.put('/usuario/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verifica
     usuario.email = body.email;
     if (body.empresas && body.empresas.length > 0) {
       usuario.empresas = body.empresas;
+      usuario.permiso = body.permiso;
     } else {
       usuario.empresas = undefined;
+      usuario.permiso = undefined;
     }
     usuario.observaciones = body.observaciones;
     usuario.usuarioMod = req.usuario._id;
@@ -349,7 +352,7 @@ app.get('/usuario/:id/enviacorreo', (req, res) => {
                
             });
             
-            var url = 'http://ec2-54-167-155-50.compute-1.amazonaws.com:3000/reset_password?token' + token;
+            var url = 'https://app.reimcontainerpark.com.mx/reset_password?token' + token;
             var cuerpoCorreo = ` Usted está recibiendo este correo porque se ha solicitado que se restablezca la contraseña de su cuenta.` ;
 
             
