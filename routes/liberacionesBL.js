@@ -150,7 +150,6 @@ app.post("/liberacion_bk/", mdAutenticacion.verificaToken, (req, res) => {
 // Actualizar Liberacion
 // ==========================================
 app.put("/liberacion_bk/:id", mdAutenticacion.verificaToken, (req, res) => {
-  console.log('entre');
   var id = req.params.id;
   var body = req.body;
 
@@ -380,7 +379,6 @@ app.put(
     var body = req.body;
 
     Liberaciones.findById(id, (err, liberacion) => {
-      console.log(liberacion);
       if (err) {
         return res.status(500).json({
           ok: false,

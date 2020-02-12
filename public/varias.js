@@ -6,7 +6,7 @@ var maniobras = require('../routes/maniobras');
 exports.ParamsToJSON = function ParamsToJSON(req) {
   var json;
   var filtro = '{';
-  console.log(req.params)
+  // console.log(req.params)
   if (req.params) {
     for (var param in req.params) {
       if (req.params.hasOwnProperty(param)) {
