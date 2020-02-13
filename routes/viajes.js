@@ -177,6 +177,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
       } else {
         maniobra = new Maniobra({
           viaje: viaje._id,
+          naviera: viaje.naviera,
           contenedor: element.contenedor,
           tipo: element.tipo,
           peso: 'VACIO_IMPORT',
