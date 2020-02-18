@@ -350,11 +350,10 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 
   Solicitud.findById(id, (err, solicitud) => {
 
-    console.log('entre en solicitud');
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al buscar viaje',
+        mensaje: 'Error al buscar Solicitud',
         errors: err
       });
     }
@@ -652,7 +651,7 @@ app.delete('/solicitud/maniobra/:id', mdAutenticacion.verificaToken, (req, res) 
           if(err) {
             return res.status(500).json({
               ok: false,
-              mensaje: 'Error al intentar borrar el viaje',
+              mensaje: 'Error al intentar borrar la Solicitud',
               errors: err
             });
           }

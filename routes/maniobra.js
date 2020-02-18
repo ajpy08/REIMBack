@@ -5,7 +5,7 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
-
+var Solicitud = require('../models/solicitud');
 var fileUpload = require('express-fileupload');
 var fs = require('fs');
 var uuid = require('uuid/v1');
@@ -299,6 +299,67 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 
 });
+
+// // ================================================
+// // ELIMINA LA MANIOBRA DE LA SOLICITUD YA APROBADA 
+// // ================================================
+
+app.delete('/eliminarManiobra/Solicitud/:id',  (req, res) => {
+  var id = req.params.id;
+  Maniobra.findById(id)
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+          
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe un maniobra con ese ID' }
+        });
+      }
+
+      if(maniobra.estatus != "TRANSITO") {
+        
+        return res.status(400).json({
+          ok: false,
+          mensaje: { message: 'La maniobra no esta en TRANSITO' },
+          errors: { message: 'La maniobra no esta en TRANSITO' }
+        });
+      }
+      Maniobra.findByIdAndRemove(id, (err, maniobraBorrada) => {
+
+            if (err) {
+              return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar maniobra',
+                errors: err
+              });
+            }
+        
+            if (!maniobraBorrada) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe una maniobra con ese id',
+                errors: { message: 'No existe una maniobra con ese id' }
+              });
+            }
+
+       
+            res.status(200).json({
+              ok: true,
+              maniobra: maniobraBorrada
+            });
+          });      
+    });
+});
+
 
 // // =======================================
 // // Borrar Maniobra por id
