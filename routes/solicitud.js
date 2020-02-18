@@ -17,7 +17,7 @@ app.put('/apruebadescarga/:id', mdAutenticacion.verificaToken, (req, res) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al buscar viaje',
+        mensaje: 'Error al buscar Solicitud',
         errors: err
       });
     }
