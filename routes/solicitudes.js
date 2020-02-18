@@ -576,8 +576,57 @@ app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res)
   });
 });
 
+// ==========================================
+// Aprobar Solicitud con maniobra
+// ==========================================
+app.put('/solicitud/:id/actualizaBLBooking/:blBooking/', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var blBooking = req.params.blBooking;
+  Solicitud.findById(id, (err, solicitud) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar viaje',
+        errors: err
+      });
+    }
+    if (!solicitud) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La solicitud con el id ' + id + ' no existe',
+        errors: { message: 'No existe solicitud con ese ID' }
+      });
+    }
 
+    if (solicitud.blBooking !== blBooking && blBooking != null && blBooking != undefined && blBooking != "undefined") {
+      solicitud.blBooking = blBooking;
+      solicitud.fMod = Date.now();
+      solicitud.usuarioMod = req.usuario._id;
 
+      solicitud.save((err, solicitudGuardado) => {
+        if (err) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'Error al actualizar la solicitud',
+            errors: err
+          });
+        }
+  
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Solicitud de Modificada',
+          solicitud: solicitudGuardado
+        });
+      });
+    } else {
+      res.status(200).json({
+        ok: true,
+        mensaje: "No se realizaron cambios",
+        solicitud: solicitud
+      });
+    }
+  });
+});
 
 // =======================================
 // Borrar Solicitud
