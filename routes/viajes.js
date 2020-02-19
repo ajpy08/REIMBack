@@ -329,7 +329,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   var contenedor = req.query.contenedor;
   var tipo = req.query.tipo;
   var peso = req.query.peso;
-  var patio = req.query.patio;
+  var patio = req.query.patio != undefined ? req.query.patio : undefined;
   var destinatario = req.query.destinatario;
   if (peso == 'VACIO') {
     maniobra = new Maniobra({
