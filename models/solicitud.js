@@ -55,10 +55,10 @@ var solicitudScheme = new Schema({
 
 solicitudScheme.plugin(uniqueValidator, { message: '{PATH} debe ser unico' })
 
-solicitudScheme.pre('save', function(next) {
+solicitudScheme.pre('save', function (next) {
   var doc = this;
   if (doc.estatus === 'APROBADA' && doc.tipo === 'C') {
-    doc.contenedores.forEach(function(element, index) {
+    doc.contenedores.forEach(function (element, index) {
       if (element.maniobra == null || element.maniobra == undefined || element.maniobra == '') {
         var maniobra;
         maniobra = new Maniobra({
@@ -89,9 +89,18 @@ solicitudScheme.pre('save', function(next) {
   next();
 });
 
-solicitudScheme.pre('remove', function(next) {
-  Maniobra.remove({'solicitud': this._id }).exec()
-  next();
+solicitudScheme.pre('remove', function (next) {
+  if (this.tipo == 'C') {
+    Maniobra.remove({ 'solicitud': this._id }).exec()
+    next();
+  } else {
+    if (this.tipo == 'D') {
+      Maniobra.updateMany({ $unset: {'solicitud': this._id } }).exec();
+      next();
+    } else {
+      next();
+    }
+  }
 });
 
 
