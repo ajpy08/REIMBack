@@ -5,7 +5,6 @@ var app = express();
 var mongoose = require('mongoose');
 var Solicitud = require('../models/solicitud');
 var Maniobra = require('../models/maniobra');
-const sentMail = require('./sendAlert');
 
 // ==========================================
 // Aprobar Solicitud con maniobra
