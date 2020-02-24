@@ -9,6 +9,7 @@ var Maniobra = require("../models/maniobra");
 var moment = require("moment");
 const sentMail = require("./sendAlert");
 var varias = require("../public/varias");
+var correosTI = require('../config/config').correosTI;
 
 // =======================================
 // Obtener liberaciones TODAS
@@ -557,7 +558,7 @@ app.get("/liberacion/:id/enviacorreo", (req, res) => {
 
               sentMail(
                 agrupado[g][0].maniobra.transportista.razonSocial,
-                "rgarcia@tlreim.com.mx",
+                correosTI,
                 "liberacion de " + tipo + " Aprobada",
                 cuerpoCorreo,
                 "emailAlert"
