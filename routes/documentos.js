@@ -46,7 +46,8 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
       if (err) {
         console.error('ERROR EN CALLBACK ' + img);
         res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
-      } else {
+      } else {        
+        res.setHeader('Content-disposition', 'atachment; filename=' + img);       
         res.setHeader('Content-length', data.ContentLength);
         res.send(data.Body);
       }
