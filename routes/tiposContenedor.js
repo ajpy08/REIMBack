@@ -57,7 +57,9 @@ app.get('/tipoContenedor/:id', (req, res) => {
 //  Obtener tipo Contenedor por Tipo
 // ==========================================
 app.get('/tipoCont/:tipo', (req, res) => {
-  var tipo = req.params.tipo;
+  var t = req.params.tipo;
+  var tipo = unescape(t);
+  console.log(tipo)
 
   TipoContenedor.find({ tipo: tipo }).exec(
     (err, tipoContenedor) => {
