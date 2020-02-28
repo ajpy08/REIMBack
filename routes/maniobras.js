@@ -367,22 +367,26 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('cliente', 'razonSocial nombreComercial')
     .populate('solicitud', 'blBooking')
     .populate('agencia', 'razonSocial nombreComercial')
-    .populate('transportista', 'razonSocial nombreComercial')
-    .populate('viaje', 'viaje ')
-    .populate('solicitud', 'viaje blBooking')
     .populate('buque', 'nombre')
+    .populate('transportista', 'razonSocial nombreComercial')
+    .populate('viaje', 'viaje')
+    .populate('solicitud', 'viaje blBooking')
     .populate({
-      path: 'viaje',
-      select: 'viaje',
-      populate: {
-        path: 'buque',
-        select: 'nombre'
-      },
+      path: "viaje",
+      select: "viaje",
       populate: {
         path: "naviera",
         select: 'nombreComercial'
       }
     })
+      .populate({
+        path: "viaje",
+        select: "viaje",
+        populate: {
+          path: "buque",
+          select: "nombre"
+        }
+      })
 
 
     .exec((err, maniobra) => {
