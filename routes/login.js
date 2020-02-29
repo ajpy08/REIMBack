@@ -154,7 +154,7 @@ function obtenerMenu(ROLE) {
     menu[3].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
 
     //TRANSPORTISTA
-    menu[4].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
+    menu[4].submenu.unshift({ titulo: 'Papeleta', url: '/solicitudes_transportista' });
     menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
 
@@ -311,7 +311,7 @@ function obtenerMenu(ROLE) {
         ]
       },
     ];
-    menu[1].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes_transportista' });
+    menu[1].submenu.unshift({ titulo: 'Papeleta', url: '/solicitudes_transportista' });
     menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[1].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
 
