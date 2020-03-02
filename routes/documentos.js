@@ -3,11 +3,12 @@ var entorno = require('../config/config').config();
 var app = express();
 var path = require('path');
 var AWS = require('aws-sdk');
+var AWS = require('aws-sdk/global');
 var variasBucket = require('../public/variasBucket');
 var s3Zip = require('s3-zip');
 var XmlStream = require('xml-stream');
 const fs = require('fs')
-const join = require('path').join
+const join = require('path').join;
 
 app.get('/documentoxtipo/:tipo/:nombre', (req, res, netx) => {
   var tipo = req.params.tipo;
@@ -50,8 +51,8 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
       if (err) {
         console.error('ERROR EN CALLBACK ' + img);
         res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
-      } else {        
-        res.setHeader('Content-disposition', 'atachment; filename=' + img);       
+      } else {
+        res.setHeader('Content-disposition', 'atachment; filename=' + img);
         res.setHeader('Content-length', data.ContentLength);
         res.send(data.Body);
       }
@@ -65,57 +66,78 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
 app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
   var idManiobra = req.params.id;
   var lavado_reparacion = req.params.LR;
-  var pathFotos = "";
-  var carpeta = "";
+  var folder = "";
 
-  if(lavado_reparacion === 'L'){
-    pathFotos = `maniobras/${idManiobra}/fotos_lavado/`;
+  if (lavado_reparacion === 'L') {
+    folder = `maniobras/${idManiobra}/fotos_lavado/`;
 
   } else {
-    if(lavado_reparacion === 'R') {
-      pathFotos = `maniobras/${idManiobra}/fotos_reparacion/`;
+    if (lavado_reparacion === 'R') {
+      folder = `maniobras/${idManiobra}/fotos_reparacion/`;
     }
   }
-  var s3 = new AWS.S3(entorno.CONFIG_BUCKET, {region: entorno.CONFIG_BUCKET.region});
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+
+
   var region = entorno.CONFIG_BUCKET.region;
   var bucket = entorno.BUCKET;
+  var Key = entorno.CONFIG_BUCKET.secretAccessKey;
 
   var params = {
     Bucket: entorno.BUCKET,
-    Prefix: pathFotos,
+    Prefix: folder,
   }
-  var filesArray = []
-  var files = s3.listObjects(params).createReadStream()
-  var xml = new XmlStream(files)
-  xml.collect('Key')
-  xml.on('endElement: Key', function(item) {
-    if(lavado_reparacion === 'L'){
-      carpeta = '/fotos_lavado/'
-    }else {
-      carpeta = '/fotos_reparacion/'
+
+
+
+  s3.listObjects(params, function (err, data) {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se encontraron fotos',
+        errors: { message: 'No existen fotos para la maniobra con ID ' + idManiobra }
+      });
+    } else {
+
+      const files = [];
+      data.Contents.forEach(d => {
+        const img = d.Key.substr(d.Key.lastIndexOf('/') + 1, d.Key.length - 1);
+        files.push(img);
+      });
+      const output = fs.createWriteStream(join(__dirname, `${idManiobra}.zip`));
+
+      s3Zip.archive({ region: region, bucket: bucket, key:Key, debug: true }, folder, files).pipe(res);
+
+      // res.status(200).json({
+      //   ok:true,
+      //   archive: x
+      // });
     }
-    
-    filesArray.push(item['$text'].substr(carpeta.length -1))
-
   })
 
-  xml.on('end', function(){
-    zip(filesArray)
 
-  })
+  // const filesArray = [];
+  // const xml = new XmlStream(files);
+  // xml.collect('Key');
+  // xml.on('endElement: Key', function(item) {
 
-  function zip(files){
-    console.log(files)
-    var output = fs.createWriteStream(join(__dirname, 'prueba.zip'))
-    
-    s3Zip.archive({region: region, bucket: bucket}, carpeta, files).pipe(output)
+  //   filesArray.push(item['$text'].substr(lavado_reparacion.length -1));
+  // });
 
-      
+  // xml
+  //   .on('end', function () {
+  //     zip(filesArray)
 
+  //   });
 
-  }
+  // function zip(files) {
+  //   console.log(files);
+  //   const output = fs.createWriteStream(join(__dirname, `${idManiobra}.zip`))
+  //   s3Zip.archive({region: region, bucket: bucket, preserveFolderStructure: true, debug: true }, lavado_reparacion , files, output)
+  //     .pipe(res);
+  // };
 
-  // s3Zip.archive(params, function(err, data){
+  // s3Zip.archive(function(err, data){
   //   if(err) {
   //     return res.status(400).json({
   //       ok: false,
@@ -126,72 +148,13 @@ app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
   //     return res.status(200).json({
   //       ok: true,
   //       mensaje: 'Vamos Bien',
+  //       fotos: data.Contents
 
   //   })
-  //     console.log('Vamos Bien');
   //   }
   // })
 })
 
-
-  // ESTE ES EL BUNO HASRA EL MOMENTO LO DEJO PARA REFERENCIA, ELIMINAR CUANDO EL DE ARRIBA ESTE BIEN///
-  //
-// app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
-//   var idManiobra = req.params.id;
-//   var lavado_reparacion = req.params.LR;
-//   var pathFotos = "";
-
-//   if(lavado_reparacion === 'L'){
-//     pathFotos = `maniobras/${idManiobra}/fotos_lavado/`;
-
-//   } else {
-//     if(lavado_reparacion === 'R') {
-//       pathFotos = `maniobras/${idManiobra}/fotos_reparacion/`;
-//     }
-//   }
-//   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
-//   const region = entorno.CONFIG_BUCKET.region;
-//   const bucket = entorno.BUCKET;
-
-//   var params = {
-//     Bucket: entorno.BUCKET,
-//     Prefix: pathFotos,
-//   }
-//   const filesArray = []
-//   const files = s3.listObjects(params).createReadStream()
-//   const xml = new XmlStream(files)
-//   xml.collect('Key')
-//   xml.on('endElement: Key', function(item) {
-//     filesArray.push(item['$text'].substr(bucket.length))
-//   })
-
-//   xml.on('end', function(){
-//     zip(filesArray)
-//   })
-
-//   function zip(files){
-//     console.log(files)
-//     const output = fs.createWriteStream(join(__dirname, 'zip.zip'))
-    
-//       s3Zip.archive({region: region, bucket: bucket, preserveFolderStructure: true}, Prefix, files)
-//       .pipe(output, res) 
-
-        
-//           // if(err) {
-//           //   return res.status(400).json({
-//           //     ok:false,
-//           //     mensaje: 'NO SE PUDO DESCARGAR EL ARCHIVO ZIP',
-//           //     errors: err
-//           //   });
-//           // } else {
-//           //   return res.status(200).json({
-//           //     ok: true,
-//           //     mensaje: 'Se descargo archivo ZIP',
-//           //     fotos: data.Contents 
-//           //   })
-//           // }
-//         }
-//       });
 
 
 // Fotos Lavados y Reparaciones de la carpeta
@@ -215,7 +178,7 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
     Prefix: pathFotos,
   };
 
-  s3.listObjects(params, function(err, data) {
+  s3.listObjects(params, function (err, data) {
     if (err) {
       // console.log(err, err.stack);
       return res.status(400).json({
