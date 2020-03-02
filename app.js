@@ -4,6 +4,10 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var entorno = require('./config/config').config();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+
+server.listen(4000)
 
 
 // Inicializar variables
@@ -138,5 +142,25 @@ app.use('/', appRoutes);
 app.listen(3000, () => {
   console.log('Express server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
   console.log(entorno.CONEXION_MONGO);
-  console.log(process.env.NODE_ENV);
+  if (process.env.NODE_ENV) {
+    console.log(process.env.NODE_ENV);    
+  } else {
+    console.log('Sin NODE_ENV')
+  }
+});
+
+// socket io
+io.on('connection', function (socket) {
+  socket.on('newdata', function (data) {
+      io.emit('new-data', { data: data });
+      console.log('Agregaste un dato!!! =D')
+  });
+  socket.on('updatedata', function (data) {
+    io.emit('update-data', { data: data });
+    console.log('Actualizaste un dato!!! =)')
+  });
+  socket.on('deletedata', function (data) {
+    io.emit('delete-data', { data: data });
+    console.log('Eliminaste un dato!!! =(')
+  });
 });
