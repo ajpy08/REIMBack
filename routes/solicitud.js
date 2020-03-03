@@ -75,7 +75,7 @@ app.put('/solicitud/:id/contenedor/:contenedor', mdAutenticacion.verificaToken, 
 });
 
 // ==========================================
-// eLIMINAR CONTENEDOR DE LA SOLICITUD
+// ELIMINAR CONTENEDOR DE LA SOLICITUD
 // ==========================================
 
 app.put('/soli/Contenedor/:id&:maniobra',mdAutenticacion.verificaToken, (req, res) => {
