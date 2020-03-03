@@ -10,6 +10,8 @@ var Maniobra = require('../models/maniobra');
 var moment = require('moment');
 const sentMail = require('../routes/sendAlert');
 var correosTI = require('../config/config').correosTI;
+var correosContainerPark = require('../config/config').correosContainerPark;
+var Agencia = require('../models/agencia');
 
 // =======================================
 // Obtener solicitudes TODAS
@@ -175,20 +177,23 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               error += 'Transportista - '
             } else { correos += agrupado[g][0].transportista.correo + ','; }
 
-            // if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
-            //   error += 'Agencia - '
-            // } else { correos += solicitud.agencia.correo; }
+            if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
+              error += 'Agencia - '
+            } else { correos += solicitud.agencia.correo; }
 
             if (correos != null) {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
               }
 
-              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correosTI,
+              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
                 'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
-
-              // sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
-              //   'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
+            } else {
+              cuerpoCorreo += `
+              No se pudo enviar este correo por que la solicitud no contaba con algún correo para enviar.
+            `;
+              sentMail('EQUIPO DE TI', correosTI,
+                'No se pudo enviar la Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
             }
           }
         }
@@ -258,6 +263,7 @@ app.get('/solicitud/:id/includes', (req, res) => {
 app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var solicitud;
+  var razonSocialAgencia = 'Se';
   if (body.tipo === 'D') {
     solicitud = new Solicitud({
       agencia: body.agencia,
@@ -317,6 +323,29 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
       usuarioAlta: req.usuario._id
     });
   }
+
+  
+  Agencia.findById({ _id: solicitud.agencia })
+    .exec((err, agencia) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar agencia',
+          errors: err
+        });
+      }
+      if (!agencia) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La agencia con el id ' + id + 'no existe',
+          errors: { message: 'No existe una agencia con ese ID' }
+        });
+      }
+
+      this.razonSocialAgencia = agencia.razonSocial;
+    });
+
+
   if (solicitud.tipo == 'D') {
     variasBucket.MoverArchivoBucket('temp/', solicitud.rutaBL, 'solicitudes/');
   }
@@ -333,6 +362,39 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
         errors: err
       });
     }
+    var tipo = solicitud.tipo == 'D' ? 'Descarga' : solicitud.tipo == 'C' ? 'Carga' : 'TIPO';
+    nombre = '';
+    var cuerpoCorreo = '';
+
+    cuerpoCorreo = `${this.razonSocialAgencia} ha solicitado las siguientes ${tipo}s: 
+            
+    `;
+    solicitud.contenedores.forEach(contenedor => {
+      if (solicitud.tipo === 'D' && contenedor.maniobra.folio && contenedor.maniobra.folio !== null && contenedor.maniobra.folio !== undefined) {
+        cuerpoCorreo += `Folio: ${contenedor.maniobra.folio} `;
+      }
+      if (contenedor.contenedor) {
+        cuerpoCorreo += `Contenedor: ${contenedor.contenedor} `;
+      }
+      if (contenedor.tipo) {
+        cuerpoCorreo += `Tipo: ${contenedor.tipo} `;
+      }
+
+      if (contenedor.maniobra && contenedor.maniobra.grado) {
+        cuerpoCorreo += `Grado: ${contenedor.maniobra.grado} 
+        `;
+      }
+
+      cuerpoCorreo += `http://reimcontainerpark.com.mx/#/solicitudes/aprobaciones/aprobar_${tipo.toLowerCase()}/${solicitud._id}`;
+
+      cuerpoCorreo += `
+    
+    `;
+    });
+
+    sentMail('Estimado Container Park', correosContainerPark,
+      'Solicitud de ' + tipo + ' Creada', cuerpoCorreo, 'emailAlert');
+
     res.status(201).json({
       ok: true,
       solicitud: solicitudGuardado
@@ -611,7 +673,7 @@ app.put('/solicitud/:id/actualizaBLBooking/:blBooking/', mdAutenticacion.verific
             errors: err
           });
         }
-  
+
         res.status(200).json({
           ok: true,
           mensaje: 'Solicitud de Modificada',
@@ -727,7 +789,7 @@ app.delete('/solicitud/maniobra/:id', mdAutenticacion.verificaToken, (req, res) 
 // SE BORRARA LA SOLICITUD DE CADA MANIOBRA DE LA TABLA SOLICITUD DESCARGA
 // ==============================================================================
 
-app.put('/solicitud/maniobra/descarga/:id',mdAutenticacion.verificaToken, (req, res) => {
+app.put('/solicitud/maniobra/descarga/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.find({
     $or: [

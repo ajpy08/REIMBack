@@ -149,7 +149,7 @@ function obtenerMenu(ROLE) {
 
     //NAVIERA
 
-    menu[3].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/liberaciones_bk' });
+    //menu[3].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/liberaciones_bk' });
     menu[3].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[3].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
 
