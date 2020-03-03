@@ -62,8 +62,7 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
 
 
 //DESCARGAR TODO LA CARPETA DE IMAGENES COMPRIMIDA //
-
-app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
+app.get('/maniobra/:id/zipLR/:LR', (req, res, netx) => {
   var idManiobra = req.params.id;
   var lavado_reparacion = req.params.LR;
   var folder = "";
@@ -77,20 +76,17 @@ app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
     }
   }
   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+  
 
 
-  var region = entorno.CONFIG_BUCKET.region;
   var bucket = entorno.BUCKET;
-  var Key = entorno.CONFIG_BUCKET.secretAccessKey;
 
   var params = {
     Bucket: entorno.BUCKET,
     Prefix: folder,
   }
 
-
-
-  s3.listObjects(params, function (err, data) {
+  s3.listObjectsV2(params, function (err, data) {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -104,55 +100,29 @@ app.get('/maniobra/:id/zipLR/:LR/', (req, res, netx) => {
         const img = d.Key.substr(d.Key.lastIndexOf('/') + 1, d.Key.length - 1);
         files.push(img);
       });
-      const output = fs.createWriteStream(join(__dirname, `${idManiobra}.zip`));
+      // const output = fs.createWriteStream(join(res + `${idManiobra}.zip`));
 
-      s3Zip.archive({ region: region, bucket: bucket, key:Key, debug: true }, folder, files).pipe(res);
+       s3Zip.archive({ s3: s3 , bucket: bucket , debug: true }, folder, files ).pipe(res, `${idManiobra}.zip`);
+      
+
+      
+      //  output.on('close', () => {
+      //    console.log('Cerrado');
+      //    res.download(res.path, 'algo.zip');
+      //    return;
+      //  });
+      //  return;
+
+      //res.send(s3Zip.archive({ region: region, bucket: bucket, debug: true, preserveFolderStructure: true  }, folder, files).pipe(output));
+      // res.setHeader('Content-disposition', 'atachment; filename=algo.zip'); 
+      // res.setHeader('Content-length',data.Contents);
 
       // res.status(200).json({
       //   ok:true,
-      //   archive: x
+      //   archive: output
       // });
     }
   })
-
-
-  // const filesArray = [];
-  // const xml = new XmlStream(files);
-  // xml.collect('Key');
-  // xml.on('endElement: Key', function(item) {
-
-  //   filesArray.push(item['$text'].substr(lavado_reparacion.length -1));
-  // });
-
-  // xml
-  //   .on('end', function () {
-  //     zip(filesArray)
-
-  //   });
-
-  // function zip(files) {
-  //   console.log(files);
-  //   const output = fs.createWriteStream(join(__dirname, `${idManiobra}.zip`))
-  //   s3Zip.archive({region: region, bucket: bucket, preserveFolderStructure: true, debug: true }, lavado_reparacion , files, output)
-  //     .pipe(res);
-  // };
-
-  // s3Zip.archive(function(err, data){
-  //   if(err) {
-  //     return res.status(400).json({
-  //       ok: false,
-  //       mensaje: 'Error de descarga',
-  //       errors: err
-  //     });
-  //   } else {
-  //     return res.status(200).json({
-  //       ok: true,
-  //       mensaje: 'Vamos Bien',
-  //       fotos: data.Contents
-
-  //   })
-  //   }
-  // })
 })
 
 
