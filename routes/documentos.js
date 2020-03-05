@@ -6,7 +6,6 @@ var AWS = require('aws-sdk');
 var AWS = require('aws-sdk/global');
 var variasBucket = require('../public/variasBucket');
 var s3Zip = require('s3-zip');
-var XmlStream = require('xml-stream');
 const fs = require('fs')
 const join = require('path').join;
 
