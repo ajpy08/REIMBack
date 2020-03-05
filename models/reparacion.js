@@ -3,7 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var reparacionSchema = new Schema({
-    descripcion: { type: String, required: true },
+    reparacion: { type: String, required: true },
     costo: { type: Schema.Types.Number, required: true },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
