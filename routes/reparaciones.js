@@ -10,7 +10,7 @@ app.get('/', (req, res, next) => {
 
   Reparacion.find({})
     .populate('usuarioAlta', 'nombre email')
-    .sort({ descripcion: 1 })
+    .sort({ reparacion: 1 })
     .exec(
       (err, reparaciones) => {
         if (err) {
@@ -64,7 +64,7 @@ app.get('/reparacion/:id', (req, res) => {
 app.post('/reparacion', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var reparacion = new Reparacion({
-    descripcion: body.descripcion,
+    reparacion: body.reparacion,
     costo: body.costo,
     usuarioAlta: req.usuario._id
   });
@@ -105,7 +105,7 @@ app.put('/reparacion/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
 
-    reparacion.descripcion = body.descripcion;
+    reparacion.reparacion = body.reparacion;
     reparacion.costo = body.costo;
     reparacion.usuarioMod = req.usuario._id;
     reparacion.fMod = new Date();

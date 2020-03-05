@@ -251,7 +251,7 @@ function buscarBuques(busqueda, regex) {
 
 function buscarReparaciones(busqueda, regex) {
     return new Promise((resolve, reject) => {
-        Reparacion.find({ descripcion: regex })
+        Reparacion.find({ reparacion: regex })
             .populate('usuario', 'nombre email img')
             .exec((err, reparacion) => {
                 if (err) {
