@@ -221,10 +221,7 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
               correos = correos.substring(0, correos.length - 1);
             }
 
-            // sentMail(maniobra.transportista.razonSocial, correos,
-            //   'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
-
-            sentMail(maniobra.transportista.razonSocial, 'jpuc@mieryteran.com.mx',
+            sentMail(maniobra.transportista.razonSocial, correos,
               'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
 
           } else {

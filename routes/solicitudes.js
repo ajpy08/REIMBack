@@ -195,10 +195,7 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
                 correos = correos.substring(0, correos.length - 1);
               }
 
-              // sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
-              //   'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
-
-              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, 'jpuc@mieryteran.com.mx, rgarcia@tlreim.com.mx',
+              sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
                 'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
             } else {
               cuerpoCorreo += `
@@ -404,10 +401,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
     `;
     });
 
-    // sentMail('Estimado Container Park', correosContainerPark,
-    //   'Solicitud de ' + tipo + ' Creada', cuerpoCorreo, 'emailAlert');
-
-    sentMail('Estimado Container Park', 'jpuc@mieryteran.com.mx, rgarcia@tlreim.com.mx',
+    sentMail('Estimado Container Park', correosContainerPark,
       'Solicitud de ' + tipo + ' Creada', cuerpoCorreo, 'emailAlert');
 
     res.status(201).json({
