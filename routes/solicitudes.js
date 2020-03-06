@@ -169,18 +169,27 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
 
             var correos = '';
             var error = '';
+            
             if (solicitud.correo === '' || solicitud.correo === undefined) {
               error += 'Solicitud - '
-            } else { correos += solicitud.correo + ','; }
+            } else if (!correos.includes(solicitud.correo)) {
+              correos += solicitud.correo + ',';
+            }
 
-            if (agrupado[g][0].transportista.correo === '' || agrupado[g][0].transportista.correo === undefined) {
+            if (agrupado[g][0].maniobra.transportista.correo === '' ||
+              agrupado[g][0].maniobra.transportista.correo === undefined) {
               error += 'Transportista - '
-            } else { correos += agrupado[g][0].transportista.correo + ','; }
+            } else if (!correos.includes(agrupado[g][0].maniobra.transportista.correo)) {
+              correos += agrupado[g][0].maniobra.transportista.correo + ',';
+            }
 
             if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
               error += 'Agencia - '
-            } else { correos += solicitud.agencia.correo; }
+            } else if (!correos.includes(solicitud.agencia.correo)) {
+              correos += solicitud.agencia.correo;
+            }
 
+            console.log(correos);
             if (correos != null) {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
@@ -324,7 +333,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
     });
   }
 
-  
+
   Agencia.findById({ _id: solicitud.agencia })
     .exec((err, agencia) => {
       if (err) {
