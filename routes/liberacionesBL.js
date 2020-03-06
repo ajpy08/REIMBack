@@ -539,12 +539,12 @@ app.get("/liberacion/:id/enviacorreo", (req, res) => {
             }
 
             if (
-              agrupado[g][0].transportista.correo === "" ||
-              agrupado[g][0].transportista.correo === undefined
+              agrupado[g][0].maniobra.transportista.correo === "" ||
+              agrupado[g][0].maniobra.transportista.correo === undefined
             ) {
               error += "Transportista - ";
             } else {
-              correos += agrupado[g][0].transportista.correo + ",";
+              correos += agrupado[g][0].maniobra.transportista.correo + ",";
             }
 
             if (liberacion.agencia.correo === '' || liberacion.agencia.correo === undefined) {
