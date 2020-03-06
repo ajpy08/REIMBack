@@ -124,9 +124,7 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
-
-
-
+    
     menu[1].submenu.unshift({ titulo: 'Tipos Contenedores', url: '/tipos_contenedores' });
     menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
     menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
@@ -138,7 +136,8 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
     
     //Solo Admin puede entrar a los siguiente
-    if (ROLE === 'ADMIN_ROLE'){
+    if (ROLE === 'ADMIN_ROLE'){      
+      menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
     }
 
