@@ -221,8 +221,11 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
               correos = correos.substring(0, correos.length - 1);
             }
 
-            sentMail(maniobra.transportista.razonSocial, correos,
-              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+            // sentMail(maniobra.transportista.razonSocial, correos,
+            //   'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
+
+            sentMail(maniobra.transportista.razonSocial, 'jpuc@mieryteran.com.mx',
+              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
 
           } else {
             return res.status(500).json({
@@ -242,6 +245,8 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
       var mensaje = '';
       if (error != '' && error != undefined && error.length > 0) {
         mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo y solo se enviará a ' + correos;
+      } else {
+        mensaje = 'Correo enviado a ' + correos;
       }
 
       res.status(200).json({

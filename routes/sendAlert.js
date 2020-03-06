@@ -27,7 +27,7 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url)
 
     smtpTransport.use('compile', hbs(handlebarsOptions));
 
-    console.log(correoReceptor);
+    //console.log(correoReceptor);
     var data = {
         to: correoReceptor,
         from: email,
