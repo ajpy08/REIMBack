@@ -167,6 +167,7 @@ app.put('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
     operador.transportista = body.transportista;
     operador.nombre = body.nombre;
     operador.usuario = req.usuario._id;
+    operador.licencia = body.licencia;
     operador.vigenciaLicencia = body.vigenciaLicencia;
     operador.activo = body.activo;
     operador.usuarioMod = req.usuario._id;
