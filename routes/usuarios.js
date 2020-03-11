@@ -21,7 +21,7 @@ var varias = require('../public/varias');
 app.get('/', (req, res, netx) => {
   Usuario.find({})
     .populate('empresas', 'razonSocial nombreComercial')
-    .sort({ nombre: 1 })
+    .sort({ nombre: 1})
     .exec(
       (err, usuarios) => {
         if (err) {
