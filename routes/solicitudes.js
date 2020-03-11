@@ -51,6 +51,7 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
     .populate('viaje', 'viaje')
     .populate('usuarioAlta', 'nombre email')
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
+    .sort({ fAlta: -1 })
     .exec(
       (err, solicitudes) => {
         if (err) {
