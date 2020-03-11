@@ -16,8 +16,8 @@ var Usuario = require('../models/usuario');
 // ==========================================
 app.get('/renuevatoken', mdAutenticacion.verificaToken, (req, res) => {
   console.log('renove token');
-  var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 90 }); // 4 horas
-  // var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 1000 }); // 4 horas
+  var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 14400 }); // 4 horas
+  // var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 90 }); // 1.5 min
   res.status(200).json({
     ok: true,
     token: token
@@ -63,8 +63,8 @@ app.post('/', (req, res) => {
     }
     // Crear token
     usuarioDB.password = '=)';
-    // var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
-    var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 70 }); // 1 min
+    var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
+    //var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 70 }); // 1.1 min
 
     Usuario.findByIdAndUpdate({ _id: usuarioDB._id }, { status: true }).exec(function (err, user) {
       if (!user) {
