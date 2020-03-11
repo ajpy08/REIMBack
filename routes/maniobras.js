@@ -222,7 +222,7 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
             }
 
             sentMail(maniobra.transportista.razonSocial, correos,
-              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo);
+              'Solicitud de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
 
           } else {
             return res.status(500).json({
@@ -242,6 +242,8 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
       var mensaje = '';
       if (error != '' && error != undefined && error.length > 0) {
         mensaje = 'No se enviará el correo a ' + error + ' por que no cuenta con correo y solo se enviará a ' + correos;
+      } else {
+        mensaje = 'Correo enviado a ' + correos;
       }
 
       res.status(200).json({
@@ -367,22 +369,26 @@ app.get('/maniobra/:id/includes', (req, res) => {
     .populate('cliente', 'razonSocial nombreComercial')
     .populate('solicitud', 'blBooking')
     .populate('agencia', 'razonSocial nombreComercial')
-    .populate('transportista', 'razonSocial nombreComercial')
-    .populate('viaje', 'viaje ')
-    .populate('solicitud', 'viaje blBooking')
     .populate('buque', 'nombre')
+    .populate('transportista', 'razonSocial nombreComercial')
+    .populate('viaje', 'viaje')
+    .populate('solicitud', 'viaje blBooking')
     .populate({
-      path: 'viaje',
-      select: 'viaje',
-      populate: {
-        path: 'buque',
-        select: 'nombre'
-      },
+      path: "viaje",
+      select: "viaje",
       populate: {
         path: "naviera",
         select: 'nombreComercial'
       }
     })
+      .populate({
+        path: "viaje",
+        select: "viaje",
+        populate: {
+          path: "buque",
+          select: "nombre"
+        }
+      })
 
 
     .exec((err, maniobra) => {

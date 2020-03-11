@@ -539,17 +539,17 @@ app.get("/liberacion/:id/enviacorreo", (req, res) => {
             }
 
             if (
-              agrupado[g][0].transportista.correo === "" ||
-              agrupado[g][0].transportista.correo === undefined
+              agrupado[g][0].maniobra.transportista.correo === "" ||
+              agrupado[g][0].maniobra.transportista.correo === undefined
             ) {
               error += "Transportista - ";
             } else {
-              correos += agrupado[g][0].transportista.correo + ",";
+              correos += agrupado[g][0].maniobra.transportista.correo + ",";
             }
 
-            // if (liberacion.agencia.correo === '' || liberacion.agencia.correo === undefined) {
-            //   error += 'Agencia - '
-            // } else { correos += liberacion.agencia.correo; }
+            if (liberacion.agencia.correo === '' || liberacion.agencia.correo === undefined) {
+              error += 'Agencia - '
+            } else { correos += liberacion.agencia.correo; }
 
             if (correos != null) {
               if (correos.endsWith(",")) {
@@ -558,14 +558,17 @@ app.get("/liberacion/:id/enviacorreo", (req, res) => {
 
               sentMail(
                 agrupado[g][0].maniobra.transportista.razonSocial,
-                correosTI,
+                correos,
                 "liberacion de " + tipo + " Aprobada",
                 cuerpoCorreo,
                 "emailAlert"
               );
-
-              // sentMail(agrupado[g][0].maniobra.transportista.razonSocial, correos,
-              //   'liberacion de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
+            } else {
+              cuerpoCorreo += `
+              No se pudo enviar este correo por que la solicitud no contaba con algún correo para enviar.
+            `;
+              sentMail('EQUIPO DE TI', correosTI,
+                'No se pudo enviar la liberacion de ' + tipo + ' Aprobada', cuerpoCorreo, 'emailAlert');
             }
           }
         }
