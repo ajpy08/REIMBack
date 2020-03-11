@@ -157,10 +157,10 @@ io.on('connection', function (socket) {
   });
   socket.on('loginuser', function (data) {
     io.emit('login-user', { data: data });
-    console.log('Alguien inicio sesion!!! =D');
+    // console.log('Alguien inicio sesion!!! =D');
   });
   socket.on('logoutuser', function (data) {
     io.emit('logout-user', { data: data });
-    console.log('Alguien cerró sesion!!! =(');
+    // console.log('Alguien cerró sesion!!! =(');
   });
 });
