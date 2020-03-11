@@ -289,6 +289,45 @@ app.put('/usuario/:id/habilita_deshabilita', [mdAutenticacion.verificaToken, mdA
   });
 });
 
+// =======================================
+// Actualizar Usuarios    Loguot - status : false
+// =======================================
+app.put('/usuario/:id/user/logout', (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+  Usuario.findById(id, (err, usuario) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar usuario',
+        errors: err
+      });
+    }
+    if (!usuario) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El usuario con el id ' + id + ' no existe',
+        errors: { message: 'No existe un usuario con ese ID' }
+      });
+    }
+    usuario.status = false;
+    usuario.save((err, usuarioGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar usuario',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        mensaje: 'Usuario Actualizado con éxito',
+        usuario: usuarioGuardado
+      });
+    });
+  });
+});
+
 // // =======================================
 // // Borrar Usuarios
 // // =======================================
