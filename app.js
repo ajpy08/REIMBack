@@ -145,14 +145,22 @@ server.listen(4000, () => {
 io.on('connection', function (socket) {
   socket.on('newdata', function (data) {
     io.emit('new-data', { data: data });
-    console.log('Agregaste un dato!!! =D ');
+    // console.log('Agregaste un dato!!! =D ');
   });
   socket.on('updatedata', function (data) {
     io.emit('update-data', { data: data });
-    console.log('Actualizaste un dato!!! =) ');
+    // console.log('Actualizaste un dato!!! =) ');
   });
   socket.on('deletedata', function (data) {
     io.emit('delete-data', { data: data });
-    console.log('Eliminaste un dato!!! =( ');
+    // console.log('Eliminaste un dato!!! =( ');
+  });
+  socket.on('loginuser', function (data) {
+    io.emit('login-user', { data: data });
+    console.log('Alguien inicio sesion!!! =D');
+  });
+  socket.on('logoutuser', function (data) {
+    io.emit('logout-user', { data: data });
+    console.log('Alguien cerró sesion!!! =(');
   });
 });
