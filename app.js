@@ -5,10 +5,23 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var entorno = require('./config/config').config();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+// var io = require('socket.io')(server);
+
+
+const io = require("socket.io")(server, {
+  handlePreflightRequest: (req, res) => {
+      const headers = {
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+          "Access-Control-Allow-Credentials": true
+      };
+      res.writeHead(200, headers);
+      res.end();
+  }
+});
 
 // io.origins('*:*')
-io.set('origins', 'http://socket.reimcontainerpark.com.mx:80');
+// io.set('origins', 'http://socket.reimcontainerpark.com.mx:80');
 
 // Inicializar variables
 var app = express();
