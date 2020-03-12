@@ -8,7 +8,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 io.origins((origin, callback) => {
-  if (origin !== 'https://reimcontainerpark.com.mx') {
+  if (origin !== 'http://localhost:4200') {
       return callback('origin not allowed', false);
   }
   callback(null, true);
