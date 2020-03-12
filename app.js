@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var entorno = require('./config/config').config();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server, { transports: ['websocket'] });
+var io = require('socket.io')(server, {origins:'reimcontainerpark.com.mx:* http://reimcontainerpark.com.mx:* http://www.reimcontainerpark.com.mx:* https://reimcontainerpark.com.mx:* https://www.reimcontainerpark.com.mx:*'});
 
 // io.origins((origin, callback) => {
 //   if (origin !== 'http://localhost:4200') {
