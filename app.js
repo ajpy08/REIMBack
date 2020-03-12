@@ -5,7 +5,9 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var entorno = require('./config/config').config();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server, { origins: '*:*'});
+var io = require('socket.io')(server);
+
+io.origins('*:*')
 
 // Inicializar variables
 var app = express();
