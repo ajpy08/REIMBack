@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var entorno = require('./config/config').config();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, { origins: '*:*'});
 
 // Inicializar variables
 var app = express();
@@ -141,6 +141,14 @@ app.listen(3000, () => {
 server.listen(4000, () => {
   console.log('Socket IO server puerto 4000: \x1b[32m%s\x1b[0m', 'ONLINE');
 });
+
+// var socket = io.connect('https://localhost', {secure: true});
+
+// var privateKey = fs.readFileSync('YOUR SSL KEY').toString();
+// var certificate = fs.readFileSync('YOUR SSL CRT').toString();
+// var ca = fs.readFileSync('YOUR SSL CA').toString();
+
+// var io = require('socket.io').listen(3456,{key:privateKey,cert:certificate,ca:ca});
 
 io.on('connection', function (socket) {
   socket.on('newdata', function (data) {
