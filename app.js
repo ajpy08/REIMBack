@@ -7,7 +7,8 @@ var entorno = require('./config/config').config();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-io.origins('*:*')
+// io.origins('*:*')
+io.set('origins', 'http://socket.reimcontainerpark.com.mx:80');
 
 // Inicializar variables
 var app = express();
