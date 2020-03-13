@@ -187,8 +187,9 @@ var io = require('socket.io').listen(server, {
 // server.listen(4000, () => {
 //   console.log('Socket IO server puerto 4000: \x1b[32m%s\x1b[0m', 'ONLINE');
 // });
-
-io.on('connection', function (socket) {
+var chat = io
+  .of('/mensajes')
+  .on('connection', function (socket) {
   socket.on('newdata', function (data) {
     io.emit('new-data', { data: data });
     // console.log('Agregaste un dato!!! =D ');
@@ -202,11 +203,11 @@ io.on('connection', function (socket) {
     // console.log('Eliminaste un dato!!! =( ');
   });
   socket.on('loginuser', function (data) {
-    io.emit('login-user', { data: data });
-    // console.log('Alguien inicio sesion!!! =D');
+    chat.emit('login-user', { data: data });
+     console.log('Alguien inicio sesion!!! =D');
   });
   socket.on('logoutuser', function (data) {
-    io.emit('logout-user', { data: data });
-    // console.log('Alguien cerró sesion!!! =(');
+    chat.emit('logout-user', { data: data });
+     console.log('Alguien cerró sesion!!! =(');
   });
 });
