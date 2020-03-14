@@ -21,7 +21,8 @@ var usuarioSchema = new Schema({
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
   reset_password_token: { type: String },
-  reset_password_expires: { type: Date }
+  reset_password_expires: { type: Date },
+  status: { type: Boolean, required: false },
 }, { collection: 'usuarios' });
 
 usuarioSchema.plugin(uniqueValidator, { message: 'Ya se encuentra registrado' })
