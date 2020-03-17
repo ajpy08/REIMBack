@@ -187,6 +187,8 @@ var io = require('socket.io').listen(server, {
 // server.listen(4000, () => {
 //   console.log('Socket IO server puerto 4000: \x1b[32m%s\x1b[0m', 'ONLINE');
 // });
+
+
 var chat = io
   .of('/mensajes')
   .on('connection', function (socket) {
@@ -205,6 +207,7 @@ var chat = io
   socket.on('loginuser', function (data) {
     chat.emit('login-user', { data: data });
      console.log('Alguien inicio sesion!!! =D');
+     
   });
   socket.on('logoutuser', function (data) {
     chat.emit('logout-user', { data: data });
