@@ -59,7 +59,7 @@ app.get('/tipoContenedor/:id', (req, res) => {
 app.get('/tipoCont/:tipo', (req, res) => {
   var t = req.params.tipo;
   var tipo = unescape(t);
-  console.log(tipo)
+  // console.log(tipo)
 
   TipoContenedor.find({ tipo: tipo }).exec(
     (err, tipoContenedor) => {

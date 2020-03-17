@@ -65,6 +65,7 @@ app.get('/naviera/:id', (req, res) => {
 // ==========================================
 app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
+  
   var naviera = new Naviera({
     rfc: body.rfc,
     razonSocial: body.razonSocial,
@@ -78,7 +79,7 @@ app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
     estado: body.estado,
     cp: body.cp,
     formatoR1: body.formatoR1,
-    correo: body.correo,
+    correo: body.correosF,
     correoFac: body.correoFac,
     credito: body.credito,
     caat: body.caat,
@@ -142,7 +143,7 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
     naviera.ciudad = body.ciudad;
     naviera.estado = body.estado;
     naviera.cp = body.cp;
-    naviera.correo = body.correo;
+    naviera.correo = body.correosF;
     naviera.correoFac = body.correoFac;
     naviera.credito = body.credito;
     naviera.caat = body.caat;
