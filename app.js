@@ -145,33 +145,27 @@ var io = require('socket.io').listen(server, {
   transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'polling']
 });
 
-var users = io
-  .of('/users')
-  .on('connection', function (socket) {
-    socket.on('loginuser', function (data) {
-      users.emit('login-user', { data: data });
-      console.log('Alguien inicio sesion!!! =D');
-    });
-    socket.on('logoutuser', function (data) {
-      users.emit('logout-user', { data: data });
-      console.log('Alguien cerró sesion!!! =(');
-    });
+io.on('connection', function (socket) {
+  //USERS
+  socket.on('loginuser', function (data) {
+    io.emit('login-user', { data: data });
+    // console.log('Alguien inicio sesion!!! =D');
   });
-
-var buques = io
-  .of('/buques')
-  .on('connection', function (socket) {
-
-    socket.on('newdata', function (data) {
-      buques.emit('new-data', { data: data });
-      // console.log('Agregaste un dato!!! =D ');
-    });
-    socket.on('updatedata', function (data) {
-      buques.emit('update-data', { data: data });
-      // console.log('Actualizaste un dato!!! =) ');
-    });
-    socket.on('deletedata', function (data) {
-      buques.emit('delete-data', { data: data });
-      // console.log('Eliminaste un dato!!! =( ');
-    });
+  socket.on('logoutuser', function (data) {
+    io.emit('logout-user', { data: data });
+    // console.log('Alguien cerró sesion!!! =(');
   });
+  //BUQUES
+  socket.on('newbuque', function (data) {
+    io.emit('new-buque', { data: data });
+    // console.log('Agregaste un buque!!! =D ');
+  });
+  socket.on('updatebuque', function (data) {
+    io.emit('update-buque', { data: data });
+    // console.log('Actualizaste un buque!!! =) ');
+  });
+  socket.on('deletebuque', function (data) {
+    io.emit('delete-buque', { data: data });
+    // console.log('Eliminaste un buque!!! =( ');
+  });
+});
