@@ -168,16 +168,17 @@ io.on('connection', function (socket) {
     io.emit('delete-buque', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
+  // SOLICITUDES
   socket.on('newsolicitud', function (data) {
-    io.emit('new-solicitud', { data: data });
+    io.emit('new-solicitud', {data: data});
     // console.log('nueva solicitud');
   });
   socket.on('updatesolicitud', function (data) {
-    io.emit('update-solicitud', { data: data });
+    io.emit('update-solicitud', {data: data});
     // console.log('actualizacion solicitud');
   });
   socket.on('deletesolicitud', function (data) {
-    io.emit('delete-solicitud', { data: data });
+    io.emit('delete-solicitud', {data: data});
     // console.log('eliminar solicitud');
   });
   socket.on('aprobarsolicitud', function (data) {
@@ -201,14 +202,14 @@ io.on('connection', function (socket) {
 
   socket.on('newoperador', function (data) {
     io.emit('new-operador', { data: data });
-    console.log('SE AGREGO UN NUEVO operador');
+
   });
   socket.on('updateoperador', function (data) {
     io.emit('update-operador', { data: data });
-    console.log('SE actualizo un operador');
+   
   });
   socket.on('deleteoperador', function (data) {
     io.emit('delete-operador', { data: data });
-    console.log('SE elimino operador');
+ 
   })
 });
