@@ -182,6 +182,34 @@ io.on('connection', function (socket) {
     // console.log('eliminar solicitud');
   });
   socket.on('aprobarsolicitud', function (data) {
-    io.emit('aprobar-solicitud', {data: data});
+    io.emit('aprobar-solicitud', { data: data });
   });
+
+  // ! SOCKET PARA TRANSPORTISTA 
+
+  socket.on('newcamion', function (data) {
+    io.emit('new-camion', { data: data });
+    // console.log('SE AGREGO UN NUEVO CAMION');
+  });
+  socket.on('updatecamion', function (data) {
+    io.emit('update-camion', { data: data });
+    // console.log('UPDATE CAMION');
+  });
+  socket.on('deletecamion', function (data) {
+    io.emit('delete-camion', { data: data });
+    // console.log('DELETE CAMION');
+  });
+
+  socket.on('newoperador', function (data) {
+    io.emit('new-operador', { data: data });
+
+  });
+  socket.on('updateoperador', function (data) {
+    io.emit('update-operador', { data: data });
+   
+  });
+  socket.on('deleteoperador', function (data) {
+    io.emit('delete-operador', { data: data });
+ 
+  })
 });
