@@ -169,18 +169,46 @@ io.on('connection', function (socket) {
     // console.log('Eliminaste un buque!!! =( ');
   });
   socket.on('newsolicitud', function (data) {
-    io.emit('new-solicitud', {data: data});
-    console.log('nueva solicitud');
+    io.emit('new-solicitud', { data: data });
+    // console.log('nueva solicitud');
   });
   socket.on('updatesolicitud', function (data) {
-    io.emit('update-solicitud', {data: data});
-    console.log('actualizacion solicitud');
+    io.emit('update-solicitud', { data: data });
+    // console.log('actualizacion solicitud');
   });
   socket.on('deletesolicitud', function (data) {
-    io.emit('delete-solicitud', {data: data});
-    console.log('eliminar solicitud');
+    io.emit('delete-solicitud', { data: data });
+    // console.log('eliminar solicitud');
   });
   socket.on('aprobarsolicitud', function (data) {
-    io.emit('aprobar-solicitud', {data: data});
+    io.emit('aprobar-solicitud', { data: data });
   });
+
+  // ! SOCKET PARA TRANSPORTISTA 
+
+  socket.on('newcamion', function (data) {
+    io.emit('new-camion', { data: data });
+    // console.log('SE AGREGO UN NUEVO CAMION');
+  });
+  socket.on('updatecamion', function (data) {
+    io.emit('update-camion', { data: data });
+    // console.log('UPDATE CAMION');
+  });
+  socket.on('deletecamion', function (data) {
+    io.emit('delete-camion', { data: data });
+    // console.log('DELETE CAMION');
+  });
+
+  socket.on('newoperador', function (data) {
+    io.emit('new-operador', { data: data });
+    console.log('SE AGREGO UN NUEVO operador');
+  });
+  socket.on('updateoperador', function (data) {
+    io.emit('update-operador', { data: data });
+    console.log('SE actualizo un operador');
+  });
+  socket.on('deleteoperador', function (data) {
+    io.emit('delete-operador', { data: data });
+    console.log('SE elimino operador');
+  })
 });
