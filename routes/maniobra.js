@@ -137,6 +137,7 @@ app.put('/asigna_camion_operador/:id', mdAutenticacion.verificaToken, (req, res)
     }
     maniobra.camion = body.camion;
     maniobra.operador = body.operador;
+    maniobra.usuarioModifico = req.usuario._id;
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
         return res.status(400).json({
