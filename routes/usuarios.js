@@ -360,9 +360,9 @@ app.put('/usuario/:id/user/logout', (req, res) => {
 
 // export
 
-// // =======================================
-// // Enviar Correo
-// // =======================================
+//  =======================================
+//  Enviar Correo
+// =======================================
 
 app.get('/usuario/:id/enviacorreo', (req, res) => {
   var id = req.params.id;
