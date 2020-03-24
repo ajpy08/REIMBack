@@ -210,6 +210,13 @@ io.on('connection', function (socket) {
   });
   socket.on('deleteoperador', function (data) {
     io.emit('delete-operador', { data: data });
- 
-  })
+  });
+
+
+  // ! SOCKET PARA PAPELETA
+
+  socket.on('updatepapeleta', function (data) {
+    io.emit('update-papeleta', {data: data});
+  });
+
 });
