@@ -23,6 +23,7 @@ var usuarioSchema = new Schema({
   reset_password_token: { type: String },
   reset_password_expires: { type: Date },
   status: { type: Boolean, required: false },
+  fActivo: { type: Date }
 }, { collection: 'usuarios' });
 
 usuarioSchema.plugin(uniqueValidator, { message: 'Ya se encuentra registrado' })
