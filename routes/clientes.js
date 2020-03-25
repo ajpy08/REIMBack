@@ -290,8 +290,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         if (cliente.formatoR1 != undefined || cliente.formatoR1 != '' && cliente.formatoR1 != null && fs.existsSync('./uploads/clientes/' + cliente.formatoR1)) {
           fs.unlink('./uploads/clientes/' + cliente.formatoR1, (err) => {
             if (err) console.log(err);
-            else
-              console.log('Imagen anterior fue borrada con éxito');
+            // else
+              // console.log('Imagen anterior fue borrada con éxito');
           });
         }
         fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
