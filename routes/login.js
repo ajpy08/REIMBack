@@ -89,7 +89,7 @@ app.post('/', (req, res) => {
 function obtenerMenu(ROLE) {
   //console.log('ROLE', ROLE);
 
-  if (ROLE === 'ADMIN_ROLE' || ROLE === 'PATIOADMIN_ROLE') {
+  if (ROLE === 'ADMIN_ROLE') {
     let menu = [{
       titulo: 'Principal',
 
@@ -170,6 +170,55 @@ function obtenerMenu(ROLE) {
     return menu;
 
   }
+
+  // ! MENU ROLE PATIO
+
+  if (ROLE === 'PATIOADMIN_ROLE') {
+    let menu = [{
+      titulo: 'Principal',
+
+      icono: 'fas fa-home',
+
+      submenu: [
+        { titulo: 'Dashboard', url: '/dashboard' }
+      ]
+    },
+    {
+      titulo: 'Catálogos',
+      icono: 'fas fa-ellipsis-v',
+      submenu: []
+    },
+    {
+      titulo: 'Facturación',
+      icono: 'fas fa-dollar-sign',
+      submenu: []
+    }
+    ];
+    // menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
+    menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
+    menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+    menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
+    menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
+
+    menu[1].submenu.unshift({ titulo: 'Tipos Contenedores', url: '/tipos_contenedores' });
+    menu[1].submenu.unshift({ titulo: 'Clientes', url: '/clientes' });
+    menu[1].submenu.unshift({ titulo: 'Reparaciones', url: '/reparaciones' });
+    menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
+    menu[1].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+    menu[1].submenu.unshift({ titulo: 'Buques', url: '/buques' });
+    menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
+    menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
+    menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
+
+    menu[2].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
+    menu[2].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
+    return menu;
+
+  }
+
+  // ! FIN DE MENU  ROLE PATIO
 
   if (ROLE === 'REIM_ROLE') {
     let menu = [{
