@@ -66,7 +66,7 @@ app.post('/', (req, res) => {
     var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
     //var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 70 }); // 1.1 min
 
-    Usuario.findByIdAndUpdate({ _id: usuarioDB._id }, { status: true }).exec(function (err, user) {
+    Usuario.findByIdAndUpdate({ _id: usuarioDB._id }, { status: true, fActivo: new  Date() }).exec(function (err, user) {
       if (!user) {
         return res.status(400).json({
           ok: true,
