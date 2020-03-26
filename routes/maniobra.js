@@ -175,8 +175,12 @@ app.put('/actualiza_fecha_asignacion/:id', mdAutenticacion.verificaToken, (req, 
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    maniobra.fAsignacionPapeleta = moment().startOf('day').utc();
-    maniobra.fExpiracionPapeleta = moment().add(3, 'days').startOf('day').utc();
+    timeZone = moment().format('Z');
+    console.log('timezone: ' + timeZone)
+    maniobra.fAsignacionPapeleta = moment().utc();
+    maniobra.fExpiracionPapeleta = moment().add(3, 'days').utc();
+    // maniobra.fAsignacionPapeleta = moment().startOf('day').utc();
+    // maniobra.fExpiracionPapeleta = moment().add(3, 'days').startOf('day').utc();
     maniobra.save((err, maniobraGuardado) => {
       if (err) {
         return res.status(400).json({
