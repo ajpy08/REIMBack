@@ -231,4 +231,12 @@ io.on('connection', function (socket) {
   socket.on('deletecliente', function (data) {
     io.emit('delete-cliente', { data: data });
   });
+
+  //! SOCKET MANIOBRAS 
+
+  socket.on('cambiomaniobra', function (data) {
+    io.emit('cambio-maniobra', { data: data });
+  });
+
+
 });
