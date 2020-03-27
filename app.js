@@ -146,7 +146,7 @@ var io = require('socket.io').listen(server, {
 });
 
 io.on('connection', function (socket) {
-  //USERS
+  // ! USERS
   socket.on('loginuser', function (data) {
     io.emit('login-user', { data: data });
     // console.log('Alguien inicio sesion!!! =D');
@@ -155,7 +155,7 @@ io.on('connection', function (socket) {
     io.emit('logout-user', { data: data });
     // console.log('Alguien cerró sesion!!! =(');
   });
-  //BUQUES
+  //! BUQUES
   socket.on('newbuque', function (data) {
     io.emit('new-buque', { data: data });
     // console.log('Agregaste un buque!!! =D ');
@@ -168,17 +168,18 @@ io.on('connection', function (socket) {
     io.emit('delete-buque', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
-  // SOLICITUDES
+  // ! SOLICITUDES
+
   socket.on('newsolicitud', function (data) {
-    io.emit('new-solicitud', {data: data});
+    io.emit('new-solicitud', { data: data });
     // console.log('nueva solicitud');
   });
   socket.on('updatesolicitud', function (data) {
-    io.emit('update-solicitud', {data: data});
+    io.emit('update-solicitud', { data: data });
     // console.log('actualizacion solicitud');
   });
   socket.on('deletesolicitud', function (data) {
-    io.emit('delete-solicitud', {data: data});
+    io.emit('delete-solicitud', { data: data });
     // console.log('eliminar solicitud');
   });
   socket.on('aprobarsolicitud', function (data) {
@@ -206,7 +207,7 @@ io.on('connection', function (socket) {
   });
   socket.on('updateoperador', function (data) {
     io.emit('update-operador', { data: data });
-   
+
   });
   socket.on('deleteoperador', function (data) {
     io.emit('delete-operador', { data: data });
@@ -216,7 +217,26 @@ io.on('connection', function (socket) {
   // ! SOCKET PARA PAPELETA
 
   socket.on('updatepapeleta', function (data) {
-    io.emit('update-papeleta', {data: data});
+    io.emit('update-papeleta', { data: data });
   });
+
+  // ! SOCKET PARA CLIENTES
+
+  socket.on('newcliente', function (data) {
+    io.emit('new-cliente', { data: data });
+  });
+  socket.on('updatecliente', function (data) {
+    io.emit('update-cliente', { data: data });
+  });
+  socket.on('deletecliente', function (data) {
+    io.emit('delete-cliente', { data: data });
+  });
+
+  //! SOCKET MANIOBRAS 
+
+  socket.on('cambiomaniobra', function (data) {
+    io.emit('cambio-maniobra', { data: data });
+  });
+
 
 });
