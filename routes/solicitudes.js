@@ -170,7 +170,7 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
 
             var correos = '';
             var error = '';
-            
+
             if (solicitud.correo === '' || solicitud.correo === undefined) {
               error += 'Solicitud - '
             } else if (!correos.includes(solicitud.correo)) {
@@ -821,7 +821,15 @@ app.put('/solicitud/maniobra/descarga/:id', mdAutenticacion.verificaToken, (req,
             mensaje: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud ',
             errors: { message: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud' }
           });
-        } else {
+        } 
+        Maniobra.updateOne({ "solicitud": id }, { $set: { "estatus": 'APROBACION' } }, (err, upd) => {
+          if (err) {
+            return err.status(500).json ({
+              ok: false,
+              mensaje: 'Errror al actulizar la maniobra asociada',
+              errors: err
+            });  
+          } else {
           Solicitud.findById(id, (err, solicitudBorrado) => {
             if (err) {
               return res.status(500).json({
@@ -844,6 +852,7 @@ app.put('/solicitud/maniobra/descarga/:id', mdAutenticacion.verificaToken, (req,
             });
           });
         }
+      });
       });
 });
 
