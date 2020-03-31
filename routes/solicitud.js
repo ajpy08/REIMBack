@@ -114,7 +114,7 @@ app.put('/soli/Contenedor/:id&:maniobra',mdAutenticacion.verificaToken, (req, re
       solicitud.contenedores = contenedores;
       solicitud.save((err, solicitudGuardado) => {
         if (err) {
-          return res, status(400).json({
+          return res.status(400).json({
             ok: false,
             mensaje: 'Error al actualizar contenedor',
             errors: err
@@ -127,7 +127,7 @@ app.put('/soli/Contenedor/:id&:maniobra',mdAutenticacion.verificaToken, (req, re
       });      
     } else {
       if (err) {
-        return res, status(400).json({
+        return res.status(400).json({
           ok: false,
           mensaje: 'No hubo cambios',
           errors: err

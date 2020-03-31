@@ -262,7 +262,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-      maniobra.camion = body.camion,
+    maniobra.camion = body.camion,
       maniobra.operador = body.operador,
       maniobra.estatus = body.estatus,
       maniobra.fLlegada = body.fLlegada,
@@ -309,17 +309,17 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 // // ELIMINA LA MANIOBRA DE LA SOLICITUD YA APROBADA 
 // // ================================================
 
-app.delete('/eliminarManiobra/Solicitud/:id', mdAutenticacion.verificaToken,  (req, res) => {
+app.delete('/eliminarManiobra/Solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .exec((err, maniobra) => {
       if (err) {
         return res.status(500).json({
-          
+
           ok: false,
           mensaje: 'Error al buscar la maniobra',
           errors: err
-          
+
         });
       }
       if (!maniobra) {
@@ -330,8 +330,8 @@ app.delete('/eliminarManiobra/Solicitud/:id', mdAutenticacion.verificaToken,  (r
         });
       }
 
-      if(maniobra.estatus != "TRANSITO") {
-        
+      if (maniobra.estatus != "TRANSITO") {
+
         return res.status(400).json({
           ok: false,
           mensaje: { message: 'La maniobra no esta en TRANSITO' },
@@ -340,28 +340,28 @@ app.delete('/eliminarManiobra/Solicitud/:id', mdAutenticacion.verificaToken,  (r
       }
       Maniobra.findByIdAndRemove(id, (err, maniobraBorrada) => {
 
-            if (err) {
-              return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al borrar maniobra',
-                errors: err
-              });
-            }
-        
-            if (!maniobraBorrada) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'No existe una maniobra con ese id',
-                errors: { message: 'No existe una maniobra con ese id' }
-              });
-            }
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al borrar maniobra',
+            errors: err
+          });
+        }
 
-       
-            res.status(200).json({
-              ok: true,
-              maniobra: maniobraBorrada
-            });
-          });      
+        if (!maniobraBorrada) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'No existe una maniobra con ese id',
+            errors: { message: 'No existe una maniobra con ese id' }
+          });
+        }
+
+
+        res.status(200).json({
+          ok: true,
+          maniobra: maniobraBorrada
+        });
+      });
     });
 });
 
@@ -369,18 +369,50 @@ app.delete('/eliminarManiobra/Solicitud/:id', mdAutenticacion.verificaToken,  (r
 // // ELIMINAR SOLAMENTE LA SOLICITUD DE MANIOBRA DESCARGA X CADA UNO DE LOS ARRAY
 // // =======================================================================================
 
-app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud',  mdAutenticacion.verificaToken, (req, res) => {
+app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var solicitud = req.params.solicitud;
+
+
+
+  Solicitud.findById(solicitud).exec((err, solicitudes) => {
+    if (err) {
+      return res.status(500).json ({
+        ok: false,
+        mensaje: 'Error al buscar solicictud',
+        errors: err
+      })
+    } else {
+      if (solicitudes.contenedores.length <= 1 ) {
+        Solicitud.findByIdAndRemove(solicitud, (err, solicictudBorrada) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al borrar Solicictud Maniobra',
+              errors: err
+            });
+          }
+          if (!solicictudBorrada) {
+            return res.status(400).json({
+              ok: false,
+              mensaje: 'No existe solicictuf con ese id',
+              errors: { message: 'No existe solicictud con ese id' }
+            });
+          }
+        })
+      }
+    }
+  });
+
   Maniobra.findById(id)
     .exec((err, maniobra) => {
       if (err) {
         return res.status(500).json({
-          
+
           ok: false,
           mensaje: 'Error al buscar la maniobra',
           errors: err
-          
+
         });
       }
       if (!maniobra) {
@@ -391,8 +423,8 @@ app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud',  mdAutenticacion.
         });
       }
 
-      if(maniobra.estatus != "TRANSITO") {
-        
+      if (maniobra.estatus != "TRANSITO") {
+
         return res.status(400).json({
           ok: false,
           mensaje: { message: 'La maniobra no esta en TRANSITO' },
@@ -400,33 +432,53 @@ app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud',  mdAutenticacion.
         });
       }
 
+      Maniobra.updateOne({ "_id": id }, { $set: { "estatus": "APROBACION", } }, (err, upd) => {
+        if (err) {
+          return err.status(500).json({
+            ok: false,
+            mensaje: 'Error al actualizar el estatus de la maniobra' + id,
+            errors: err
+          });
+        }
 
-      
-      Maniobra.updateOne({"_id": id}, { $unset: {"solicitud": solicitud }},(err, maniobraBorrada ) => {
-            if (err) {
-              return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al borrar solicitud',
-                errors: err
-              });
-            }
-        
-            if (!maniobraBorrada) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'No existe una maniobra con ese id',
-                errors: { message: 'No existe una maniobra con ese id' }
-              });
-            }
-
-       
-            res.status(200).json({
-              ok: true,
-              maniobra: maniobraBorrada
+        Maniobra.updateOne({ "_id": id }, { $unset: { "fAsignacionPapeleta": '', 'fExpiracionPapeleta': '' } }, (err, maniobraUpdate) => {
+          if (err) {
+            return err.status(500).json({
+              ok: false,
+              mensaje: 'Error al actualizar el estatus de la maniobra' + id,
+              errors: err
             });
-          });      
+          }
+          else {
+            Maniobra.updateOne({ "_id": id }, { $unset: { "solicitud": solicitud } }, (err, maniobraBorrada) => {
+              if (err) {
+                return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al borrar solicitud',
+                  errors: err
+                });
+              }
+
+              if (!maniobraBorrada) {
+                return res.status(400).json({
+                  ok: false,
+                  mensaje: 'No existe una maniobra con ese id',
+                  errors: { message: 'No existe una maniobra con ese id' }
+                });
+              }
+
+
+            });
+          }
+        });
+
+      });
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
+      });
     });
-  });
+});
 
 
 // // =======================================
