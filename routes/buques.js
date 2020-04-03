@@ -40,7 +40,7 @@ app.get('/naviera/:id', (req, res, next) => {
       if (err) {
         return res.status(500).json({
           ok: false,
-          mensaje: 'Error al cargar clientes',
+          mensaje: 'Error al cargar buques',
           errors: err
         });
       }

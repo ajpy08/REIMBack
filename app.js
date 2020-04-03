@@ -57,6 +57,8 @@ var coordenadasRoutes = require('./routes/coordenadas');
 var liberacionesRoute = require('./routes/liberacionesBL');
 var EDIRoutes = require('./routes/EDIs');
 var StatusRoutes = require('./routes/status');
+var ProdServRoutes = require('./routes/productos-servicios');
+var FacturacionRoutes = require('./routes/facturacion');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -90,6 +92,8 @@ app.use('/coordenadas', coordenadasRoutes);
 app.use('/liberaciones', liberacionesRoute);
 app.use('/EDI', EDIRoutes);
 app.use('/status', StatusRoutes);
+app.use('/productos-servicios', ProdServRoutes);
+app.use('/facturacion', FacturacionRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
