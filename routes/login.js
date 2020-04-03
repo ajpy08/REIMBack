@@ -142,12 +142,15 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
+    
 
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
       menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+      menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
     }
+
 
     //AGENCIA ADUANAL
 
@@ -166,7 +169,8 @@ function obtenerMenu(ROLE) {
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
 
     menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
-    menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
+    menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });    
+
     return menu;
 
   }
