@@ -145,6 +145,7 @@ var io = require('socket.io').listen(server, {
   transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'polling']
 });
 
+/* #region  SOCKETS */
 io.on('connection', function (socket) {
   // ! USERS
   socket.on('loginuser', function (data) {
@@ -168,6 +169,7 @@ io.on('connection', function (socket) {
     io.emit('delete-buque', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
+
   // ! SOLICITUDES
 
   socket.on('newsolicitud', function (data) {
@@ -184,6 +186,12 @@ io.on('connection', function (socket) {
   });
   socket.on('aprobarsolicitud', function (data) {
     io.emit('aprobar-solicitud', { data: data });
+  });
+  socket.on('deletemaniobra', function (data) {
+    io.emit('delete-maniobra', { data: data });
+  });
+  socket.on('deletemaniobradescarga', function (data) {
+    io.emit('delete-maniobra-descarga', { data: data });
   });
 
   // ! SOCKET PARA TRANSPORTISTA 
@@ -220,6 +228,10 @@ io.on('connection', function (socket) {
     io.emit('update-papeleta', { data: data });
   });
 
+  socket.on('asignacionpapeleta', function (data) {
+    io.emit('asignacion-papeleta', { data: data });
+  });
+
   // ! SOCKET PARA CLIENTES
 
   socket.on('newcliente', function (data) {
@@ -240,3 +252,4 @@ io.on('connection', function (socket) {
 
 
 });
+/* #endregion */

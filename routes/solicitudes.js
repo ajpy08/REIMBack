@@ -822,7 +822,7 @@ app.put('/solicitud/maniobra/descarga/:id', mdAutenticacion.verificaToken, (req,
             errors: { message: 'Existen ' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite elimnar la solicitud' }
           });
         } 
-        Maniobra.updateOne({ "solicitud": id }, { $set: { "estatus": 'APROBACION' } }, (err, upd) => {
+        Maniobra.updateMany({ "solicitud": id }, { $set: { "estatus": 'APROBACION' } }, (err, upd) => {
           if (err) {
             return err.status(500).json ({
               ok: false,
