@@ -2,7 +2,6 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var app = express();
 var ProductoServicio = require('../models/facturacion/producto-servicio');
-var app = express();
 
 // ==========================================
 // Obtener todos los Productos o Servicios
@@ -58,7 +57,7 @@ app.get('/producto-servicio/:id', (req, res) => {
   });
 
 
-  // ==========================================
+// ==========================================
 // Crear nuevo Producto o Servicio
 // ==========================================
 app.post('/producto-servicio/', mdAutenticacion.verificaToken, (req, res) => {
