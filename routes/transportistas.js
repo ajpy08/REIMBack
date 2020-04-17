@@ -86,6 +86,7 @@ app.post('/transportista/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     caat: body.caat,
     img: body.img,
+    usoCFDI: body.usoCFDI,
     usuarioAlta: req.usuario._id
   });
 
@@ -145,6 +146,7 @@ app.put('/transportista/:id', mdAutenticacion.verificaToken, (req, res) => {
     transportista.correoFac = body.correoFac;
     transportista.credito = body.credito;
     transportista.caat = body.caat;
+    transportista.usoCFDI = body.usoCFDI;
     transportista.usuarioMod = req.usuario._id;
     transportista.fMod = new Date();
 
