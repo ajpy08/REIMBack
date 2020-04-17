@@ -21,6 +21,7 @@ var clienteSchema = new Schema({
   estado: { type: String, requiered: [true, 'El estado es necesario'] },
   cp: { type: String, requiered: [true, 'El codigo postal es necesario'] },
   formatoR1: { type: String },
+  usoCFDI: {type: Schema.Types.ObjectId, ref: 'Uso-CFDI', required: [true, 'El Uso CFDI es necesario']},
   correo: { type: String, requiered: false },
   correoFac: { type: String, requiered: false },
   credito: { type: Boolean, requiered: [true, 'EL credito es necesario'], default: false },
