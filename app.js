@@ -58,6 +58,8 @@ var liberacionesRoute = require('./routes/liberacionesBL');
 var EDIRoutes = require('./routes/EDIs');
 var StatusRoutes = require('./routes/status');
 var ProdServRoutes = require('./routes/productos-servicios');
+var ClaveProdSerRoutes = require('./routes/clave-productos-servicios');
+var ClaveUnidad = require('./routes/clave-unidades');
 var FacturacionRoutes = require('./routes/facturacion');
 
 // Rutas
@@ -92,6 +94,8 @@ app.use('/coordenadas', coordenadasRoutes);
 app.use('/liberaciones', liberacionesRoute);
 app.use('/EDI', EDIRoutes);
 app.use('/status', StatusRoutes);
+app.use('/clave-productos-servicios', ClaveProdSerRoutes);
+app.use('/clave-unidades', ClaveUnidad);
 app.use('/productos-servicios', ProdServRoutes);
 app.use('/facturacion', FacturacionRoutes);
 app.use('/', appRoutes);
@@ -149,6 +153,7 @@ var io = require('socket.io').listen(server, {
   transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'polling']
 });
 
+/* #region  SOCKETS */
 io.on('connection', function (socket) {
   // ! USERS
   socket.on('loginuser', function (data) {
@@ -172,6 +177,7 @@ io.on('connection', function (socket) {
     io.emit('delete-buque', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
+
   // ! SOLICITUDES
 
   socket.on('newsolicitud', function (data) {
@@ -188,6 +194,12 @@ io.on('connection', function (socket) {
   });
   socket.on('aprobarsolicitud', function (data) {
     io.emit('aprobar-solicitud', { data: data });
+  });
+  socket.on('deletemaniobra', function (data) {
+    io.emit('delete-maniobra', { data: data });
+  });
+  socket.on('deletemaniobradescarga', function (data) {
+    io.emit('delete-maniobra-descarga', { data: data });
   });
 
   // ! SOCKET PARA TRANSPORTISTA 
@@ -224,6 +236,10 @@ io.on('connection', function (socket) {
     io.emit('update-papeleta', { data: data });
   });
 
+  socket.on('asignacionpapeleta', function (data) {
+    io.emit('asignacion-papeleta', { data: data });
+  });
+
   // ! SOCKET PARA CLIENTES
 
   socket.on('newcliente', function (data) {
@@ -243,3 +259,5 @@ io.on('connection', function (socket) {
   });
   /* #endregion */
 });
+/* #endregion */
+

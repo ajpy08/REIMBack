@@ -154,6 +154,8 @@ function obtenerMenu(ROLE) {
       menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
       menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
+      menu[1].submenu.unshift({ titulo: 'FAC Clave Productos Servicios', url: '/clave-productos-servicios' });
+      menu[1].submenu.unshift({ titulo: 'FAC Clave Unidades', url: '/clave-unidades' });
     }
 
 
