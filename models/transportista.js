@@ -18,6 +18,7 @@ var transportistaSchema = new Schema({
   colonia: { type: String, requiered: false },
   municipio: { type: String, requiered: false },
   ciudad: { type: String, requiered: false },
+  usoCFDI: {type: Schema.Types.ObjectId, ref: 'Uso-CFDI', required: [true, 'El Uso CFDI es necesario']},
   estado: { type: String, requiered: [true, 'El estado es necesario'] },
   cp: { type: String, requiered: [true, 'El codigo postal es necesario'] },
   formatoR1: { type: String, required: false },

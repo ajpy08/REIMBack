@@ -84,6 +84,7 @@ app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     caat: body.caat,
     img: body.img,
+    usoCFDI: body.usoCFDI,
     usuarioAlta: req.usuario._id
   });
 
@@ -147,6 +148,7 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
     naviera.correoFac = body.correoFac;
     naviera.credito = body.credito;
     naviera.caat = body.caat;
+    naviera.usoCFDI = body.usoCFDI;
     naviera.usuarioMod = req.usuario._id;
     naviera.fMod = new Date();
 

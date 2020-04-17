@@ -200,6 +200,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     empresas: body.empresas,
     img: body.img,
+    usoCFDI: body.usoCFDI,
     usuarioAlta: req.usuario._id
   });
 
@@ -267,6 +268,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     cliente.correoFac = body.correoFac;
     cliente.credito = body.credito;
     cliente.empresas = body.empresas;
+    cliente.usoCFDI = body.usoCFDI;
     cliente.usuarioMod = req.usuario._id;
     cliente.fMod = new Date();
 

@@ -21,6 +21,7 @@ var navieraSchema = new Schema({
   estado: { type: String, requiered: [true, 'El estado es necesaria'] },
   cp: { type: String, requiered: [true, 'El codigo postal es necesaria'] },
   formatoR1: { type: String, required: false },
+  usoCFDI: {type: Schema.Types.ObjectId, ref: 'Uso-CFDI', required: [true, 'El Uso CFDI es necesario']},
   correo: { type: String, requiered: false },
   correoFac: { type: String, requiered: false },
   credito: { type: Boolean, requiered: [true, 'EL credito es necesaria'], default: false },
