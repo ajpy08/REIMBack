@@ -31,6 +31,7 @@ var uploadFileTemp = require('./routes/uploadFileTemp');
 var uploadFileTempBucket = require('./routes/uploadFileTempBucket');
 var documentosRoutes = require('./routes/documentos');
 var reparacionesRoutes = require('./routes/reparaciones');
+var reportesRoutes = require('./routes/reportes');
 var loginRoutes = require('./routes/login');
 var usuariosRoutes = require('./routes/usuarios');
 var navieraRoutes = require('./routes/navieras');
@@ -98,6 +99,7 @@ app.use('/clave-productos-servicios', ClaveProdSerRoutes);
 app.use('/clave-unidades', ClaveUnidad);
 app.use('/productos-servicios', ProdServRoutes);
 app.use('/facturacion', FacturacionRoutes);
+app.use('/reportes', reportesRoutes)
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
