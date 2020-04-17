@@ -147,7 +147,7 @@ var server = app.listen(3000, () => {
   }
 });
 
-// socket io
+/* #region  Socket IO */
 var io = require('socket.io').listen(server, {
   log: false,
   agent: false,
@@ -259,7 +259,7 @@ io.on('connection', function (socket) {
   socket.on('cambiomaniobra', function (data) {
     io.emit('cambio-maniobra', { data: data });
   });
-
-
+  /* #endregion */
 });
 /* #endregion */
+
