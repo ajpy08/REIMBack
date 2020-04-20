@@ -6,6 +6,7 @@ var ClaveUnidad = require('../models/facturacion/claveUnidad');
 var Serie = require('../models/facturacion/serie');
 var RegimenFiscal = require('../models/facturacion/regimenFiscal');
 var FormaPago = require('../models/facturacion/forma-pago');
+var MetodoPago = require('../models/facturacion/metodo-pago');
 var TipoComprobante = require('../models/facturacion/tipo-comprobante');
 var UsoCFDI = require('../models/facturacion/uso-CFDI');
 var app = express();
@@ -119,6 +120,28 @@ app.get('/formas-pago', (req, res, next) => {
         ok: true,
         formasPago: formasPago,
         total: formasPago.length
+      });
+    });
+});
+
+// // ==========================================
+// // Obtener todas los metodos de pago
+// // ==========================================
+app.get('/metodos-pago', (req, res, next) => {
+  MetodoPago.find({})
+    .sort({ metodoPago: 1 })
+    .exec((err, metodosPago) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al cargar metodos de pago',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        metodosPago: metodosPago,
+        total: metodosPago.length
       });
     });
 });
