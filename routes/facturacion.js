@@ -80,6 +80,36 @@ app.get('/series', (req, res, next) => {
     });
 });
 
+// ==========================================
+//  Obtener Serie por Serie
+// ==========================================
+app.get('/series/:serie', (req, res) => {
+  var serie = req.params.serie;
+
+  Serie.find({serie: serie})
+      .exec((err, serie) => {
+          if (err) {
+              return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al buscar serie',
+                  errors: err
+              });
+          }
+          if (!serie) {
+              return res.status(400).json({
+                  ok: false,
+                  mensaje: 'La serie ' + serie + ' no existe',
+                  errors: { message: 'No existe una serie con ' + serie }
+              });
+          }
+          res.status(200).json({
+              ok: true,
+              serie: serie[0],
+              // total: serie.length
+          });
+      });
+});
+
 // // ==========================================
 // // Obtener todos los regimenes fiscales
 // // ==========================================
