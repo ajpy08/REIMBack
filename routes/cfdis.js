@@ -77,6 +77,10 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     direccion: body.direccion,
     correo: body.correo,
     conceptos: body.conceptos,
+    subtotal: body.subtotal,
+    totalImpuestosRetenidos: body.totalImpuestosRetenidos,
+    totalImpuestosTrasladados: body.totalImpuestosTrasladados,
+    total: body.total,
     usuarioAlta: req.usuario._id
   });
   cfdi.save((err, cfdiGuardado) => {
