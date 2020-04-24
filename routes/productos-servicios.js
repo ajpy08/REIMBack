@@ -7,54 +7,56 @@ var ProductoServicio = require('../models/facturacion/producto-servicio');
 // Obtener todos los Productos o Servicios
 // ==========================================
 app.get('/', (req, res, next) => {
-    ProductoServicio.find({})
-        .populate('claveSAT', 'claveProdServ descripcion')
-        .populate('unidadSAT', 'claveUnidad nombre')
-        .sort({ descripcion: 1 })
-        .exec((err, productos_servicios) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al cargar Productos o Servicios',
-                    errors: err
-                });
-            }
-            res.status(200).json({
-                ok: true,
-                productos_servicios: productos_servicios,
-                total: productos_servicios.length
-            });
+  ProductoServicio.find({})
+    .populate('claveSAT', 'claveProdServ descripcion')
+    .populate('unidadSAT', 'claveUnidad nombre')
+    .sort({ descripcion: 1 })
+    .exec((err, productos_servicios) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al cargar Productos o Servicios',
+          errors: err
         });
+      }
+      res.status(200).json({
+        ok: true,
+        productos_servicios: productos_servicios,
+        total: productos_servicios.length
+      });
+    });
 });
 
 // ==========================================
 //  Obtener Producto o Servicio por ID
 // ==========================================
 app.get('/producto-servicio/:id', (req, res) => {
-    var id = req.params.id;
-    ProductoServicio.findById(id)
-      .populate('usuario', 'nombre img email')
-      .exec((err, producto_servicio) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al buscar el producto_servicio',
-            errors: err
-          });
-        }
-        if (!producto_servicio) {
-          return res.status(400).json({
-            ok: false,
-            mensaje: 'El producto_servicio con el id ' + id + 'no existe',
-            errors: { message: 'No existe un producto_servicio con ese ID' }
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          producto_servicio: producto_servicio
+  var id = req.params.id;
+  ProductoServicio.findById(id)
+    .populate('claveSAT', 'claveProdServ')
+    .populate('unidadSAT', 'claveUnidad')
+    .populate('usuario', 'nombre img email')
+    .exec((err, producto_servicio) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar el producto_servicio',
+          errors: err
         });
+      }
+      if (!producto_servicio) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El producto_servicio con el id ' + id + 'no existe',
+          errors: { message: 'No existe un producto_servicio con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        producto_servicio: producto_servicio
       });
-  });
+    });
+});
 
 
 // ==========================================
@@ -109,12 +111,12 @@ app.put('/producto-servicio/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
 
     producto_servicio.codigo = body.codigo,
-    producto_servicio.unidad = body.unidad,
-    producto_servicio.descripcion = body.descripcion,
-    producto_servicio.valorUnitario = body.valorUnitario,
-    producto_servicio.claveSAT = body.claveSAT,
-    producto_servicio.unidadSAT = body.unidadSAT,
-    producto_servicio.impuestos = body.impuestos
+      producto_servicio.unidad = body.unidad,
+      producto_servicio.descripcion = body.descripcion,
+      producto_servicio.valorUnitario = body.valorUnitario,
+      producto_servicio.claveSAT = body.claveSAT,
+      producto_servicio.unidadSAT = body.unidadSAT,
+      producto_servicio.impuestos = body.impuestos
 
     producto_servicio.save((err, producto_servicioGuardado) => {
       if (err) {

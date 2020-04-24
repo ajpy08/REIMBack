@@ -2,11 +2,11 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
-// var Serie = require('./serie');
+var Serie = require('./serie');
 
 var cfdiSchema = new Schema({
     serie: { type: String },
-    folio: { type: String },
+    folio: { type: Number },
     sucursal: { type: String },
     formaPago: { type: String },
     metodoPago: { type: String },
@@ -18,24 +18,22 @@ var cfdiSchema = new Schema({
     usoCFDI: { type: String },
     direccion: { type: String },
     correo: { type: String },
-    // conceptos: [{
-    //     productoServicio: { type: Schema.Types.ObjectId, ref: 'ProductoServicio' },
-    //     unidad: { type: String },
-    //     cantidad: { type: String },
-    //     valorUnitario: { type: String },
-    //     impuestos: { type: String },
-    //     importe: { type: String },
-    //     descuento: { type: String },
-    //     maniobras: { type: String }
-    // }],
-    // conceptos: { type: [{}], required: [true, 'Los conceptos son necesarios'] },
     conceptos: [{
-        descripcion: { type: String },
-        unidad: { type: String },
         cantidad: { type: String },
-        valorUnitario: { type: String },
-        impuestos: { type: String },
+        claveProdServ: { type: String },
+        claveUnidad: { type: String },
+        descripcion: { type: String },
+        noIdentificacion: { type: String },
         importe: { type: String },
+        valorUnitario: { type: String },
+        impuestos: [{
+            TR: { type: String, required: true },
+            importe: { type: Number, required: true },
+            impuesto: { type: String, required: true },
+            tasaOCuota: { type: String, required: true },
+            tipoFactor: { type: String, default: 'Tasa', required: true },
+        }],
+        unidad: { type: String },
         descuento: { type: String },
         maniobras: [{ type: Schema.Types.ObjectId, ref: 'Maniobra' }],
       }],
@@ -49,20 +47,19 @@ var cfdiSchema = new Schema({
     fMod: { type: Date },
 }, { collection: 'cfdis' });
 
-// cfdiSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
-// cfdiSchema.pre('save', function (next) {
-//     var doc = this;
-//     if (this.cargaDescarga === 'D' && this.peso != 'VACIO' && (this.folio === undefined || this.folio === '') ||
-//         (this.cargaDescarga === 'C' && (this.folio === undefined || this.folio === ''))) {
-//         Serie.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function (error, cont) {
-//             if (error)
-//                 return next(error);
-//             doc.folio = cont.seq;
-//             next();
-//         });
-//     } else {
-//         next();
-//     }
-// });
+cfdiSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
+cfdiSchema.pre('save', function (next) {
+    var doc = this;
+    if (doc._id !== undefined) {
+        Serie.findOneAndUpdate({ serie: doc.serie }, { $inc: { folio: 1 } }, function (error, cont) {
+            if (error)
+                return next(error);
+            // doc.folio = cont.seq;
+            next();
+        });
+    } else {
+        next();
+    }
+});
 
 module.exports = mongoose.model('CFDI', cfdiSchema);
