@@ -1,6 +1,9 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Naviera = require('../models/naviera');
+var Maniobra = require('../models/maniobra');
+var Buque = require('../models/buque');
+var Viaje = require('../models/viaje');
 var variasBucket = require('../public/variasBucket');
 var app = express();
 
@@ -8,9 +11,11 @@ var app = express();
 // Obtener todas las navieras
 // ==========================================
 
-app.get('/', (req, res, next) => {
+app.get('/:tf', (req, res, next) => {
   var role = 'NAVIERA_ROLE';
-  Naviera.find({ role: role })
+  var tf = req.params.tf;
+
+  Naviera.find({ role: role, "activo": tf })
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
     .sort({ nombreComercial: 1 })
@@ -65,7 +70,7 @@ app.get('/naviera/:id', (req, res) => {
 // ==========================================
 app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
-  
+
   var naviera = new Naviera({
     rfc: body.rfc,
     razonSocial: body.razonSocial,
@@ -84,6 +89,7 @@ app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     caat: body.caat,
     img: body.img,
+    activo: body.activo,
     usoCFDI: body.usoCFDI,
     usuarioAlta: req.usuario._id
   });
@@ -105,10 +111,7 @@ app.post('/naviera/', mdAutenticacion.verificaToken, (req, res) => {
       mensaje: 'Naviera Creada Con éxito.',
       naviera: navieraGuardado
     });
-
-
   });
-
 });
 
 // ==========================================
@@ -149,6 +152,7 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
     naviera.credito = body.credito;
     naviera.caat = body.caat;
     naviera.usoCFDI = body.usoCFDI;
+    naviera.activo = body.activo;
     naviera.usuarioMod = req.usuario._id;
     naviera.fMod = new Date();
 
@@ -191,30 +195,138 @@ app.put('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Naviera.findByIdAndRemove(id, (err, navieraBorrado) => {
+
+  Maniobra.find({ $or: [{ "naviera": id }] }).exec(
+    (err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al cargar Maniobras asociadas',
+          errors: err
+        });
+      }
+      if (maniobra && maniobra.length > 0) {
+        res.status(400).json({
+          ok: false,
+          mensaje: 'Existe ' + maniobra.length + ' asociadas, por lo tanto no se permite eliminarlo. ',
+          errors: { message: 'Existe ' + maniobra.length + ' asociadas, por lo tanto no se permite eliminarlo. ' },
+          resultadoError: maniobra
+        });
+      } else {
+        Buque.find({ $or: [{ "naviera": id }] }).exec((err, buque) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al intentar cargar Buque asociado',
+              errors: err
+            });
+          }
+          if (buque && buque.length > 0) {
+            res.status(400).json({
+              ok: false,
+              mensaje: 'Existen ' + buque.length + ' asociados, por lo tanto no se permite eliminar.',
+              errors: { message: 'Existen ' + buque.length + ' asociados, por lo tanto no se permite eliminar.' },
+              resultadoError: buque
+            });
+          } else {
+            Viaje.find({ $or: [{ "naviera": id }] }).exec((err, viaje) => {
+              if (err) {
+                return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al intentar cargar Viaje asociado',
+                  errors: err
+                });
+              }
+              if (viaje && viaje.length > 0) {
+                res.status(400).json({
+                  ok: false,
+                  mensaje: 'Existen ' + viaje.length + ' asociados, por lo tanto no se permite eliminar.',
+                  errors: { message: 'Existen ' + viaje.length + ' asociados, por lo tanto no se permite eliminar.' },
+                  resultadoError: viaje
+                });
+              } else {
+                Naviera.findByIdAndRemove(id, (err, navieraBorrado) => {
+                  if (err) {
+                    return res.status(500).json({
+                      ok: false,
+                      mensaje: 'Error al borrar naviera',
+                      errors: err
+                    });
+                  }
+                  if (!navieraBorrado) {
+                    return res.status(400).json({
+                      ok: false,
+                      mensaje: 'No existe naviera con ese id',
+                      errors: { message: 'No existe naviera con ese id' }
+                    });
+                  }
+                  variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.img);
+                  variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.formatoR1);
+                  res.status(200).json({
+
+                    ok: true,
+                    naviera: navieraBorrado
+                  });
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+});
+
+// =======================================
+// Actualizar Naviera  HABILITAR DESHABILITAR
+// =======================================
+
+app.put('/navieraDes/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.activo;
+
+  Naviera.findById(id, (err, naviera) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al borrar naviera',
+        mensaje: 'Error al buscar Naviera',
         errors: err
       });
     }
-    if (!navieraBorrado) {
+    if (!naviera) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No existe naviera con ese id',
-        errors: { message: 'No existe naviera con ese id' }
+        mensaje: 'La Naviera con el id  ' + id + ' no existe',
+        errors: { message: 'La Naviera con el id  ' + id + ' no existe' }
       });
     }
-    variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.img);
-    variasBucket.BorrarArchivoBucket('clientes/', navieraBorrado.formatoR1);
-    res.status(200).json({
+    if (naviera.activo === body) {
+      var hab = ''
+      if (body === 'true') {
+        hab = 'Activo'
+      } else {
+        hab = 'Inactivo'
+      }
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El estatus de la Naviera ya se encuentra en  ' + hab,
+        errors: { message: 'El estatus de la Naviera ya se encuentra en ' + hab }
+      });
+    }
 
-      ok: true,
-      naviera: navieraBorrado
+    naviera.activo = body;
+    naviera.save((err, navieraGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar estatus Naviera',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        naviera: navieraGuardado
+      });
     });
   });
 });
-
-
 module.exports = app;

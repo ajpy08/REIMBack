@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var fs = require('fs');
 var app = express();
 var ParamsToJSON = require('../public/varias');
+var Maniobra = require('../models/maniobra');
 
 // ==========================================
 // Obtener todos los clientes
@@ -13,7 +14,9 @@ app.get('/', (req, res, next) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   var role = 'CLIENT_ROLE';
-  Cliente.find({ role: role })
+  var act = req.query.act || act;
+  // act = Boolean(act)
+  Cliente.find({ role: role, "activo": act })
     .skip(desde)
     // .limit(10)
     .populate('empresas', 'razonSocial nombreComercial')
@@ -200,6 +203,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     empresas: body.empresas,
     img: body.img,
+    activo: body.activo,
     usoCFDI: body.usoCFDI,
     usuarioAlta: req.usuario._id
   });
@@ -269,6 +273,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
     cliente.credito = body.credito;
     cliente.empresas = body.empresas;
     cliente.usoCFDI = body.usoCFDI;
+    cliente.activo = body.activo;
     cliente.usuarioMod = req.usuario._id;
     cliente.fMod = new Date();
 
@@ -327,28 +332,102 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Cliente.findByIdAndRemove(id, (err, clienteBorrado) => {
+
+Maniobra.find({$or: [{"cliente": id}]}).exec((err, maniobras) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al borrar cliente',
+        mensaje: 'Error al intentar cargar maniobra asociada',
+        errors: err,
+      });
+    }
+
+    if (maniobras && maniobras.length > 0) {
+       res.status(400).json({
+        ok: false,
+        mensaje: 'Existen' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite eliminar el cliente',
+        errors: {message:  'Existen (' + maniobras.length + ')  maniobras asociadas, por lo tanto no se permite eliminar el cliente'},
+        resultadoError: maniobras
+      });
+    } else {
+      Cliente.findByIdAndRemove(id, (err, clienteBorrado) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al borrar cliente',
+            errors: err
+          });
+        }
+        if (!clienteBorrado) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'No existe cliente con ese id',
+            errors: { message: 'No existe cliente con ese id' }
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Cliente borrado con exito',
+          cliente: clienteBorrado
+        });
+      });
+    }
+  })
+});
+
+// =======================================
+// Actualizar Camion  HABILITAR DESHABILITAR
+// =======================================
+
+app.put('/clienteDes/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.activo;
+
+  Cliente.findById(id, (err, cliente) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar Cliente',
         errors: err
       });
     }
-    if (!clienteBorrado) {
+    if (!cliente) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No existe cliente con ese id',
-        errors: { message: 'No existe cliente con ese id' }
+        mensaje: 'El Cliente con el id ' + id + ' no existe',
+        errors: {message: 'El Cliente con el id ' + id + ' no existe'}
       });
     }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Cliente borrado con exito',
-      cliente: clienteBorrado
+    if (cliente.activo === body) {
+      var hab = '';
+      if (body.activo === 'true') {
+        hab = 'Activo'
+      } else {
+        hab = 'Inactivo'
+      }
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El estatus del Cliente ya se encuentra en ' + hab,
+        errors: {message: 'El estatus del Cliente ya se encuentra en ' + hab}
+      });
+    }
+    cliente.activo = body
+    cliente.save((err, clienteGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar el estatus del Cliente',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        cliente: clienteGuardado
+      });
     });
   });
 });
+
 
 
 module.exports = app;

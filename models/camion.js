@@ -11,6 +11,7 @@ var camionSchema = new Schema({
     pdfSeguro: { type: String, required: false },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
+    activo: {type: Boolean, required: false},
     usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fMod: { type: Date }
 }, { collection: 'camiones' });

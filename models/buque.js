@@ -8,6 +8,7 @@ var buqueSchema = new Schema({
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
     usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+    activo: {type: Boolean, required: [true, 'El campo es obligatorio']},
     fMod: { type: Date }
 }, { collection: 'buques' });
 
