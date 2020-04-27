@@ -8,10 +8,10 @@ var rolesValidos = {
 };
 
 var navieraSchema = new Schema({
-  razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesario'] },
+  razonSocial: { type: String, unique: true, requiered: [true, 'La razon social es necesaria'] },
   // rfc: { type: String,  required: [true, 'El RFC es necesario'] },
   rfc: { type: String },
-  nombreComercial: { type: String, requiered: [true, 'La nombre comercial o ALIAS es necesario'] },
+  nombreComercial: { type: String, requiered: [true, 'El nombre comercial o ALIAS es necesario'] },
   calle: { type: String, requiered: false },
   noExterior: { type: String, required: false },
   noInterior: { type: String, required: false },
@@ -21,7 +21,7 @@ var navieraSchema = new Schema({
   estado: { type: String, requiered: [true, 'El estado es necesaria'] },
   cp: { type: String, requiered: [true, 'El codigo postal es necesaria'] },
   formatoR1: { type: String, required: false },
-  usoCFDI: {type: Schema.Types.ObjectId, ref: 'Uso-CFDI', required: [true, 'El Uso CFDI es necesario']},
+  usoCFDI: { type: Schema.Types.ObjectId, ref: 'UsoCFDI', required: [true, 'El Uso CFDI es necesario'] },
   correo: { type: String, requiered: false },
   correoFac: { type: String, requiered: false },
   credito: { type: Boolean, requiered: [true, 'EL credito es necesaria'], default: false },
