@@ -1,13 +1,17 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
+var Maniobra = require('../models/maniobra');
+var Viaje = require('../models/viaje');
 var app = express();
 var Buque = require('../models/buque');
 
 // ==========================================
 // Obtener todos los buques
 // ==========================================
-app.get('/', (req, res, next) => {
-  Buque.find({})
+app.get('/:tf', (req, res, next) => {
+  var tf = req.params.tf;
+
+  Buque.find({ "activo": tf })
     .populate('naviera', 'razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
     .sort({ nombre: 1 })
@@ -90,6 +94,7 @@ app.post('/buque/', mdAutenticacion.verificaToken, (req, res) => {
   var buque = new Buque({
     nombre: body.nombre,
     naviera: body.naviera,
+    activo: body.activo,
     usuarioAlta: req.usuario._id
   });
   buque.save((err, buqueGuardado) => {
@@ -132,6 +137,7 @@ app.put('/buque/:id', mdAutenticacion.verificaToken, (req, res) => {
     buque.nombre = body.nombre;
     buque.naviera = body.naviera;
     buque.usuarioMod = req.usuario._id;
+    buque.activo = body.activo;
     buque.fMod = new Date();
     buque.save((err, buqueGuardado) => {
       if (err) {
@@ -154,26 +160,119 @@ app.put('/buque/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/buque/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Buque.findByIdAndRemove(id, (err, buqueBorrado) => {
+
+  Maniobra.find({ $or: [{ "buque": id }] })
+    .exec(
+      (err, maniobra) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al intentar validar la eliminacion el buque',
+            errors: err
+          });
+        }
+        if (maniobra && maniobra.length > 0) {
+          res.status(400).json({
+            ok: false,
+            mensaje: 'El camión ya tiene operaciones registradas, por lo tanto no puede eliminarse.',
+            errors: { message: 'El camión ya tiene operaciones registradas, por lo tanto no puede eliminarse.' },
+            resultadoError: maniobra
+          });
+        } else {
+          Viaje.find({ $or: [{ "buque": id }] }).exec(
+            (err, viaje) => {
+              if (err) {
+                return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al intentar cargar viaje asociado',
+                  errors: err
+                });
+              }
+              if (viaje && viaje.length > 0) {
+                res.status(400).json({
+                  ok: false,
+                  mensaje: 'Existen' + viaje.length + '  asociados, por lo tanto no puede eliminarse.',
+                  errors: { message: 'Existen' + viaje.length + '  asociados, por lo tanto no puede eliminarse.' },
+                  resultadoError: viaje
+                });
+              } else {
+                Buque.findByIdAndRemove(id, (err, buqueBorrado) => {
+                  if (err) {
+                    return res.status(500).json({
+                      ok: false,
+                      mensaje: 'Error al borrar buque',
+                      errors: err
+                    });
+                  }
+                  if (!buqueBorrado) {
+                    return res.status(400).json({
+                      ok: false,
+                      mensaje: 'No existe buque con ese id',
+                      errors: { message: 'No existe buque con ese id' }
+                    });
+                  }
+                  res.status(200).json({
+                    ok: true,
+                    buque: buqueBorrado
+                  });
+                });
+              }
+            });
+        }
+      });
+});
+
+
+// =======================================
+// Actualizar Buque  HABILITAR DESHABILITAR
+// =======================================
+
+app.put('/buqueDes/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.action;
+
+  Buque.findById(id, (err, buque) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al borrar buque',
+        mensaje: 'Error al buscar Buque',
         errors: err
       });
     }
-    if (!buqueBorrado) {
+    if (!buque) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No existe buque con ese id',
-        errors: { message: 'No existe buque con ese id' }
+        mensaje: 'El buque con el id ' + id + ' no existe',
+        errors: { message: 'El buque con el id ' + id + ' no existe' }
       });
     }
-    res.status(200).json({
-      ok: true,
-      buque: buqueBorrado
+    if (buque.activo === body) {
+      var hab = ''
+      if (body.activo === 'true') {
+        hab = 'Activo'
+      } else {
+        hab = 'Inactivo'
+      }
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error el estatus del Buque ya se encuentra ' + hab,
+        errors: { message: 'Error el estatus del Buque ya se encuentra ' + hab }
+      });
+    }
+    buque.activo = body;
+    buque.save((err, buqueGuardados) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar el etatus del buque',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        buque: buqueGuardados
+      });
     });
   });
 });
-
 module.exports = app;

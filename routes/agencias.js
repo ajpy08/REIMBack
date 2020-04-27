@@ -1,6 +1,8 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Agencia = require('../models/agencia');
+var Maniobra = require('../models/maniobra');
+var Viaje = require('../models/viaje');
 var variasBucket = require('../public/variasBucket');
 var fs = require('fs');
 var app = express();
@@ -8,9 +10,11 @@ var app = express();
 // ==========================================
 // Obtener todas las agencias aduanales
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/:tf', (req, res, next) => {
   var role = 'AA_ROLE';
-  Agencia.find({ role: role })
+  var tf = req.params.tf
+
+  Agencia.find({ role: role, "activo": tf })
     .populate('usuarioAlta', 'nombre email')
     .populate('usuarioMod', 'nombre email')
     .sort({ nombreComercial: 1 })
@@ -113,6 +117,7 @@ app.post('/agencia/', mdAutenticacion.verificaToken, (req, res) => {
     credito: body.credito,
     patente: body.patente,
     img: body.img,
+    activo: body.activo,
     usuarioAlta: req.usuario._id
   });
 
@@ -171,6 +176,7 @@ app.put('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
     agencia.correoFac = body.correoFac;
     agencia.credito = body.credito;
     agencia.patente = body.patente;
+    agencia.activo = body.activo;
     agencia.usuarioMod = req.usuario._id;
     agencia.fMod = new Date();
 
@@ -217,27 +223,115 @@ app.put('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Agencia.findByIdAndRemove(id, (err, agenciaBorrado) => {
+  Maniobra.find({$or: [{'agencia': id}]}).exec((err, maniobra) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al borrar agencia',
+        mensaje: 'Error al buscar Maniobra asociada',
         errors: err
       });
     }
-    if (!agenciaBorrado) {
+    if (maniobra && maniobra.length > 0) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No existe agencia con ese id',
-        errors: { message: 'No existe agencia con ese id' }
+        mensaje: 'La agencia cuenta con ( ' + maniobra.length + ' ) maniobras asociadas, por lo tanto no se puede eliminar',
+        errors: {message: 'La agencia tiene ' + maniobra.length + ' asociadas, por lo tanto no se puede eliminar',}
+      });
+    } else {
+      Viaje.find({$or: [{ "agencia": id}]}).exec((err, viaje) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al buscar Viaje asociado',
+            errors: err
+          });
+        }
+        if (viaje && viaje.length > 0) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'La agencia cuenta con ( ' + viaje.length + ' ) viajes asociados, por lo tanto no se puede eliminar',
+            errors: {message:  'La agencia cuenta con ( ' + viaje.length + ' ) viajes asociados, por lo tanto no se puede eliminar'}
+          });
+        } else {
+          Agencia.findByIdAndRemove(id, (err, agenciaBorrado) => {
+            if (err) {
+              return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar agencia',
+                errors: err
+              });
+            }
+            if (!agenciaBorrado) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe agencia con ese id',
+                errors: { message: 'No existe agencia con ese id' }
+              });
+            }
+            variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.img);
+            variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.formatoR1);
+            res.status(200).json({
+              ok: true,
+              mensaje: 'Agencia borrada con exito',
+              agencia: agenciaBorrado
+            });
+          });
+        }
       });
     }
-    variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.img);
-    variasBucket.BorrarArchivoBucket('clientes/', agenciaBorrado.formatoR1);
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Agencia borrada con exito',
-      agencia: agenciaBorrado
+  });
+});
+
+
+// =======================================
+// Actualizar Agencias HABILITAR DESHABILITAR
+// =======================================
+
+app.put('/agenciaDes/:id', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.activo;
+
+  Agencia.findById(id, (err, agencia) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar Agencia',
+        errors: err
+      });
+    }
+    if (!agencia) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: ' La Agencia con el id ' + id + ' no existe',
+        errors: {message:' La Agencia con el id ' + id + ' no existe'}
+      });
+    }
+    if (agencia.activo === body) {
+      var hab = '';
+      if (body === ' true') {
+        hab = 'Activo';
+      } else {
+        hab = 'Inactivo'
+      }
+      return res.status(400).json({
+        ok: false,
+        mensaje: ' El estatus de la Agencia ' + agencia.nombreComercial + ' ya se encuentra en ' + hab,
+        errors: {message: ' El estatus de la Agencia ' + agencia.nombreComercial + ' ya se encuentra en ' + hab}
+      });
+    }
+    agencia.activo = body
+    agencia.save((err, agenciaGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar agencia',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        agencia: agenciaGuardado
+      });
     });
   });
 });

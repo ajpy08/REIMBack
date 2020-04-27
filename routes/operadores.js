@@ -3,6 +3,7 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 var Operador = require('../models/operador');
 var fs = require('fs');
 var app = express();
+var Camion = require('../models/camion');
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 var mongoose = require('mongoose');
@@ -231,6 +232,19 @@ app.put('/operador/:id/habilita_deshabilita', mdAutenticacion.verificaToken, (re
         errors: { message: 'No existe un operador con ese ID' }
       });
     }
+    if (operador.activo === body.activo) {
+      var hab = ''
+      if (body.activo === 'true') {
+        hab = 'Activo'
+      } else {
+        hab = 'Inactivo'
+      }
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El estatus del Operador ' +  operador.nombre + ' ya se encuentra en ' + hab, 
+        errors: {message:'El estatus del transportista' +  operador.nombre + ' ya se encuentra en ' + hab }
+      });
+    }
     operador.activo = body.activo;
     operador.save((err, operadorGuardado) => {
       if (err) {
@@ -254,7 +268,11 @@ app.put('/operador/:id/habilita_deshabilita', mdAutenticacion.verificaToken, (re
 app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
-  Maniobra.find({ "operador": new mongoose.Types.ObjectId(id) })
+  Maniobra.find({
+    $or: [
+      { 'operador': id }
+    ]
+  })
     .exec(
       (err, maniobra) => {
         if (err) {
@@ -265,35 +283,58 @@ app.delete('/operador/:id', mdAutenticacion.verificaToken, (req, res) => {
           });
         }
         if (maniobra && maniobra.length > 0) {
-          return res.status(400).json({
+           res.status(400).json({
             ok: false,
             mensaje: 'El operador ya tiene operaciones registradas, por lo tanto no puede eliminarse.',
-            errors: { message: 'El operador ya tiene operaciones registradas, por lo tanto no puede eliminarse.' }
+            errors: { message: 'El operador ya tiene operaciones registradas, por lo tanto no puede eliminarse.' },
+            resultadoError: maniobra
           });
         }
-
-        Operador.findByIdAndRemove(id, (err, operadorBorrado) => {
+        Camion.find({
+          $or: [
+            { "operador": id, "activo": true }
+          ]
+        }).exec((err, camion) => {
           if (err) {
             return res.status(500).json({
               ok: false,
-              mensaje: 'Error al borrar el operador',
+              mensaje: 'Error a intentar cargar el Camion',
               errors: err
             });
           }
-          if (!operadorBorrado) {
-            return res.status(400).json({
+          if (camion && camion.length > 0) {
+            res.status(400).json({
               ok: false,
-              mensaje: 'No existe un operador con ese id',
-              errors: { message: 'No existe un operador con ese id' }
+              mensaje: 'Existen ' + camion.length + ' camiones asociados, por lo tanto no de permite eliminar',
+              errors: {message: 'Existen ' + camion.length + ' camiones asociados, por lo tanto no de permite eliminar'},
+              resultadoError: camion
+            })
+          } else {
+            Operador.findByIdAndRemove(id, (err, operadorBorrado) => {
+              if (err) {
+                return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al borrar el operador',
+                  errors: err
+                });
+              }
+              if (!operadorBorrado) {
+                return res.status(400).json({
+                  ok: false,
+                  mensaje: 'No existe un operador con ese id',
+                  errors: { message: 'No existe un operador con ese id' }
+                });
+              }
+              variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.foto);
+              variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.fotoLicencia);
+              res.status(200).json({
+                ok: true,
+                operador: operadorBorrado
+              });
             });
           }
-          variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.foto);
-          variasBucket.BorrarArchivoBucket('clientes/', operadorBorrado.fotoLicencia);
-          res.status(200).json({
-            ok: true,
-            operador: operadorBorrado
-          });
-        });
+        })
+
       });
 
 
