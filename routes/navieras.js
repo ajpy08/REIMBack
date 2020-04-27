@@ -38,6 +38,7 @@ app.get('/', (req, res, next) => {
 app.get('/naviera/:id', (req, res) => {
   var id = req.params.id;
   Naviera.findById(id)
+  .populate('usoCFDI', 'usoCFDI descripcion')
     .exec((err, naviera) => {
       if (err) {
         return res.status(500).json({

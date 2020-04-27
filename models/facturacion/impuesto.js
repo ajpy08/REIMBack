@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 var impuestoSchema = new Schema({
     TR: { type: String, required: true },
     impuesto: { type: String, required: true },
+    cveImpuesto: { type: String, required: true },
     valor: { type: Number, required: true },    
     fAlta: { type: Date, default: Date.now }
 }, { collection: 'buques' });

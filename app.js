@@ -62,6 +62,7 @@ var ProdServRoutes = require('./routes/productos-servicios');
 var ClaveProdSerRoutes = require('./routes/clave-productos-servicios');
 var ClaveUnidad = require('./routes/clave-unidades');
 var FacturacionRoutes = require('./routes/facturacion');
+var CFDIRoutes = require('./routes/cfdis');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -99,6 +100,7 @@ app.use('/clave-productos-servicios', ClaveProdSerRoutes);
 app.use('/clave-unidades', ClaveUnidad);
 app.use('/productos-servicios', ProdServRoutes);
 app.use('/facturacion', FacturacionRoutes);
+app.use('/cfdis', CFDIRoutes);
 app.use('/reportes', reportesRoutes)
 app.use('/', appRoutes);
 
