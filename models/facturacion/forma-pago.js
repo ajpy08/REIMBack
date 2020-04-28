@@ -3,7 +3,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
 
 var formaPagoSchema = new Schema({
-    formaPago: { type: Number, required: true },
+    formaPago: { type: String, required: true },
     descripcion: { type: String, required: true }
 }, { collection: 'fac_SAT_formasPago' });
 
