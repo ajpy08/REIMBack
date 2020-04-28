@@ -17,16 +17,15 @@ var cfdiSchema = new Schema({
   tipoComprobante: { type: String },
   total: { type: Number, required: true },
   // version: { type: String }, // FALTA
-  // xsi_schemaLocation: { type: String }, // FALTA
   // noCertificado: { type: String }, // FALTA
   // sello: { type: String }, // FALTA
   // certificado: { type: String }, // FALTA
   /////////////////////////////////////////////////
 
   ////////////////////EMISOR////////////////////////
-  NombreEmisor: { type: String },
-  regimenFiscal: { type: String },
-  rfcEmisor: { type: String },
+  // nombreEmisor: { type: String }, FALTA
+  // regimenFiscal: { type: String }, FALTA
+  // rfcEmisor: { type: String }, FALTA
   /////////////////////////////////////////////////
 
   ////////////////////RECEPTOR/////////////////////
