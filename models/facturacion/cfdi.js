@@ -38,18 +38,18 @@ var cfdiSchema = new Schema({
 
   ////////////////////CONCEPTOS/////////////////////
   conceptos: [{
-    cantidad: { type: String },
+    cantidad: { type: Number },
     claveProdServ: { type: String },
     claveUnidad: { type: String },
     descripcion: { type: String },
     noIdentificacion: { type: String },
-    importe: { type: String },
-    valorUnitario: { type: String },
+    importe: { type: Number },
+    valorUnitario: { type: Number },
     impuestos: [{
       TR: { type: String, required: true },
       importe: { type: Number, required: true },
       impuesto: { type: String, required: true },
-      tasaOCuota: { type: String, required: true },
+      tasaCuota: { type: String, required: true },
       tipoFactor: { type: String, default: 'Tasa', required: true },
     }],
     unidad: { type: String },
