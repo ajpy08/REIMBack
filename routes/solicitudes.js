@@ -315,6 +315,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
       correo: body.correo,
       contenedores: body.contenedores,
       tipo: body.tipo,
+      rutaBooking: body.rutaBooking,
       blBooking: body.blBooking,
       facturarA: body.facturarA,
       rfc: body.rfc,
@@ -358,6 +359,9 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
 
   if (solicitud.tipo == 'D') {
     variasBucket.MoverArchivoBucket('temp/', solicitud.rutaBL, 'solicitudes/');
+  }
+  if (solicitud.tipo == 'C') {
+    variasBucket.MoverArchivoBucket('temp/', solicitud.rutaBooking, 'solicitudes/');
   }
   if (!solicitud.credito && solicitud.rutaComprobante != '..') {
     variasBucket.MoverArchivoBucket('temp/', solicitud.rutaComprobante, 'solicitudes/');
@@ -460,6 +464,8 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
     solicitud.contenedores = body.contenedores;
     solicitud.facturarA = body.facturarA;
     solicitud.rfc = body.rfc;
+    solicitud.rutaBL = body.rutaBL,
+    solicitud.rutaBooking = body.rutaBooking,
     solicitud.razonSocial = body.razonSocial;
     solicitud.calle = body.razonSocial;
     solicitud.noExterior = body.noExterior;
@@ -482,6 +488,16 @@ app.put('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
             variasBucket.BorrarArchivoBucket('solicitudes/', solicitud.rutaBL);
           }
           solicitud.rutaBL = body.rutaBL;
+        }
+      }
+    }
+    if (solicitud.tipo == 'C') {
+      if (solicitud.rutaBooking != body.rutaBooking) {
+        if (variasBucket.MoverArchivoBucket('temp/', body.rutaBooking, 'solicitudes/')) {
+          if (solicitud.rutaBooking != null && solicitud.rutaBooking != undefined && solicitud.rutaBooking != '') { //BORRAR EL ACTUAL
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitud.rutaBooking);
+          }
+          solicitud.rutaBooking = body.rutaBooking;
         }
       }
     }
@@ -731,6 +747,7 @@ app.delete('/solicitud/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrada.rutaComprobante);
     variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrada.rutaBL);
+    variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrada.rutaBooking);
 
     solicitudBorrada.remove();
     res.status(200).json({
@@ -785,6 +802,7 @@ app.delete('/solicitud/maniobra/:id', mdAutenticacion.verificaToken, (req, res) 
             }
             variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaComprobante);
             variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaBL);
+            variasBucket.BorrarArchivoBucket('solicitudes/', solicitudBorrado.rutaBooking);
             solicitudBorrado.remove();
             res.status(200).json({
               ok: true,

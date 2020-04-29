@@ -30,6 +30,7 @@ var agenciaSchema = new Schema({
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  activo: {type: Boolean, required: false},
   fMod: { type: Date }
 }, { collection: 'clientes' });
 

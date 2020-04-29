@@ -17,6 +17,7 @@ var solicitudScheme = new Schema({
   noViaje: { type: String },
   observaciones: { type: String },
   rutaBL: { type: String },
+  rutaBooking: { type: String },
   credito: { type: Boolean, default: 'false', required: true },
   rutaComprobante: { type: String },
   correo: { type: String, requiered: [true, 'El correo es necesario'] },

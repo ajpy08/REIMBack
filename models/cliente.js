@@ -33,6 +33,7 @@ var clienteSchema = new Schema({
   role: { type: String, required: true, default: 'CLIENT_ROLE', enum: rolesValidos },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
+  activo: {type: Boolean, required: false},
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date }
 }, { collection: 'clientes' });
