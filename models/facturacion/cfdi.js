@@ -49,11 +49,11 @@ var cfdiSchema = new Schema({
       TR: { type: String, required: true },
       importe: { type: Number, required: true },
       impuesto: { type: String, required: true },
-      tasaCuota: { type: String, required: true },
+      tasaCuota: { type: Number, required: true },
       tipoFactor: { type: String, default: 'Tasa', required: true },
     }],
     unidad: { type: String },
-    descuento: { type: String },
+    descuento: { type: Number },
     maniobras: [{ type: Schema.Types.ObjectId, ref: 'Maniobra' }],
   }],
   /////////////////////////////////////////////////
