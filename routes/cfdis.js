@@ -5,6 +5,7 @@ var KEYS = require('../config/config').KEYS
 var app = express();
 var fs = require('fs');
 var path = require('path');
+var funcion = require('../routes/fuctions');
 var moment = require('moment');
 var CFDIS = require('../models/facturacion/cfdi');
 const CFDI = require('@alexotano/cfdi33').CFDI
@@ -227,8 +228,9 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
 
-    const fecha = moment(cfdi.fecha).format();
+    const fecha = moment(cfdi.fecha).format('YYYY-MM-DDTHH:mm:ss');
 
+    var total = funcion.splitStart(cfdi.total);
     const cfdiXML = new CFDI({
       'Fecha': fecha,
       'Folio': cfdi.folio,
@@ -236,9 +238,11 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       'LugarExpedicion': DATOS.LugarExpedicion,
       'MetodoPago': cfdi.metodoPago,
       'Serie': cfdi.serie,
+      'Moneda': cfdi.moneda,
+      'NoCertificado': DATOS.NoCertificado,
       'SubTotal': cfdi.subtotal,
       'TipoDeComprobante': cfdi.tipoComprobante,
-      'Total': cfdi.total,
+      'Total': total
     });
 
     cfdiXML.cer = KEYS.cer
@@ -258,40 +262,43 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
     }));
 
 
+
     for (const c of cfdi.conceptos) {
+      let ValorUnitario = funcion.splitEnd(c.valorUnitario)
+      let Importe = funcion.splitEnd(c.importe);
+      let Cantidad = funcion.cantidad(c.cantidad);
       const concepto = new Concepto({
-        'ValorUnitarios': c.valorUnitario,
+        'ValorUnitario': ValorUnitario,
         'NoIdentificacion': c.noIdentificacion,
-        'Importe': c.importe,
+        'Importe': Importe,
         'Descripcion': c.descripcion,
         'ClaveUnidad': c.claveUnidad,
         'ClaveProdServ': c.claveProdServ,
-        'Cantidad': c.cantidad,
+        'Cantidad': Cantidad,
       });
 
-      let tasaOCuota = ''
+
       for (const im of c.impuestos) {
-        if (im.tasaCuota < 10) {
-          tasaOCuota = '0.0' + im.tasaCuota
-        } else if (im.tasaCuota > 10) {
-          tasaOCuota = '0.' + im.tasaCuota
-        }
+        var tasaOCuota = funcion.punto(im.tasaCuota);
+        
         if (im.TR === 'TRASLADO') {
+          var importeT = funcion.splitEnd(im.importe);
           concepto.add(new Traslado({
-            'Importe': im.importe,
+            'Importe': importeT,
             'TipoFactor': im.tipoFactor,
             'TasaOCuota': tasaOCuota,
             'Impuesto': im.impuesto,
-            'Base': c.importe,
+            'Base': Importe,
           }));
           // cfdiXML.add(concepto);
         } else if (im.TR === 'RETENCION') {
+          var importeR = funcion.splitEnd(im.importe);
           concepto.add(new Retencion({
-            'Importe': im.importe,
+            'Importe': importeR,
             'TipoFactor': im.tipoFactor,
             'TasaOCuota': tasaOCuota,
             'Impuesto': im.impuesto,
-            'Base': c.importe,
+            'Base': Importe,
           }));
         }
 
@@ -300,34 +307,47 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       break
     }
 
-    
+
+    var totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados);
+    var totalImpuestosRetenidos = funcion.splitStart(cfdi.totalImpuestosRetenidos);
     const totalimp = new Impuestos({
-      'TotalImpuestosTrasladados': cfdi.totalImpuestosTrasladados, 
-      'TotalImpuestosRetenidos': cfdi.totalImpuestosRetenidos 
- });
-  ;
+      
+      'TotalImpuestosRetenidos': totalImpuestosRetenidos,
+      'TotalImpuestosTrasladados': totalImpuestosTrasladados
+    });
+
+    let tasaOCuotaR = ''
     for (const imp of cfdi.conceptos) {
       for (const im of imp.impuestos) {
-        if (im.TR === 'TRASLADO') {
+        if (im.TR !== 'RETENCION') {
+          tasaOCuotaR = funcion.punto(im.tasaCuota);
+        }
+        if (im.TR === 'RETENCION') {
           let impR = im.impuesto;
+          let totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados)
           totalimp.add(new ImpTraslado({
-            'Importe': cfdi.totalImpuestosTrasladados,
-            'Impuesto': impR
-          }))
-        } if (im.TR === 'RETENCION') {
+            'Importe': totalImpuestosTrasladados,
+            'Impuesto': impR,
+            'TasaOCuota': tasaOCuotaR,
+            'TipoFactor': im.tipoFactor,
+
+          }));
+
+        } if (im.TR === 'TRASLADO') {
           const imp = im.impuesto;
+          let totalImpuestosRetenidos = funcion.splitStart(cfdi.totalImpuestosRetenidos);
           totalimp.add(new ImpRetencion({
-            'Importe': cfdi.totalImpuestosRetenidos,
+            'Importe': totalImpuestosRetenidos,
             'Impuesto': imp
           }));
         }
       }
-      cfdiXML.add(totalimp)
+      cfdiXML.add(totalimp);
       break
     }
 
     cfdiXML.getXml()
-      .then(xml => fs.writeFile(path.resolve(__dirname, `${cfdi._id}.xml`), xml, (err, res) => {
+      .then(xml => fs.writeFile(path.resolve('C:/Users/leogh/Documents/GitHub/REIMBack/xmlTemp', `${cfdi._id}.xml`), xml, (err, res) => {
         if (err) {
           console.log('error al crear archivo XML');
         } else {
@@ -342,6 +362,10 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
-// ! FALTA TERMINAR LA BUSQUEDA DEL ARCHIVO PARA SABER EN DONDE SE ENCUENTRA Y FALTA TIMBRAR EL ARCHVO
+
+
+
+
+
 
 module.exports = app;
