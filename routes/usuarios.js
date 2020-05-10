@@ -311,6 +311,7 @@ app.put('/usuario/:id/user/logout', (req, res) => {
       });
     }
     usuario.status = false;
+    usuario.fActivo = undefined;
     usuario.save((err, usuarioGuardado) => {
       if (err) {
         return res.status(400).json({
