@@ -1,0 +1,91 @@
+
+    Fecha: 08/05/2020 18:04
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:06
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:06
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:07
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:08
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:17
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:18
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:19
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:22
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:23
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:23
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:24
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:25
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:28
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................
+    Fecha: 08/05/2020 18:32
+    Archivo: C:\Users\leogh\Documents\GitHub\REIMBack\xmlTemp\A-61-5eb5dd61a18f6a25b09a9893.xml
+    Mensaje Error: No se obtuvo respuesta del PAC
+    Intentos: 2
+    Respuesta: Sin respuesta
+    ..........................................................................................

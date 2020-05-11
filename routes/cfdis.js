@@ -4,7 +4,7 @@ var DATOS = require('../config/config').DATOS
 var KEYS = require('../config/config').KEYS
 var app = express();
 var fs = require('fs');
-var path = require('path');
+const path = require('path');
 var funcion = require('../routes/fuctions');
 var moment = require('moment');
 var CFDIS = require('../models/facturacion/cfdi');
@@ -17,6 +17,7 @@ const Traslado = require('@alexotano/cfdi33').Traslado
 const Retencion = require('@alexotano/cfdi33').Retencion
 const ImpTraslado = require('@alexotano/cfdi33').ImpTraslado
 const ImpRetencion = require('@alexotano/cfdi33').ImpRetencion
+
 
 // ==========================================
 // Obtener todos los CFDIS
@@ -230,29 +231,30 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 
     const fecha = moment(cfdi.fecha).format('YYYY-MM-DDTHH:mm:ss');
 
-    var total = funcion.splitStart(cfdi.total);
+    var total = funcion.totalRedondeo(cfdi.total);
     const cfdiXML = new CFDI({
       'Fecha': fecha,
       'Folio': cfdi.folio,
       'FormaPago': cfdi.formaPago,
       'LugarExpedicion': DATOS.LugarExpedicion,
       'MetodoPago': cfdi.metodoPago,
-      'Serie': cfdi.serie,
       'Moneda': cfdi.moneda,
-      'NoCertificado': DATOS.NoCertificado,
+      'Serie': cfdi.serie,
       'SubTotal': cfdi.subtotal,
       'TipoDeComprobante': cfdi.tipoComprobante,
-      'Total': total
+      'Total': total,
+      'NoCertificado': DATOS.NoCertificado,
     });
 
-    cfdiXML.cer = KEYS.cer
+
     cfdiXML.key = KEYS.key
+    cfdiXML.cer = KEYS.cer
     cfdiXML.withOutCerts = false
 
     cfdiXML.add(new Emisor({
-      'Rfc': DATOS.Emisor_RFC,
       'Nombre': DATOS.Emisor_Nombre,
-      'RegimenFiscal': DATOS.Emisor_RegimenFiscal
+      'RegimenFiscal': DATOS.Emisor_RegimenFiscal,
+      'Rfc': DATOS.Emisor_RFC,
     }));
 
     cfdiXML.add(new Receptor({
@@ -267,51 +269,51 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       let ValorUnitario = funcion.splitEnd(c.valorUnitario)
       let Importe = funcion.splitEnd(c.importe);
       let Cantidad = funcion.cantidad(c.cantidad);
+      
       const concepto = new Concepto({
-        'ValorUnitario': ValorUnitario,
-        'NoIdentificacion': c.noIdentificacion,
-        'Importe': Importe,
-        'Descripcion': c.descripcion,
-        'ClaveUnidad': c.claveUnidad,
-        'ClaveProdServ': c.claveProdServ,
         'Cantidad': Cantidad,
+        'ClaveProdServ': c.claveProdServ,
+        'ClaveUnidad': c.claveUnidad,
+        'Descripcion': c.descripcion,
+        'Importe': Importe,
+        'NoIdentificacion': c.noIdentificacion,
+        'ValorUnitario': ValorUnitario,
       });
 
 
       for (const im of c.impuestos) {
         var tasaOCuota = funcion.punto(im.tasaCuota);
-        
+
         if (im.TR === 'TRASLADO') {
           var importeT = funcion.splitEnd(im.importe);
           concepto.add(new Traslado({
-            'Importe': importeT,
-            'TipoFactor': im.tipoFactor,
-            'TasaOCuota': tasaOCuota,
-            'Impuesto': im.impuesto,
             'Base': Importe,
+            'Importe': importeT,
+            'Impuesto': im.impuesto,
+            'TasaOCuota': tasaOCuota,
+            'TipoFactor': im.tipoFactor,
           }));
           // cfdiXML.add(concepto);
         } else if (im.TR === 'RETENCION') {
           var importeR = funcion.splitEnd(im.importe);
           concepto.add(new Retencion({
-            'Importe': importeR,
-            'TipoFactor': im.tipoFactor,
-            'TasaOCuota': tasaOCuota,
-            'Impuesto': im.impuesto,
             'Base': Importe,
+            'Importe': importeR,
+            'Impuesto': im.impuesto,
+            'TasaOCuota': tasaOCuota,
+            'TipoFactor': im.tipoFactor,
           }));
         }
 
       }
       cfdiXML.add(concepto);
-      break
     }
 
 
     var totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados);
     var totalImpuestosRetenidos = funcion.splitStart(cfdi.totalImpuestosRetenidos);
     const totalimp = new Impuestos({
-      
+
       'TotalImpuestosRetenidos': totalImpuestosRetenidos,
       'TotalImpuestosTrasladados': totalImpuestosTrasladados
     });
@@ -322,7 +324,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
         if (im.TR !== 'RETENCION') {
           tasaOCuotaR = funcion.punto(im.tasaCuota);
         }
-        if (im.TR === 'RETENCION') {
+        if (im.TR === 'TRASLADO') {
           let impR = im.impuesto;
           let totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados)
           totalimp.add(new ImpTraslado({
@@ -333,7 +335,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 
           }));
 
-        } if (im.TR === 'TRASLADO') {
+        } if (im.TR === 'RETENCION') {
           const imp = im.impuesto;
           let totalImpuestosRetenidos = funcion.splitStart(cfdi.totalImpuestosRetenidos);
           totalimp.add(new ImpRetencion({
@@ -345,20 +347,40 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       cfdiXML.add(totalimp);
       break
     }
+    var archivo = `${cfdi.serie}-${cfdi.folio}-${cfdi._id}.xml`;
+    var Route =path.resolve(__dirname, `../xmlTemp/${archivo}`);
+    var oks = false;
 
+    var timbrado_ok = false;
     cfdiXML.getXml()
-      .then(xml => fs.writeFile(path.resolve('C:/Users/leogh/Documents/GitHub/REIMBack/xmlTemp', `${cfdi._id}.xml`), xml, (err, res) => {
+      .then(xml => fs.writeFile(Route, xml, (err) => {
         if (err) {
           console.log('error al crear archivo XML');
+          oks
         } else {
           console.log('Archivo Creado');
+          oks = true
+          if (oks === true) {
+            timbrado_ok  = funcion.timbrado(Route);
+          }
         }
       }))
-      .catch(e => console.log(e.toString(), '---> error'));
+      .catch(e => console.log(e.toString(), '---> OCURRIO UN ERROR AL CREAR EL ARCHIVO XML del CFDI ' + `${archivo}`));
+      if (timbrado_ok !== false) {
+        res.status(200).json({
+          ok: true
+        });
+      } else {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Hubo un error de timbrado',
+          errors: {message: 'Hubo un error de timbrado'}
+        })
+      }
 
-    res.status(200).json({
-      ok: true
-    });
+    //TIMBRADO 
+
+
   });
 });
 
