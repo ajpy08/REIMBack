@@ -133,10 +133,10 @@ function obtenerMenu(ROLE) {
     // menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
     menu[0].submenu.unshift({titulo: 'Reportes', url: '/reportes'});
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
-    menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
 
@@ -176,7 +176,6 @@ function obtenerMenu(ROLE) {
     menu[4].submenu.unshift({ titulo: 'Papeleta', url: '/solicitudes_transportista' });
     menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
-    menu[4].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
 
     menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
     menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });  
@@ -363,6 +362,7 @@ function obtenerMenu(ROLE) {
     },
     ];
     // menu[1].submenu.unshift({ titulo: 'Liberacion Booking', url: '/liberaciones_bk' });
+    menu[1].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
     menu[1].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[1].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
         menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
