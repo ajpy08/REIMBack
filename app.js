@@ -3,6 +3,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var CronJob = require('cron').CronJob;
 var entorno = require('./config/config').config();
 // var server = require('http').createServer(app);
 // var io = require('socket.io')(server);
@@ -63,6 +64,7 @@ var ClaveProdSerRoutes = require('./routes/clave-productos-servicios');
 var ClaveUnidad = require('./routes/clave-unidades');
 var FacturacionRoutes = require('./routes/facturacion');
 var CFDIRoutes = require('./routes/cfdis');
+var jobsRoutes = require('./routes/jobs');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -101,7 +103,8 @@ app.use('/clave-unidades', ClaveUnidad);
 app.use('/productos-servicios', ProdServRoutes);
 app.use('/facturacion', FacturacionRoutes);
 app.use('/cfdis', CFDIRoutes);
-app.use('/reportes', reportesRoutes)
+app.use('/reportes', reportesRoutes);
+app.use('/jobs', jobsRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose

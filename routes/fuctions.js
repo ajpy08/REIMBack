@@ -2,8 +2,8 @@ var fs = require('fs');
 var soap = require('soap');
 var moment = require('moment');
 const path = require('path');
-
 var KEYS = require('../config/config').KEYS
+
 var ok = false;
 
 let tasaOCuotaR = ''
@@ -39,21 +39,33 @@ function splitEnd(valorSplit) { // ! SIRVE PARA VALIDAR SI TIENE DECIMALES Y REL
 }
 
 function totalRedondeo(valor) {
-    var red = redondeo(valor)
-    var sep = red.toString().indexOf('.');
-    if (sep != -1) {
-        var valorCortado = red.toString().split('.');
-        if (valorCortado[1].length > 6) {
-            var resp = valorCortado[1].substr(0, 6);
-            resp = valorCortado[0] + '.' + resp;
+    var resp = valor.toString().indexOf('.');
+    if (resp != -1) {
+        var valores = valor.toString().split('.');
+        if (valores[1].length < 2) {
+            resp = valores[0] + '.' + valores[1] + '00000';
+
         } else {
-            valor = valorCortado[1].padEnd(6, 0);
-            resp = valorCortado[0] + '.' + valor
+            var red = redondeo(valor)
+            var sep = red.toString().indexOf('.');
+            if (sep != -1) {
+                var valorCortado = red.toString().split('.');
+                if (valorCortado[1].length > 6) {
+                    resp = valorCortado[1].substr(0, 6);
+                    resp = valorCortado[0] + '.' + resp;
+                } else {
+                    valor = valorCortado[1].padEnd(6, 0);
+                    resp = valorCortado[0] + '.' + valor
+                }
+
+            } else {
+                resp = red + '.' + '000000';
+            }
+            separador = '';
         }
     } else {
-        resp = red + '.' + '000000';
+        resp = valor + '.' + '000000';
     }
-    separador = '';
     return resp;
 }
 
@@ -72,8 +84,7 @@ function splitStart(valorSplit) { // SIRVE PARA CORTAR A DOS CECIMALES Y SI NO T
         totalF = total[1].substr(0, 2);
         ValorS = total[0] + '.' + totalF;
         if (totalF === '' || totalF.length < 2) {
-            totalF = total.padStart(2, 0);
-            ValorS = total[0] + '.' + totalF
+            ValorS = total[0] + '.' + total[1] + '0';
         }
     } else {
         ValorS = valorSplit + '.00';
@@ -97,77 +108,56 @@ function cantidad(cantidad) {
 
 
 
-let count = 0;
+// let count = 0;
 
+// var resultado = {};
 
-function timbrado(archivo) {
-
-    var archivXML = fs.readFileSync(archivo, 'utf8');
-    var url = 'https://dev.advans.mx/ws/awscfdi.php?wsdl';
-    var key = '51beb7b6859d126837ebb6b532406619';
-    var args = {
-        key: key,
-        cfdi: archivXML,
-    };
-
-
-
-    soap.createClient(url, function (err, cliente) {
-        if (err) {
-            return err;
-        } else {
-            cliente.timbrar(args, function (err, result) {
-                count++
-                if (err) {
-                    if (count > 2) {
-                        log(err, null, count, null);
-                        count = 0;
-                        return console.log('---> Consultar LOG_CGDI'), ok
-                    } else {
-                        timbrado(archivo);
-                    }
-                } else if (!result.return || result.return === undefined) {
-                            if (count < 2) {
-                                timbrado(archivo)
-                            } else {
-                                log('No se obtuvo respuesta del PAC', archivo, count, 'Sin respuesta');
-                                count = 0;
-                                return ok
-                                
-                            }
-                    } else
-                        if (result.return.Code.$value == 200) {
-                            var resultado = result.return.resultados[0];
-                            handleResultado(resultado);
-                        } else {
-                            if (result) {
-                                if (count > 2) {
-                                    log(result.return.Code.$value + '- ' + result.return.Message.$value, archivo, intentos, respuesta)
-                                    return console.log('---> Consultar LOG_CGDI'), ok
-                                } else {
-                                    timbrado(archivo);
-                                }
-                            }
-                        }
-                
-            });
-        }
-    });
-
-    function handleResultado(resultado) {
-        console.log("Status: " + resultado.Code.$value);
-        console.log("Mensaje: " + resultado.Message.$value);
-        if (resultado.status == 200) {
-            console.log("UUID: " + resultado.uuid);
-            console.log("CFDI con timbre: " + resultado.cfdiTimbrado);
-        }
-    }
-
-}
+// function timbrado(xml, archivo) {
+// var archivXML = fs.readFileSync(archivo, 'utf8');
+//     var url = 'https://dev.advans.mx/ws/awscfdi.php?wsdl';
+//     var key = KEYS.API_KEY;
+//     var args = {
+//         key: key,
+//         cfdi: xml,
+//     };
+//     soap.createClient(url,(err, cliente) => {
+//         if (err) {
+//             return err;
+//         } else {
+//             cliente.timbrar(args, function (err, result) {
+//                 count++
+//                 if (err) {
+//                     log(err, null, count, null);
+//                     count = 0;
+//                     return
+//                 } else {
+//                     if (result.return === undefined) {
+//                         if (count < 2) {
+//                             timbrado(xml)
+//                         } else {
+//                             log('No se obtuvo respuesta del PAC', archivo, count, 'Sin respuesta');
+//                             count = 0;
+//                             return
+//                         }
+//                     } else {
+//                         if (result.return.Code.$value == 200) {
+//                             ok = true;
+//                              resultado = {
+//                                 timbre: result.return.Timbre.$value,
+//                                 ok: ok
+//                             }
+//                             return resultado
+//                         }
+//                     }
+//                 }
+//             });
+//         };
+//     });
+// }
 
 
 function log(mensaje, archivo, intentos, respuesta) {
-    var Route =path.resolve(__dirname, `../xmlTemp/logCFDI.txt`);
+    var Route = path.resolve(__dirname, `../xmlTemp/logCFDI.txt`);
     let fecha = moment().format('DD/MM/YYYY HH:mm');
     fs.writeFile(Route, `
     Fecha: ${fecha}
@@ -175,11 +165,17 @@ function log(mensaje, archivo, intentos, respuesta) {
     Mensaje Error: ${mensaje}
     Intentos: ${intentos}
     Respuesta: ${respuesta}
-    ..........................................................................................`, {flag:'a'}, function(err)  {
+    ..........................................................................................`, { flag: 'a' }, function (err) {
         if (err) {
             console.log('Error al Escribir en el LOG_CFDI');
         }
     });
+}
+
+
+function cadenaOriginalComplemeto(version, uuid, fecha, rfcProvedor, selloDigitalEmisor, NoSerieSat) {
+    let cadenaOriginalComplemetoDeCertificadoDigital = `||${version}|${uuid}|${fecha}|${rfcProvedor}|${selloDigitalEmisor}|${NoSerieSat}||`
+    return cadenaOriginalComplemetoDeCertificadoDigital;
 }
 
 
@@ -190,4 +186,6 @@ exports.splitStart = splitStart;
 exports.redondeo = redondeo;
 exports.totalRedondeo = totalRedondeo;
 exports.cantidad = cantidad;
-exports.timbrado = timbrado;
+exports.log = log;
+exports.cadenaOriginalComplemeto = cadenaOriginalComplemeto;
+
