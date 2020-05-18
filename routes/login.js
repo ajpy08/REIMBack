@@ -211,7 +211,7 @@ function obtenerMenu(ROLE) {
     // menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
-    menu[0].submenu.unshift({titulo: 'Reportes', url: '/reportes'});
+    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes'});
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
@@ -343,6 +343,7 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
+    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes'});
     return menu;
   }
 
