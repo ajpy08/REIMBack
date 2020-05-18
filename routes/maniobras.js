@@ -26,6 +26,7 @@ app.get('', (req, res, netx) => {
   var finillegada = req.query.finillegada || '';
   var ffinllegada = req.query.ffinllegada || '';
   var naviera = req.query.naviera || '';
+  var cliente = req.query.cliente || '';
 
   var filtro = '{';
   if (cargadescarga != 'undefined' && cargadescarga != '')
@@ -40,8 +41,9 @@ app.get('', (req, res, netx) => {
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
   if (naviera != 'undefined' && naviera != '')
     filtro += '\"naviera\":' + '\"' + naviera + '\",';
-
-
+if (cliente != 'undefined' && cliente != '')
+    filtro += '\"cliente\":' + '\"' + cliente + '\",';
+    
   // if (peso != 'undefined' && peso != '')
   //   filtro += '\"peso\":' + '\"' + peso + '\",';
   peso = peso.replace(/,/g, '\",\"');
