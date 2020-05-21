@@ -65,6 +65,7 @@ var ClaveUnidad = require('./routes/clave-unidades');
 var FacturacionRoutes = require('./routes/facturacion');
 var CFDIRoutes = require('./routes/cfdis');
 var jobsRoutes = require('./routes/jobs');
+var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -105,6 +106,7 @@ app.use('/facturacion', FacturacionRoutes);
 app.use('/cfdis', CFDIRoutes);
 app.use('/reportes', reportesRoutes);
 app.use('/jobs', jobsRoutes);
+app.use('/pdfFacturacion', pdfFacturacionRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose

@@ -20,7 +20,8 @@ const ImpTraslado = require('@alexotano/cfdi33').ImpTraslado
 const ImpRetencion = require('@alexotano/cfdi33').ImpRetencion
 const parser = require('xml2json');
 var QRCode = require('qrcode');
-const Complemento = require('@alexotano/cfdi33').Complemento
+const Complemento = require('@alexotano/cfdi33').Complemento;
+var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 let cfdiXML;
 var options = {
@@ -122,17 +123,58 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     sucursal: body.sucursal,
     usuarioAlta: req.usuario._id
   });
-  cfdi.save((err, cfdiGuardado) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'Error al crear el CFDI',
-        errors: err
+  body.conceptos.forEach(concepto => {
+    concepto.maniobras.forEach(m => {
+      CFDIS.find({ 'conceptos.maniobras': { $eq: m._id }, 'conceptos._id': { $eq: concepto._id } }, (err, ok) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al buscar Maniobra y Producto Servicio',
+            errors: { message: 'Error al buscar Maniobra y Producto Servicio' }
+          });
+        }
+
+        if (ok.length > 0) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'La(s) maniobra(s) no se puede(n) facturar con el mismo PRODUCTO SERVICIO',
+            errors: { message: 'La(s) maniobra(s) no se puede(n) facturar con el mismo PRODUCTO SERVICIO' }
+          });
+        } else {
+          body.maniobras.forEach(maniobra => {
+            Maniobra.updateMany({ "_id": maniobra }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err) => {
+              if (err) {
+                return res.status(400).json({
+                  ok: false,
+                  mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
+                  errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
+                })
+              }
+              if (!maniobra) {
+                return res.status(500).json({
+                  ok: false,
+                  mensaje: 'Error al buscar maniobra asociada',
+                  errors: { message: 'Error al buscar maniobra asociada' }
+                });
+              }
+            });
+          });
+
+          cfdi.save((err, cfdiGuardado) => {
+            if (err) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al crear el CFDI',
+                errors: err
+              });
+            }
+            res.status(201).json({
+              ok: true,
+              cfdi: cfdiGuardado
+            });
+          });
+        }
       });
-    }
-    res.status(201).json({
-      ok: true,
-      cfdi: cfdiGuardado
     });
   });
 });
@@ -197,25 +239,35 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+  Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
     if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al borrar CFDI',
-        errors: err
-      });
-    }
-    if (!cfdiBorrado) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'No existe CFDI con ese ID',
-        errors: { message: 'No existe CFDI con ese ID' }
+        mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
+        errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
+      });
+    } else {
+      CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al borrar CFDI',
+            errors: err
+          });
+        }
+        if (!cfdiBorrado) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'No existe CFDI con ese ID',
+            errors: { message: 'No existe CFDI con ese ID' }
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          cfdi: cfdiBorrado
+        });
       });
     }
-    res.status(200).json({
-      ok: true,
-      cfdi: cfdiBorrado
-    });
   });
 });
 
@@ -423,14 +475,14 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
           mensaje: 'Se produjo un error al timbrar XML, validar LOG..',
           errors: { message: 'Se produjo un error al timbrar XML, validar LOG..' }
         });
-      } 
+      }
 
       if (result.return === undefined) {
         funcion.log('No se obtuvo respuesta del provedor de servicio', nombre, 1, 'No se obtuvo respuesta del provedor de servicios de timbrado');
         return res.status(500).json({
           ok: false,
           mensaje: 'No hay respuesta de timbrado',
-          errors: {message: 'No hay respuesta del provedor de timbrado'}
+          errors: { message: 'No hay respuesta del provedor de timbrado' }
         });
       }
 
