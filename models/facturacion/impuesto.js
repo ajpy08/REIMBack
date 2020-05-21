@@ -4,11 +4,13 @@ var Schema = mongoose.Schema;
 
 var impuestoSchema = new Schema({
     TR: { type: String, required: true },
+    importe: { type: Number, required: false }, 
     impuesto: { type: String, required: true },
-    cveImpuesto: { type: String, required: true },
-    valor: { type: Number, required: true },    
+    tasaCuota: { type: Number, required: true }, 
+    tipoFactor: { type: String, required: true },
     fAlta: { type: Date, default: Date.now }
-}, { collection: 'buques' });
-
-impuestoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
-module.exports = mongoose.model('Impuesto', impuestoSchema);
+    }, { collection: 'fac_SAT_impuestos' });
+    
+    impuestoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
+    module.exports = mongoose.model('Impuesto', impuestoSchema); 
+    
