@@ -68,6 +68,7 @@ var cfdiSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
+  xmlTimbrado: {type: String},
 }, { collection: 'cfdis' });
 
 cfdiSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });

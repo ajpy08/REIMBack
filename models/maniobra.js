@@ -58,6 +58,7 @@ var maniobraSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
+  cfdisAsociados: [{ type: Schema.Types.ObjectId, ref: 'CFDI' }],
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });

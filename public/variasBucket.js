@@ -4,13 +4,21 @@ var entorno = require('../config/config').config();
 exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
   return new Promise((resolve, reject) => {
     var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
-    var params = {
-      Bucket: entorno.BUCKET,
-      Body: archivo.data,
-      Key: rutaDestino + nombreArchivo,
-      ContentType: archivo.mimetype
-    };
-
+    if (archivo.data === undefined) {
+      var params = {
+        Bucket: entorno.BUCKET,
+        Body: archivo,
+        Key: rutaDestino + nombreArchivo,
+        ContentType: archivo.mimetype
+      };
+    } else {
+      params = {
+       Bucket: entorno.BUCKET,
+       Body: archivo.data,
+       Key: rutaDestino + nombreArchivo,
+       ContentType: archivo.mimetype
+     };
+    }
     s3.upload(params, function(err, data) {
       if (err) {
         console.log("Error", err);
