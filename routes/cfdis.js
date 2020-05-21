@@ -141,22 +141,24 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
             errors: { message: 'La(s) maniobra(s) no se puede(n) facturar con el mismo PRODUCTO SERVICIO' }
           });
         } else {
-          body.maniobras.forEach(maniobra => {
-            Maniobra.updateMany({ "_id": maniobra }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err) => {
-              if (err) {
-                return res.status(400).json({
-                  ok: false,
-                  mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
-                  errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
-                })
-              }
-              if (!maniobra) {
-                return res.status(500).json({
-                  ok: false,
-                  mensaje: 'Error al buscar maniobra asociada',
-                  errors: { message: 'Error al buscar maniobra asociada' }
-                });
-              }
+          body.conceptos.forEach(m => {
+            m.maniobras.forEach(maniobra => {
+              Maniobra.updateMany({ "_id": maniobra }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err) => {
+                if (err) {
+                  return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
+                    errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
+                  })
+                }
+                if (!maniobra) {
+                  return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar maniobra asociada',
+                    errors: { message: 'Error al buscar maniobra asociada' }
+                  });
+                }
+              });
             });
           });
 
@@ -407,6 +409,12 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       totalimp.nodes.reverse()
       cfdiXML.add(totalimp);
       break
+    }
+
+    var RouteFolder = path.resolve(__dirname, `../xmlTemp/`)
+    var folderexist = fs.existsSync(RouteFolder);
+    if (folderexist === false) {
+      fs.mkdirSync(RouteFolder)
     }
     var nombre = `${cfdi.serie}-${cfdi.folio}-${cfdi._id}.xml`;
     var Route = path.resolve(__dirname, `../xmlTemp/${nombre}`);
