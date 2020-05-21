@@ -542,6 +542,8 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
+  }  else {
+    filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': true},';
   }
 
   if (descargados === 'true') {
