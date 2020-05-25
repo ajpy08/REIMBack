@@ -88,6 +88,36 @@ app.get('/cfdi/:id', (req, res) => {
 
 
 // ==========================================
+//  VALIDAR SI NO EXISTE MANIOBRA Y CONCEPTO YA AGREGADOS EN LA BD 
+// ==========================================
+
+app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verificaToken, (req, res) => {
+  var maniobra_ID = req.params.maniobra;
+  var concepto_ID = req.params.concepto;
+
+  CFDIS.find({ 'conceptos.maniobras': { $eq: maniobra_ID }, 'conceptos._id': { $eq:  concepto_ID }}).exec((err, maniobrasConcepto) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar Maniobra ' + maniobra_ID  + 'y concepto ' + concepto_ID,
+        errors: {message: 'Error al buscar Maniobra ' + maniobra_ID  + 'y concepto' + concepto_ID,}
+      });
+    }
+    if (!maniobra_ID && !concepto_ID) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra ' + maniobra_ID + ' y conceptos ' + concepto_ID + ' no existen',
+        errors: { message: 'La maniobra ' + maniobra_ID + ' y conceptos ' + concepto_ID + ' no existen'}
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      maniobrasConceptos: maniobrasConcepto
+    });
+  });
+});
+
+// ==========================================
 // Crear nuevo CFDI
 // ==========================================
 app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
@@ -123,60 +153,39 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     sucursal: body.sucursal,
     usuarioAlta: req.usuario._id
   });
-  body.conceptos.forEach(concepto => {
-    concepto.maniobras.forEach(m => {
-      CFDIS.find({ 'conceptos.maniobras': { $eq: m._id }, 'conceptos._id': { $eq: concepto._id } }, (err, ok) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al buscar Maniobra y Producto Servicio',
-            errors: { message: 'Error al buscar Maniobra y Producto Servicio' }
-          });
-        }
 
-        if (ok.length > 0) {
+  body.conceptos.forEach(c => {
+    c.maniobras.forEach(m => {
+      Maniobra.updateMany({ "_id": m._id }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => {
+        if (err) {
           return res.status(400).json({
             ok: false,
-            mensaje: 'La(s) maniobra(s) no se puede(n) facturar con el mismo PRODUCTO SERVICIO',
-            errors: { message: 'La(s) maniobra(s) no se puede(n) facturar con el mismo PRODUCTO SERVICIO' }
-          });
-        } else {
-          body.conceptos.forEach(m => {
-            m.maniobras.forEach(maniobra => {
-              Maniobra.updateMany({ "_id": maniobra }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err) => {
-                if (err) {
-                  return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
-                    errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
-                  })
-                }
-                if (!maniobra) {
-                  return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar maniobra asociada',
-                    errors: { message: 'Error al buscar maniobra asociada' }
-                  });
-                }
-              });
-            });
-          });
-
-          cfdi.save((err, cfdiGuardado) => {
-            if (err) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al crear el CFDI',
-                errors: err
-              });
-            }
-            res.status(201).json({
-              ok: true,
-              cfdi: cfdiGuardado
-            });
+            mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
+            errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
+          })
+        }
+        if (!maniobra) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al buscar maniobra asociada',
+            errors: { message: 'Error al buscar maniobra asociada' }
           });
         }
       });
+    });
+  });
+
+  cfdi.save((err, cfdiGuardado) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al crear el CFDI',
+        errors: err
+      });
+    }
+    res.status(201).json({
+      ok: true,
+      cfdi: cfdiGuardado
     });
   });
 });
