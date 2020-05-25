@@ -90,7 +90,7 @@ app.get('/cfdi/:id', (req, res) => {
 // ==========================================
 // Crear nuevo CFDI
 // ==========================================
-app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => { 
   var body = req.body;
   var cfdi = new CFDIS({
     fecha: body.fecha,
