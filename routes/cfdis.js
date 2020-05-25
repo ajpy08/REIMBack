@@ -203,21 +203,25 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
 
+    cfdi.fecha = body.fecha,
+    cfdi.folio = body.folio,
+    cfdi.formaPago = body.formaPago,
+    cfdi.metodoPago = body.metodoPago,
+    cfdi.moneda = body.moneda,
     cfdi.serie = body.serie,
-      cfdi.folio = body.folio,
-      cfdi.sucursal = body.sucursal,
-      cfdi.formaPago = body.formaPago,
-      cfdi.metodoPago = body.metodoPago,
-      cfdi.moneda = body.moneda,
-      cfdi.tipoComprobante = body.tipoComprobante,
-      cfdi.fecha = body.fecha,
-      cfdi.rfc = body.rfc,
-      cfdi.nombre = body.nombre,
-      cfdi.usoCFDI = body.usoCFDI,
-      cfdi.direccion = body.direccion,
-      cfdi.correo = body.correo,
-      cfdi.conceptos = body.conceptos,
-      cfdi.usuarioMod = req.usuario._id;
+    cfdi.subtotal = body.subtotal,
+    cfdi.tipoComprobante = body.tipoComprobante,
+    cfdi.total = body.total,
+    cfdi.nombre = body.nombre,
+    cfdi.rfc = body.rfc,
+    cfdi.usoCFDI = body.usoCFDI,
+    cfdi.direccion = body.direccion,
+    cfdi.correo = body.correo,
+    cfdi.conceptos = body.conceptos,
+    cfdi.totalImpuestosRetenidos = body.totalImpuestosRetenidos,
+    cfdi.totalImpuestosTrasladados = body.totalImpuestosTrasladados,
+    cfdi.sucursal = body.sucursal,
+    cfdi.usuarioMod = req.usuario._id;
     cfdi.fMod = new Date();
 
     cfdi.save((err, cfdiGuardado) => {
