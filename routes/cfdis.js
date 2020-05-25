@@ -19,6 +19,7 @@ const Retencion = require('@alexotano/cfdi33').Retencion
 const ImpTraslado = require('@alexotano/cfdi33').ImpTraslado
 const ImpRetencion = require('@alexotano/cfdi33').ImpRetencion
 // const parser = require('xml2json');
+var xml2js = require('xml2js').parseString;
 var QRCode = require('qrcode');
 const Complemento = require('@alexotano/cfdi33').Complemento;
 var Maniobra = require('../models/maniobra');
@@ -95,19 +96,19 @@ app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verific
   var maniobra_ID = req.params.maniobra;
   var concepto_ID = req.params.concepto;
 
-  CFDIS.find({ 'conceptos.maniobras': { $eq: maniobra_ID }, 'conceptos._id': { $eq:  concepto_ID }}).exec((err, maniobrasConcepto) => {
+  CFDIS.find({ 'conceptos.maniobras': { $eq: maniobra_ID }, 'conceptos._id': { $eq: concepto_ID } }).exec((err, maniobrasConcepto) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        mensaje: 'Error al buscar Maniobra ' + maniobra_ID  + 'y concepto ' + concepto_ID,
-        errors: {message: 'Error al buscar Maniobra ' + maniobra_ID  + 'y concepto' + concepto_ID,}
+        mensaje: 'Error al buscar Maniobra ' + maniobra_ID + 'y concepto ' + concepto_ID,
+        errors: { message: 'Error al buscar Maniobra ' + maniobra_ID + 'y concepto' + concepto_ID, }
       });
     }
     if (!maniobra_ID && !concepto_ID) {
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra ' + maniobra_ID + ' y conceptos ' + concepto_ID + ' no existen',
-        errors: { message: 'La maniobra ' + maniobra_ID + ' y conceptos ' + concepto_ID + ' no existen'}
+        errors: { message: 'La maniobra ' + maniobra_ID + ' y conceptos ' + concepto_ID + ' no existen' }
       });
     }
     res.status(200).json({
@@ -120,7 +121,7 @@ app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verific
 // ==========================================
 // Crear nuevo CFDI
 // ==========================================
-app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => { 
+app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var cfdi = new CFDIS({
     fecha: body.fecha,
@@ -213,24 +214,24 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
 
     cfdi.fecha = body.fecha,
-    cfdi.folio = body.folio,
-    cfdi.formaPago = body.formaPago,
-    cfdi.metodoPago = body.metodoPago,
-    cfdi.moneda = body.moneda,
-    cfdi.serie = body.serie,
-    cfdi.subtotal = body.subtotal,
-    cfdi.tipoComprobante = body.tipoComprobante,
-    cfdi.total = body.total,
-    cfdi.nombre = body.nombre,
-    cfdi.rfc = body.rfc,
-    cfdi.usoCFDI = body.usoCFDI,
-    cfdi.direccion = body.direccion,
-    cfdi.correo = body.correo,
-    cfdi.conceptos = body.conceptos,
-    cfdi.totalImpuestosRetenidos = body.totalImpuestosRetenidos,
-    cfdi.totalImpuestosTrasladados = body.totalImpuestosTrasladados,
-    cfdi.sucursal = body.sucursal,
-    cfdi.usuarioMod = req.usuario._id;
+      cfdi.folio = body.folio,
+      cfdi.formaPago = body.formaPago,
+      cfdi.metodoPago = body.metodoPago,
+      cfdi.moneda = body.moneda,
+      cfdi.serie = body.serie,
+      cfdi.subtotal = body.subtotal,
+      cfdi.tipoComprobante = body.tipoComprobante,
+      cfdi.total = body.total,
+      cfdi.nombre = body.nombre,
+      cfdi.rfc = body.rfc,
+      cfdi.usoCFDI = body.usoCFDI,
+      cfdi.direccion = body.direccion,
+      cfdi.correo = body.correo,
+      cfdi.conceptos = body.conceptos,
+      cfdi.totalImpuestosRetenidos = body.totalImpuestosRetenidos,
+      cfdi.totalImpuestosTrasladados = body.totalImpuestosTrasladados,
+      cfdi.sucursal = body.sucursal,
+      cfdi.usuarioMod = req.usuario._id;
     cfdi.fMod = new Date();
 
     cfdi.save((err, cfdiGuardado) => {
@@ -434,7 +435,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 
 
 
-
+    var xmlT = [];
     cfdiXML.getXml().then(xml => fs.writeFile(Route, xml, (err) => {
       if (err) {
         console.log('error al crear archivo XML Temporal');
@@ -446,12 +447,15 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 
       } else {
         console.log('Archivo Temportal Guardado');
-        const xmlSinT = parser.toJson(xml, options);
+        const xmlSinT = xml2js(xml, function (err, data) {
+
+          xmlT = data
+        });
         return res.status(200).json({
           ok: true,
           rutaArchivo: Route,
           NombreArchivo: nombre,
-          cfdiXMLsinTimbrar: xmlSinT
+          cfdiXMLsinTimbrar: xmlT
         });
       }
     }))
@@ -490,7 +494,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 
     cliente.timbrar(args, (errT, result) => {
       if (errT) {
-        funcion.log('Se produjo un error al rimbrar' + result.return.Message.$value, nombre, 1, result.return.Code.$value + ' - ' + result.return.Message.$value)
+        funcion.log('Se produjo un error al Timbrar' + result.return.Message.$value, nombre, 1, result.return.Code.$value + ' - ' + result.return.Message.$value)
         return res.status(400).json({
           ok: false,
           mensaje: 'Se produjo un error al timbrar XML, validar LOG..',
@@ -528,20 +532,24 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
   });
 
   function RespuestaTimbre(result) {
-    var respuesta = parser.toJson(result.return.Timbre.$value, options);
-    Object.getOwnPropertyNames(respuesta).forEach(function (val) {
 
-      const complemento = new Complemento({
-        'xmlns:tdf': 'http://www.sat.gob.mx/TimbreFiscalDigital',
-        'xsi:schemaLocation': 'http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd',
-        'Version': respuesta[val].Version,
-        'FechaTimbrado': respuesta[val].FechaTimbrado,
-        'SelloCFD': respuesta[val].SelloCFD,
-        'UUID': respuesta[val].UUID,
-        'NoCertificadoSAT': respuesta[val].NoCertificadoSAT,
-        'RfcProvCertif': respuesta[val].RfcProvCertif,
-        'SelloSAT': respuesta[val].SelloSAT
-      });
+    var respuesta = []
+    xml2js(result.return.Timbre.$value, function (err, data) {
+      respuesta = data[Object.keys(data)];
+    });
+    Object.getOwnPropertyNames(respuesta).forEach(function (val) {
+        const complemento = new Complemento({          
+          'xmlns:tdf': 'http://www.sat.gob.mx/TimbreFiscalDigital',
+          'xsi:schemaLocation': 'http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd',
+          'Version': respuesta[val].Version,
+          'FechaTimbrado': respuesta[val].FechaTimbrado,
+          'SelloCFD': respuesta[val].SelloCFD,
+          'UUID': respuesta[val].UUID,
+          'NoCertificadoSAT': respuesta[val].NoCertificadoSAT,
+          'RfcProvCertif': respuesta[val].RfcProvCertif,
+          'SelloSAT': respuesta[val].SelloSAT
+        });
+
       cfdiXML.add(complemento);
     });
 
