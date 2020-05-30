@@ -3,7 +3,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var CronJob = require('cron').CronJob;
+// var CronJob = require('cron').CronJob;
 var entorno = require('./config/config').config();
 // var server = require('http').createServer(app);
 // var io = require('socket.io')(server);
@@ -64,7 +64,7 @@ var ClaveProdSerRoutes = require('./routes/clave-productos-servicios');
 var ClaveUnidad = require('./routes/clave-unidades');
 var FacturacionRoutes = require('./routes/facturacion');
 var CFDIRoutes = require('./routes/cfdis');
-var jobsRoutes = require('./routes/jobs');
+// var jobsRoutes = require('./routes/jobs');
 var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
 
 // Rutas
@@ -105,7 +105,7 @@ app.use('/productos-servicios', ProdServRoutes);
 app.use('/facturacion', FacturacionRoutes);
 app.use('/cfdis', CFDIRoutes);
 app.use('/reportes', reportesRoutes);
-app.use('/jobs', jobsRoutes);
+// app.use('/jobs', jobsRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
 app.use('/', appRoutes);
 
