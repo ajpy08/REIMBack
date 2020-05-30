@@ -82,7 +82,8 @@ app.get('/cfdi/:id', (req, res) => {
       }
       res.status(200).json({
         ok: true,
-        cfdi: cfdi
+        cfdi: cfdi,
+        NoCertificadoEmisor: DATOS.NoCertificado,
       });
     });
 });
@@ -152,6 +153,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     totalImpuestosRetenidos: body.totalImpuestosRetenidos,
     totalImpuestosTrasladados: body.totalImpuestosTrasladados,
     sucursal: body.sucursal,
+    fechaEmision: moment().format('YYYY-MM-DD HH:mm:ss'),
     usuarioAlta: req.usuario._id
   });
 
@@ -176,7 +178,9 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     });
   });
 
+
   cfdi.save((err, cfdiGuardado) => {
+    var Time_Emision = moment
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -186,7 +190,8 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     }
     res.status(201).json({
       ok: true,
-      cfdi: cfdiGuardado
+      cfdi: cfdiGuardado,
+
     });
   });
 });
@@ -433,8 +438,6 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
     var nombre = `${cfdi.serie}-${cfdi.folio}-${cfdi._id}.xml`;
     var Route = path.resolve(__dirname, `../xmlTemp/${nombre}`);
 
-
-
     var xmlT = [];
     cfdiXML.getXml().then(xml => fs.writeFile(Route, xml, (err) => {
       if (err) {
@@ -455,7 +458,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
           ok: true,
           rutaArchivo: Route,
           NombreArchivo: nombre,
-          cfdiXMLsinTimbrar: xmlT
+          cfdiXMLsinTimbrar: xmlT,
         });
       }
     }))
@@ -538,17 +541,17 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
       respuesta = data[Object.keys(data)];
     });
     Object.getOwnPropertyNames(respuesta).forEach(function (val) {
-        const complemento = new Complemento({          
-          'xmlns:tdf': 'http://www.sat.gob.mx/TimbreFiscalDigital',
-          'xsi:schemaLocation': 'http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd',
-          'Version': respuesta[val].Version,
-          'FechaTimbrado': respuesta[val].FechaTimbrado,
-          'SelloCFD': respuesta[val].SelloCFD,
-          'UUID': respuesta[val].UUID,
-          'NoCertificadoSAT': respuesta[val].NoCertificadoSAT,
-          'RfcProvCertif': respuesta[val].RfcProvCertif,
-          'SelloSAT': respuesta[val].SelloSAT
-        });
+      const complemento = new Complemento({
+        'xmlns:tdf': 'http://www.sat.gob.mx/TimbreFiscalDigital',
+        'xsi:schemaLocation': 'http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd',
+        'Version': respuesta[val].Version,
+        'FechaTimbrado': respuesta[val].FechaTimbrado,
+        'SelloCFD': respuesta[val].SelloCFD,
+        'UUID': respuesta[val].UUID,
+        'NoCertificadoSAT': respuesta[val].NoCertificadoSAT,
+        'RfcProvCertif': respuesta[val].RfcProvCertif,
+        'SelloSAT': respuesta[val].SelloSAT
+      });
 
       cfdiXML.add(complemento);
     });
@@ -672,75 +675,123 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 // GENERAR CODIGO QR
 // ==========================================
 
-app.get('/code/:uuid&:rfc_emisor&:rfc_receptor&:total&:sello/', (req, res) => {
-  var uuid = req.params.uuid;
-  rfc_emisor = req.params.rfc_emisor,
-    rfc_receptor = req.params.rfc_receptor,
-    total = req.params.total,
-    sello = req.params.sello,
-    urlQR = 'cfdi/QR/',
-    readQR = path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`);
+// app.get('/code/:uuid&:rfc_emisor&:rfc_receptor&:total&:sello/', (req, res) => {
+//   var uuid = req.params.uuid;
+//   rfc_emisor = req.params.rfc_emisor,
+//     rfc_receptor = req.params.rfc_receptor,
+//     total = req.params.total,
+//     sello = req.params.sello,
+//     urlQR = 'cfdi/QR/',
+//     readQR = path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`);
 
-  var sellomod = sello.indexOf('@'),
-    selloast = '';
-  if (sellomod != -1) {
-    selloast = sello.replace('@', '/');
-  } else {
-    selloast = sello;
-  }
+//   var sellomod = sello.indexOf('@'),
+//     selloast = '';
+//   if (sellomod != -1) {
+//     selloast = sello.replace('@', '/');
+//   } else {
+//     selloast = sello;
+//   }
 
-  var codigoQR = '';
-  var totalQR = total.toString().indexOf('.');
-  var totalFinalQR = "";
-  if (totalQR != -1) {
-    let cort = total.toString().split('.');
-    totalFinalQR = cort[0].padStart(17, 0) + cort[1].padStart(6, 0);
-  } else {
-    totalFinalQR = total.toString().padStart(16, 0);
-  }
-  codigoQR = `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=${uuid}&re=${rfc_emisor}&rr=${rfc_receptor}&tt=${totalFinalQR}&fe=${selloast}`;
-  QRCode.toFile(readQR, codigoQR, function (err, data) {
+//   var codigoQR = '';
+//   var totalQR = total.toString().indexOf('.');
+//   var totalFinalQR = "";
+//   if (totalQR != -1) {
+//     let cort = total.toString().split('.');
+//     totalFinalQR = cort[0].padStart(17, 0) + cort[1].padStart(6, 0);
+//   } else {
+//     totalFinalQR = total.toString().padStart(16, 0);
+//   }
+//   codigoQR = `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=${uuid}&re=${rfc_emisor}&rr=${rfc_receptor}&tt=${totalFinalQR}&fe=${selloast}`;
+//   QRCode.toFile(readQR, codigoQR, function (err, data) {
+//     if (err) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'Error al generar codigo QR del UUID ' + uuid,
+//         errors: {
+//           mensaje: 'Error al generar codigo QR del UUID ' + uuid
+//         }
+//       })
+//     } else {
+//       fs.readFile(readQR, (err, qr) => {
+//         if (err) {
+//           funcion.log('Error al leer archivo QR del uuid' + `QR-${uuid}.png`, `QR-${uuid}.png`, 1, err);
+//           return res.status(400).json({
+//             ok: false,
+//             mensaje: 'Error al leer archivo QR del uuid' + uuid,
+//             errors: { message: 'Error al leer archivo QR del uuid' + uuid }
+//           })
+//         };
+//         variasBucket.SubirArchivoBucket(qr, urlQR, `QR-${uuid}.png`).then((value) => {
+//           if (value) {
+//             console.log('Archivo QR subido al bucket');
+
+//             fs.unlink(path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`), (err) => {
+//               if (err) {
+//                 return res.status(400).json({
+//                   ok: false,
+//                   mensaje: 'Error al borrar codigo QR Temporal',
+//                   errors: { message: 'Error al borrar codigo QR Temporal' }
+//                 });
+//               }
+//             });
+//             return res.status(200).json({
+//               ok: true,
+//               QR: `QR-${uuid}.png`
+//             });
+//           }
+//         });
+//       });
+//     }
+//   });
+// });
+
+
+// ==========================================
+// ACTUALIZAR DATOS DE TIMBRADO EN LA BD
+// ==========================================
+app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken ,(req, res) => {
+  let id = req.params.id;
+  let body = req.body
+  CFDIS.findById(id, (err, datosTimbre) => {
+
     if (err) {
-      return res.status(400).json({
+      return res.status(500).json({
         ok: false,
-        mensaje: 'Error al generar codigo QR del UUID ' + uuid,
-        errors: {
-          mensaje: 'Error al generar codigo QR del UUID ' + uuid
-        }
-      })
-    } else {
-      fs.readFile(readQR, (err, qr) => {
-        if (err) {
-          funcion.log('Error al leer archivo QR del uuid' + `QR-${uuid}.png`, `QR-${uuid}.png`, 1, err);
-          return res.status(400).json({
-            ok: false,
-            mensaje: 'Error al leer archivo QR del uuid' + uuid,
-            errors: { message: 'Error al leer archivo QR del uuid' + uuid }
-          })
-        };
-        variasBucket.SubirArchivoBucket(qr, urlQR, `QR-${uuid}.png`).then((value) => {
-          if (value) {
-            console.log('Archivo QR subido al bucket');
-
-            fs.unlink(path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`), (err) => {
-              if (err) {
-                return res.status(400).json({
-                  ok: false,
-                  mensaje: 'Error al borrar codigo QR Temporal',
-                  errors: { message: 'Error al borrar codigo QR Temporal' }
-                });
-              }
-            });
-            return res.status(200).json({
-              ok: true,
-              QR: `QR-${uuid}.png`
-            });
-          }
-        });
+        mensaje: 'Error al buscar CFDI',
+        errors: err
       });
     }
+    if (!datosTimbre) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El CFDI con el id ' + id + ' no existe',
+        errors: { message: 'El CFDI con el id ' + id + ' no existe' }
+      });
+    }
+    datosTimbre.uuid = body.uuid;
+    datosTimbre.NoSerieSat = body.NoCerieSat;
+    datosTimbre.fechaCertificacion = body.fechaCer;
+    datosTimbre.cadenaOriginalSat = body.cadenaOriginal;
+    datosTimbre.selloSat = body.selloSat;
+    datosTimbre.selloEmisor = body.selloEmisor;
+    datosTimbre.rfcProvCer = body.rfcProvSat;
+    datosTimbre.save((err, datosTimbradoGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar el CFDI',
+          errors: { message: 'Error al actualizar el CFDI' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        cfdiTimbradoAct: datosTimbradoGuardado
+      });
+    });
   });
 });
+
+
 
 
 module.exports = app;
