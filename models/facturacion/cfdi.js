@@ -16,11 +16,22 @@ var cfdiSchema = new Schema({
   subtotal: { type: Number, required: true },
   tipoComprobante: { type: String },
   total: { type: Number, required: true },
+ 
+
   // version: { type: String }, // FALTA
   // noCertificado: { type: String }, // FALTA
   // sello: { type: String }, // FALTA
   // certificado: { type: String }, // FALTA
   /////////////////////////////////////////////////
+
+  // TIMBRADO //
+  uuid: {type: String },
+  NoSerieSat: {type: String},
+  fechaCertificacion: {type: Date},
+  cadenaOriginalSat: {type: String},
+  selloSat: {type: String},
+  selloEmisor: {type: String},
+  rfcProvCer: {type: String},
 
   ////////////////////EMISOR////////////////////////
   // nombreEmisor: { type: String }, FALTA
@@ -66,6 +77,7 @@ var cfdiSchema = new Schema({
   sucursal: { type: String },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
+  fechaEmision: {type: String},
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
   xmlTimbrado: {type: String},

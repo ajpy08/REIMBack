@@ -143,7 +143,7 @@ app.put('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
     camion.noEconomico = body.noEconomico;
     camion.vigenciaSeguro = body.vigenciaSeguro;
     camion.usuarioMod = req.usuario._id;
-    camion.activo = req.activo;
+    camion.activo = body.activo;
     camion.fMod = new Date();
 
 
