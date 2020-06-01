@@ -1,0 +1,71 @@
+{
+  "_from": "@alexotano/cfdi33",
+  "_id": "@alexotano/cfdi33@2.2.7",
+  "_inBundle": false,
+  "_integrity": "sha512-FGqVZd4Ycs3pe3Ch/kZLpf1TWP9EGOHFSMh3I/bJ8YUWZQItAOJXuzcQi23RlmWfjjF4WkdK1WZ/mmaKFXgTdA==",
+  "_location": "/@alexotano/cfdi33",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@alexotano/cfdi33",
+    "name": "@alexotano/cfdi33",
+    "escapedName": "@alexotano%2fcfdi33",
+    "scope": "@alexotano",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@alexotano/cfdi33/-/cfdi33-2.2.7.tgz",
+  "_shasum": "2b167ed40c810a1977f4aeb036f29b2138a74b2f",
+  "_spec": "@alexotano/cfdi33",
+  "_where": "C:\\Users\\leogh\\Documents\\GitHub\\REIMBack",
+  "author": {
+    "name": "Alex Otano"
+  },
+  "bugs": {
+    "url": "https://github.com/ALEXOTANO/cfdi33/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "jxon": "^2.0.0-beta.5",
+    "xsltproc": "^0.0.3"
+  },
+  "deprecated": false,
+  "description": "Libreria para generación de XML, para facturación electrónica 3.3 en México",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "homepage": "https://github.com/ALEXOTANO/cfdi33#readme",
+  "keywords": [
+    "cfdi",
+    "version",
+    "3.3",
+    "XML",
+    "facturacion",
+    "electronica",
+    "mexico"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "@alexotano/cfdi33",
+  "optionalDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ALEXOTANO/cfdi33.git"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "version": "2.2.7"
+}
