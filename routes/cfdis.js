@@ -277,85 +277,86 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
-  CFDIS.findById(id, (err, valcfdi) => {
-    if (err || !valcfdi) {
-      return res.status(404).json({
-        ok: false,
-        mensaje: 'Error al validar si esta timbrado el cfdi',
-        errors: {message: 'Error al validar si esta timbrado el cfdi'}
-      });
-    }
-    if (valcfdi.uuid) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`,
-        errors:{ message: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`}
-      });
-    } else {
-      Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
-        if (err) {
-          return res.status(400).json({
-            ok: false,
-            mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
-            errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
-          });
-        } else {
-    
-          CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
-            if (err) {
-              return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al borrar CFDI',
-                errors: err
-              });
-            }
-            if (!cfdiBorrado) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'No existe CFDI con ese ID',
-                errors: { message: 'No existe CFDI con ese ID' }
-              });
-            }
-            res.status(200).json({
-              ok: true,
-              cfdi: cfdiBorrado
-            });
-          });
-        }
-      });
-    }
-  });
-  // Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
-  //   if (err) {
+  //! DESCOMENTAR PARA PASE A PRODUCCION
+  // CFDIS.findById(id, (err, valcfdi) => {
+  //   if (err || !valcfdi) {
+  //     return res.status(404).json({
+  //       ok: false,
+  //       mensaje: 'Error al validar si esta timbrado el cfdi',
+  //       errors: {message: 'Error al validar si esta timbrado el cfdi'}
+  //     });
+  //   }
+  //   if (valcfdi.uuid) {
   //     return res.status(400).json({
   //       ok: false,
-  //       mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
-  //       errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
+  //       mensaje: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`,
+  //       errors:{ message: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`}
   //     });
   //   } else {
-
-  //     CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+  //     Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
   //       if (err) {
-  //         return res.status(500).json({
-  //           ok: false,
-  //           mensaje: 'Error al borrar CFDI',
-  //           errors: err
-  //         });
-  //       }
-  //       if (!cfdiBorrado) {
   //         return res.status(400).json({
   //           ok: false,
-  //           mensaje: 'No existe CFDI con ese ID',
-  //           errors: { message: 'No existe CFDI con ese ID' }
+  //           mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
+  //           errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
+  //         });
+  //       } else {
+    
+  //         CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+  //           if (err) {
+  //             return res.status(500).json({
+  //               ok: false,
+  //               mensaje: 'Error al borrar CFDI',
+  //               errors: err
+  //             });
+  //           }
+  //           if (!cfdiBorrado) {
+  //             return res.status(400).json({
+  //               ok: false,
+  //               mensaje: 'No existe CFDI con ese ID',
+  //               errors: { message: 'No existe CFDI con ese ID' }
+  //             });
+  //           }
+  //           res.status(200).json({
+  //             ok: true,
+  //             cfdi: cfdiBorrado
+  //           });
   //         });
   //       }
-  //       res.status(200).json({
-  //         ok: true,
-  //         cfdi: cfdiBorrado
-  //       });
   //     });
   //   }
   // });
+  Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
+        errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
+      });
+    } else {
+
+      CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al borrar CFDI',
+            errors: err
+          });
+        }
+        if (!cfdiBorrado) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'No existe CFDI con ese ID',
+            errors: { message: 'No existe CFDI con ese ID' }
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          cfdi: cfdiBorrado
+        });
+      });
+    }
+  });
 });
 
 // ==========================================
