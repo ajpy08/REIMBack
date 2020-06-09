@@ -15,6 +15,7 @@ const Impuestos = require('@alexotano/cfdi33').Impuestos
 const Receptor = require('@alexotano/cfdi33').Receptor
 const Concepto = require('@alexotano/cfdi33').Concepto
 const Traslado = require('@alexotano/cfdi33').Traslado
+const Addenda = require('@alexotano/cfdi33').Addenda
 const Retencion = require('@alexotano/cfdi33').Retencion
 const ImpTraslado = require('@alexotano/cfdi33').ImpTraslado
 const ImpRetencion = require('@alexotano/cfdi33').ImpRetencion
@@ -124,6 +125,7 @@ app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verific
 // ==========================================
 app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
+  let respuesta = [];
   var cfdi = new CFDIS({
     fecha: body.fecha,
     folio: body.folio,
@@ -157,9 +159,24 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  body.conceptos.forEach(c => {
-    c.maniobras.forEach(m => {
-      Maniobra.updateMany({ "_id": m._id }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => {
+  function maniobraCfdi() {
+    let maniobra = [];
+    body.conceptos.forEach(c => {
+      c.maniobras.forEach(m => {
+        maniobra.push(m._id);
+      });
+    });
+    maniobra = new Set(maniobra);
+    return maniobra
+  }
+
+  async function agregacion() {
+    respuesta = await maniobraCfdi();
+  }
+
+  agregacion().then(() => {
+    respuesta.forEach(m => {
+      Maniobra.updateMany({ "_id": m }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => {
         if (err) {
           return res.status(400).json({
             ok: false,
@@ -177,7 +194,6 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
       });
     });
   });
-
 
   cfdi.save((err, cfdiGuardado) => {
     var Time_Emision = moment
@@ -260,6 +276,56 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
+
+  //! DESCOMENTAR PARA PASE A PRODUCCION
+  // CFDIS.findById(id, (err, valcfdi) => {
+  //   if (err || !valcfdi) {
+  //     return res.status(404).json({
+  //       ok: false,
+  //       mensaje: 'Error al validar si esta timbrado el cfdi',
+  //       errors: {message: 'Error al validar si esta timbrado el cfdi'}
+  //     });
+  //   }
+  //   if (valcfdi.uuid) {
+  //     return res.status(400).json({
+  //       ok: false,
+  //       mensaje: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`,
+  //       errors:{ message: `Error al borrar el cfdi ${valcfdi.serie} - ${valcfdi.folio}, ya que se encuentra TIMBRADO`}
+  //     });
+  //   } else {
+  //     Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
+  //       if (err) {
+  //         return res.status(400).json({
+  //           ok: false,
+  //           mensaje: 'Error al borrar CFDi Asociado con el id ' + id,
+  //           errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
+  //         });
+  //       } else {
+    
+  //         CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
+  //           if (err) {
+  //             return res.status(500).json({
+  //               ok: false,
+  //               mensaje: 'Error al borrar CFDI',
+  //               errors: err
+  //             });
+  //           }
+  //           if (!cfdiBorrado) {
+  //             return res.status(400).json({
+  //               ok: false,
+  //               mensaje: 'No existe CFDI con ese ID',
+  //               errors: { message: 'No existe CFDI con ese ID' }
+  //             });
+  //           }
+  //           res.status(200).json({
+  //             ok: true,
+  //             cfdi: cfdiBorrado
+  //           });
+  //         });
+  //       }
+  //     });
+  //   }
+  // });
   Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
     if (err) {
       return res.status(400).json({
@@ -268,6 +334,7 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
       });
     } else {
+
       CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
         if (err) {
           return res.status(500).json({
@@ -313,7 +380,8 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
     const fecha = moment(cfdi.fecha).format('YYYY-MM-DDTHH:mm:ss');
-    var total = funcion.totalRedondeo(cfdi.total);
+    var total = funcion.cortado(cfdi.total, 6);
+    const subTotal = funcion.cortado(cfdi.subtotal, 2);
     cfdiXML = new CFDI({
       'Fecha': fecha,
       'Folio': cfdi.folio,
@@ -322,7 +390,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       'MetodoPago': cfdi.metodoPago,
       'Moneda': cfdi.moneda,
       'Serie': cfdi.serie,
-      'SubTotal': cfdi.subtotal,
+      'SubTotal': subTotal,
       'TipoDeComprobante': cfdi.tipoComprobante,
       'Total': total,
       'NoCertificado': DATOS.NoCertificado,
@@ -459,22 +527,24 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
           rutaArchivo: Route,
           NombreArchivo: nombre,
           cfdiXMLsinTimbrar: xmlT,
+          cfdiData: cfdi
         });
       }
     }))
       .catch(e => console.log(e.toString(), '---> OCURRIO UN ERROR AL CREAR EL XML del CFDI ' + `${nombre}`));
 
   });
-
 });
 
 
 // ==========================================
 // TIMBRAR XML Y GENERAL CADENA ORIGINAL COMPLEMENTO 
 // ==========================================
-app.get('/timbrado/:nombre&:id/', (req, res) => {
+app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
   var id = req.params.id;
   var nombre = req.params.nombre;
+  let direccion = req.params.direccion;
+  let info = req.params.info;
   var Route = path.resolve(__dirname, `../xmlTemp/${nombre}`);
   xml = fs.readFileSync(Route, 'utf8');
 
@@ -487,7 +557,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 
   soap.createClient(url, (errC, cliente) => {
     if (errC) {
-      funcion.log('Error al conectar con Web Services Timbrado' + errC, nombre, 1, 'Error al conectar con Web Services Timbrado');
+      funcion.CorreoFac('Error al conectar con Web Services Timbrado' + errC, nombre, 1, 'Error al conectar con Web Services Timbrado');
       return res.status(500).json({
         ok: false,
         mensaje: 'Error al conectar con Web Services Timbrado, validar LOG..',
@@ -497,16 +567,16 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 
     cliente.timbrar(args, (errT, result) => {
       if (errT) {
-        funcion.log('Se produjo un error al Timbrar' + result.return.Message.$value, nombre, 1, result.return.Code.$value + ' - ' + result.return.Message.$value)
+        funcion.CorreoFac('Se produjo un error al Timbrar' + result.return.Message.$value, nombre, 1, result.return.Code.$value + ' - ' + result.return.Message.$value)
         return res.status(400).json({
           ok: false,
-          mensaje: 'Se produjo un error al timbrar XML, validar LOG..',
-          errors: { message: 'Se produjo un error al timbrar XML, validar LOG..' }
+          mensaje: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}`,
+          errors: { message: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}` }
         });
       }
 
       if (result.return === undefined) {
-        funcion.log('No se obtuvo respuesta del provedor de servicio', nombre, 1, 'No se obtuvo respuesta del provedor de servicios de timbrado');
+        funcion.CorreoFac('No se obtuvo respuesta del provedor de servicio', nombre, 1, 'No se obtuvo respuesta del provedor de servicios de timbrado');
         return res.status(500).json({
           ok: false,
           mensaje: 'No hay respuesta de timbrado',
@@ -522,11 +592,11 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
         return ok = true
       } else {
         if ((result.return.Code.$value != "200") || (result.return.Code.$value != "307")) {
-          funcion.log(result.return.Code.$value + ' - ' + result.return.Message.$value, nombre, '1', result.return.Message.$value)
+          funcion.CorreoFac(result.return.Code.$value + ' - ' + result.return.Message.$value, nombre, '1', result.return.Message.$value)
           return res.status(400).json({
             ok: false,
-            mensaje: 'Error al Timbrar -> LogCFDI',
-            errors: { message: 'Error al Timbrar -> LogCFDI' }
+            mensaje: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}`,
+            errors: { message: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}` }
           });
         }
 
@@ -535,7 +605,6 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
   });
 
   function RespuestaTimbre(result) {
-
     var respuesta = []
     xml2js(result.return.Timbre.$value, function (err, data) {
       respuesta = data[Object.keys(data)];
@@ -555,6 +624,21 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 
       cfdiXML.add(complemento);
     });
+
+    if (info !== '' || info !== undefined) {
+      const addenda = new Addenda({
+        'xmlns:REIM': 'http://reimcontainerpark.com.mx',
+        'xsi:schemaLocation': 'http://advans.mx/adicionales/adicionales_advans.xsd',
+        'Version': '1.0',
+        'InformacionAdicional': info,
+        'ReceptorDireccion': direccion,
+        'EmisorDireccion': DATOS.Direccion
+      });
+      cfdiXML.add(addenda);
+    }
+
+
+
 
     var TRoute = path.resolve(__dirname, `../xmlTemp/T-${nombre}`);
 
@@ -579,7 +663,6 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
         });
 
         if (cadenaOriginal != undefined) {
-
           CFDIS.findById(id, (err, cfdi) => {
             if (err) {
               return res.status(500).json({
@@ -595,6 +678,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
                 errors: { message: 'No existe CFDI con ese ID' }
               });
             }
+
             var xmlFinal = fs.readFileSync(TRoute, 'utf8')
             cfdi.xmlTimbrado = xmlFinal
             cfdi.save((err, cfdiGuardado) => {
@@ -614,7 +698,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
             });
           });
         } else {
-          funcion.log('Error al generar Cadena Original Complemento Sat', nombre, 0, 'Error al generar Cadena Original Complemento Sat');
+          funcion.CorreoFac('Error al generar Cadena Original Complemento Sat', nombre, 0, 'Error al generar Cadena Original Complemento Sat');
           return res.status(400).json({
             ok: false,
             mensaje: 'Error al generar Cadena Original Comelento Sat, validar LOG..',
@@ -631,7 +715,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
           read = path.resolve(__dirname, `../xmlTemp/T-${nombre}`);
         fs.readFile(read, (err, fd) => {
           if (err) {
-            funcion.log('Fallo al leer archivo timbrado XML', nombreArchivo, 0, 'Error read');
+            funcion.CorreoFac('Fallo al leer archivo timbrado XML', nombreArchivo, 0, 'Error read');
             return res.status(400).json({
               ok: false,
               mensaje: 'Error al leer archivo XML temporal, validar LOG..'
@@ -652,7 +736,7 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
               });
               fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivoTemp}`), (err) => {
                 if (err) {
-                  funcion.log('Error al borrar archivo XML temporal', nombreArchivo, 1, 'error when deleting');
+                  funcion.CorreoFac('Error al borrar archivo XML temporal', nombreArchivo, 1, 'error when deleting');
                   return res.status(400).json({
                     ok: false,
                     mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
@@ -671,85 +755,12 @@ app.get('/timbrado/:nombre&:id/', (req, res) => {
 });
 
 
-// ==========================================
-// GENERAR CODIGO QR
-// ==========================================
-
-// app.get('/code/:uuid&:rfc_emisor&:rfc_receptor&:total&:sello/', (req, res) => {
-//   var uuid = req.params.uuid;
-//   rfc_emisor = req.params.rfc_emisor,
-//     rfc_receptor = req.params.rfc_receptor,
-//     total = req.params.total,
-//     sello = req.params.sello,
-//     urlQR = 'cfdi/QR/',
-//     readQR = path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`);
-
-//   var sellomod = sello.indexOf('@'),
-//     selloast = '';
-//   if (sellomod != -1) {
-//     selloast = sello.replace('@', '/');
-//   } else {
-//     selloast = sello;
-//   }
-
-//   var codigoQR = '';
-//   var totalQR = total.toString().indexOf('.');
-//   var totalFinalQR = "";
-//   if (totalQR != -1) {
-//     let cort = total.toString().split('.');
-//     totalFinalQR = cort[0].padStart(17, 0) + cort[1].padStart(6, 0);
-//   } else {
-//     totalFinalQR = total.toString().padStart(16, 0);
-//   }
-//   codigoQR = `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=${uuid}&re=${rfc_emisor}&rr=${rfc_receptor}&tt=${totalFinalQR}&fe=${selloast}`;
-//   QRCode.toFile(readQR, codigoQR, function (err, data) {
-//     if (err) {
-//       return res.status(400).json({
-//         ok: false,
-//         mensaje: 'Error al generar codigo QR del UUID ' + uuid,
-//         errors: {
-//           mensaje: 'Error al generar codigo QR del UUID ' + uuid
-//         }
-//       })
-//     } else {
-//       fs.readFile(readQR, (err, qr) => {
-//         if (err) {
-//           funcion.log('Error al leer archivo QR del uuid' + `QR-${uuid}.png`, `QR-${uuid}.png`, 1, err);
-//           return res.status(400).json({
-//             ok: false,
-//             mensaje: 'Error al leer archivo QR del uuid' + uuid,
-//             errors: { message: 'Error al leer archivo QR del uuid' + uuid }
-//           })
-//         };
-//         variasBucket.SubirArchivoBucket(qr, urlQR, `QR-${uuid}.png`).then((value) => {
-//           if (value) {
-//             console.log('Archivo QR subido al bucket');
-
-//             fs.unlink(path.resolve(__dirname, `../xmlTemp/QR-${uuid}.png`), (err) => {
-//               if (err) {
-//                 return res.status(400).json({
-//                   ok: false,
-//                   mensaje: 'Error al borrar codigo QR Temporal',
-//                   errors: { message: 'Error al borrar codigo QR Temporal' }
-//                 });
-//               }
-//             });
-//             return res.status(200).json({
-//               ok: true,
-//               QR: `QR-${uuid}.png`
-//             });
-//           }
-//         });
-//       });
-//     }
-//   });
-// });
 
 
 // ==========================================
 // ACTUALIZAR DATOS DE TIMBRADO EN LA BD
 // ==========================================
-app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken ,(req, res) => {
+app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken, (req, res) => {
   let id = req.params.id;
   let body = req.body
   CFDIS.findById(id, (err, datosTimbre) => {
