@@ -13,6 +13,10 @@ app.get('/documentoxtipo/:tipo/:nombre', (req, res, netx) => {
   var tipo = req.params.tipo;
   var nombreArchivo = req.params.nombre;
   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+
+  if (tipo === 'cfdi') {
+    tipo += '/xml'
+  }
   if (nombreArchivo === 'xxx') {
     res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
   } else {

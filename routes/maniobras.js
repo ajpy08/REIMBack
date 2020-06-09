@@ -93,7 +93,7 @@ if (cliente != 'undefined' && cliente != '')
     })
     .populate({
       path: "viaje",
-      select: 'viaje',
+      select: 'viaje fVigenciaTemporal pdfTemporal',
 
       populate: {
         path: "buque",
