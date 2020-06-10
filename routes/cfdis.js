@@ -59,6 +59,34 @@ app.get('/', (req, res, next) => {
     });
 });
 
+app.get('/T_ST/:timbres', (req, res, next) => {
+  let timbres = req.query.timbre || '';
+  if (timbres === '') {
+    timbres = 'false';
+  }
+  let filtro = '{';
+
+  if (timbres !== '' && timbres !== 'undefined') {
+    filtro += '\"uuid\":{\"$exists\":' + '\"' + timbres + '\"}' + '}';
+  }
+  var json = JSON.parse(filtro);
+
+  CFDIS.find(json).exec((err, data) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al buscar cfdis Timbrados/sin Timbrar',
+        errors: {message: 'Error al buscar cfdis Timbrados/sin Timbrar'}
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      cfdi_T_sT: data,
+      total: data.length
+    });
+  });
+
+})
 // ==========================================
 //  Obtener CFDI por ID
 // ==========================================

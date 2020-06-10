@@ -249,6 +249,20 @@ io.on('connection', function (socket) {
     io.emit('asignacion-papeleta', { data: data });
   });
 
+  // ! SOCKET PARA CFDI
+  socket.on('updatecfdi', function (data) {
+    io.emit('update-cfdi', {data: data});
+  });
+  socket.on('deletecfdi', function (data) {
+    io.emit('delete-cfdi', {data: data});
+  });
+  socket.on('newcfdi', function (data) {
+    io.emit('new-cfdi', {data: data});
+  });
+  socket.on('timbradocfdi', function (data) {
+    io.emit('timbrado-cfdi', {data: data});
+  });
+
   // ! SOCKET PARA CLIENTES
 
   socket.on('newcliente', function (data) {
