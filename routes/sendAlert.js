@@ -33,11 +33,11 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url)
         from: email,
         template: template,
         subject: asunto,
-        // attachments: [
-        //     {   // utf-8 string as an attachment
-        //         filename: 'text1.txt',
-        //         content: 'hello world!'
-        //     }
+        attachments: [
+            {   // utf-8 string as an attachment
+                filename: 'text1.txt',
+                content: 'hello world!'
+            }
         //     // {   // binary buffer as an attachment
         //     //     filename: 'text2.txt',
         //     //     content: new Buffer('hello world!','utf-8')
@@ -46,7 +46,7 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url)
         //     //     filename: 'text3.txt',
         //     //     path: '/path/to/file.txt' // stream this file
         //     // }
-        // ],
+        ],
         context: {
             subject: asunto,
             body: cuerpo,
