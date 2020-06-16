@@ -1,8 +1,6 @@
 var fs = require('fs');
-var soap = require('soap');
 var moment = require('moment');
 const path = require('path');
-var KEYS = require('../config/config').KEYS;
 const ti = require('../config/config').correosTI
 const sentMail = require('../routes/sendAlert');
 
@@ -71,15 +69,13 @@ function totalRedondeo(valor) {
     return resp;
 }
 
-function redondeo(valor) {
-    var final = valor.toFixed(2)
-    return final
-}
+
+
 
 let ValorS = '';
 var total = '';
 let totalF = '';
-function splitStart(valorSplit) { // SIRVE PARA CORTAR A DOS CECIMALES Y SI NO TIENE DECIAL LE COLOCAL 2 00
+function splitStart(valorSplit) { // SIRVE PARA CORTAR A DOS DECIMALES Y SI NO TIENE DECIAL LE COLOCAL 2 00
     separador = valorSplit.toString().indexOf('.');
     if (separador != -1) {
         total = valorSplit.toString().split('.');
@@ -106,7 +102,7 @@ function cantidad(cantidad) {
 
 }
 
-function cortado(valor, truc) {
+function cortado(valor, truc, coma) {
     let totalCor = valor.toString().indexOf('.')
     let resultado = '';
     if (totalCor != -1) {
@@ -115,37 +111,40 @@ function cortado(valor, truc) {
         if (truc === 6) {
             resultado = totalCor[0] + '.' + total.substr(0, 6).padEnd(6, '0');
         } else if (truc === 2) {
-            resultado = totalCor[0] + '.' + total.substr(0, 2);
+            if (coma !== undefined) {
+                if (totalCor[0] >= '1000') {
+                    resultado = totalCor[0].substr(0, 1) + ',' + totalCor[0].substr(1) + '.' + total.substr(0, 2).padStart(2, '0');
+                } else if (totalCor[0] >= '10000') {
+                    resultado = totalCor[0].substr(0, 2) + ',' + totalCor[0].substr(2) + '.' + total.substr(0, 2).padStart(2, '0')
+                } else if (totalCor[0] >= '100000') {
+                    resultado = totalCor[0].substr(0, 3) + ',' + totalCor[0].substr(3) + '.' + total.substr(0, 2).padStart(2, '0');
+                }
+            } else {
+                resultado = totalCor[0] + '.' + total.substr(0, 2);
+            }
         }
         return resultado
     } else {
-        return valor + '.' + '00'
+        if (coma !== undefined) {
+            let value = valor.toString()
+            let result = '';
+            if (valor < 999) {
+                return value + '.' + '00';
+            } else if (valor >= 1000) {
+                result = value.substr(0, 1) + ',' + value.substr(1) + '.' + '00';
+            } else if (valor >= 10000) {
+                result = value.substr(0, 2) + ',' + value.substr(2) + '.' + '00';
+            } else if (valor >= 100000) {
+                result = value.substr(0, 3) + ',' + value.substr(3) + '.' + '00';
+            }
+            return result;
+        } else {
+            return valor + '.' + '00'
+        }
     }
 }
 
 
-
-// function log(mensaje, archivo, intentos, respuesta) {
-//     var Route = path.resolve(__dirname, `../xmlTemp/logCFDI.txt`);
-//     let fecha = moment().format('DD/MM/YYYY HH:mm');
-//     let ok = true;
-//     fs.writeFile(Route, `
-//     Fecha: ${fecha}
-//     Archivo: ${archivo}
-//     Mensaje Error: ${mensaje}
-//     Intentos: ${intentos}
-//     Respuesta: ${respuesta}
-//     ..........................................................................................`, { flag: 'a' }, function (err) {
-
-//         if (err) {
-//             ok = false;
-//             console.log('Error al Escribir en el LOG_CFDI');
-//         } else {
-//             ok = true;
-//         }
-//     });
-//     return ok;
-// }
 function envioCooreo(mensaje, archivo) {
     let fecha = moment().format('DD/MM/YYYY HH:mm');
     mensaje = `Fecha: ${fecha}
@@ -156,7 +155,7 @@ function envioCooreo(mensaje, archivo) {
 }
 
 async function CorreoFac(mensaje, archivo) {
-   await envioCooreo(mensaje, archivo);
+    await envioCooreo(mensaje, archivo);
     fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivo}`), (err) => {
         if (err) {
             console.log('Error al eliminar archivo sin timbrar XML');
@@ -167,12 +166,53 @@ async function CorreoFac(mensaje, archivo) {
 
 function cadenaOriginalComplemeto(version, uuid, fecha, rfcProvedor, selloDigitalEmisor, NoSerieSat) {
     let cadenaOriginalComplemetoDeCertificadoDigital = `||${version}|${uuid}|${fecha}|${rfcProvedor}|${selloDigitalEmisor}|${NoSerieSat}||`
-    return cadenaOriginalComplemetoDeCertificadoDigital.replace(/(\r\n|\n|\r)/gm, "");
+    cadenaOriginalComplemetoDeCertificadoDigital.replace(/(\r\n|\n|\r)/gm, "");
+    cadenaOriginalComplemetoDeCertificadoDigital.trim();
+    return cadenaOriginalComplemetoDeCertificadoDigital
+}
+function cadenaOriginalComplemetoPDF(cadena, num) {
+    let cadenaOriginalComplemetoDeCertificadoDigital = cadena;
+    let cort = '';
+    if (num == 1) {
+        cort = cadenaOriginalComplemetoDeCertificadoDigital.match(/.{1,126}/g)
+    }
+    if (num == 2) {
+        cort = cadenaOriginalComplemetoDeCertificadoDigital.match(/.{1,100}/g)
+    }
+    return cort;
+
+}
+function QrG(uuid, rfcEmisor, rfcReceptor, total, selloEmisor) {
+    const url = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx',
+        dataT = QrT_C(total),
+        dataS = QrT_C(null, selloEmisor);
+    let QrString = '';
+
+    QrString = `${url}${uuid}${rfcEmisor}${rfcReceptor}${dataT}${dataS}`;
+    return QrString
 }
 
+function QrT_C(valor, cadena) {
+    if (valor && !cadena) {
+        let total = valor.toString();
+        const decimal = valor.toString().indexOf('.');
+        if (decimal !== -1) {
+            total = total.split('.');
+            total = total[0].padStart(10, '0') + '.' + total[1].padStart(6, '0');
+        } else {
+            total = valor.toString().padStart(10, '0') + '.' + '000000';
+        }
+        return total;
+    } else if (cadena && !valor) {
+        let selloEmisorCortado = '';
+        if (cadena) {
+            selloEmisorCortado = cadena.substr(-8);
+        }
+        return selloEmisorCortado;
+    }
+}
 
 //  CONVERTIR NUMERO A LETRAS //
-
 var numeroALetras = (function () {
 
     // Código basado en https://gist.github.com/alfchee/e563340276f89b22042a
@@ -332,15 +372,49 @@ var numeroALetras = (function () {
 
 })();
 
+function impuestos(impuesto) {
+    let impuestos = 0;
+    if (impuesto >= 10) {
+        impuestos = 0 + '.' + impuesto;
+    } else {
+        impuestos = 0 + '.' + 0 + impuesto;
+    }
+    return impuestos;
+}
+
+function letraT(letra, numero) {
+    let letras = '';
+    let centavos = numero.toString().indexOf('.')
+    if (centavos !== -1) {
+        let punto = numero.toString().split('.');
+        let valid = punto[1].substr(0, 2)
+        if (valid >= '10') {
+            centavos = punto[1].substr(0, 2);
+        } else {
+            centavos =  '0' + punto[1].substr(0, 1)
+        }
+    } else {
+        centavos = '00'
+    }
+    letras = `${letra}   ${centavos}/100 M.N.`
+    return letras
+}
+
 
 exports.punto = punto;
 exports.splitEnd = splitEnd;
 exports.splitStart = splitStart;
-exports.redondeo = redondeo;
+exports.QrG = QrG;
 exports.totalRedondeo = totalRedondeo;
 exports.cantidad = cantidad;
+exports.letraT = letraT;
+exports.impuestos = impuestos;
 exports.CorreoFac = CorreoFac;
 exports.cortado = cortado;
 exports.numeroALetras = numeroALetras;
 exports.cadenaOriginalComplemeto = cadenaOriginalComplemeto;
+exports.cadenaOriginalComplemetoPDF = cadenaOriginalComplemetoPDF;
+
+
+
 
