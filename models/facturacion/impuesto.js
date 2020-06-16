@@ -4,9 +4,9 @@ var Schema = mongoose.Schema;
 
 var impuestoSchema = new Schema({
     TR: { type: String, required: true },
-    importe: { type: Number, required: false }, 
+    importe: { type: mongoose.Types.Decimal128, required: false }, 
     impuesto: { type: String, required: true },
-    tasaCuota: { type: Number, required: true }, 
+    tasaCuota: { type: mongoose.Types.Decimal128, required: true }, 
     tipoFactor: { type: String, required: true },
     fAlta: { type: Date, default: Date.now }
     }, { collection: 'fac_SAT_impuestos' });
