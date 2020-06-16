@@ -13,9 +13,9 @@ var cfdiSchema = new Schema({
   metodoPago: { type: String },
   moneda: { type: String, default: 'MXN' },
   serie: { type: String },
-  subtotal: { type: Number, required: true },
+  subtotal: { type: mongoose.Types.Decimal128, required: true },
   tipoComprobante: { type: String },
-  total: { type: Number, required: true },
+  total: { type: mongoose.Types.Decimal128, required: true },
  
 
   // version: { type: String }, // FALTA
@@ -54,31 +54,32 @@ var cfdiSchema = new Schema({
     claveUnidad: { type: String },
     descripcion: { type: String },
     noIdentificacion: { type: String },
-    importe: { type: Number },
-    valorUnitario: { type: Number },
+    importe: { type: mongoose.Types.Decimal128 },
+    valorUnitario: { type: mongoose.Types.Decimal128 },
     impuestos: [{
       TR: { type: String, required: true },
-      importe: { type: Number, required: true },
+      importe: { type: mongoose.Types.Decimal128, required: true },
       impuesto: { type: String, required: true },
-      tasaCuota: { type: Number, required: true },
+      tasaCuota: { type: mongoose.Types.Decimal128, required: true },
       tipoFactor: { type: String, default: 'Tasa', required: true },
     }],
     unidad: { type: String },
-    descuento: { type: Number },
+    descuento: { type: mongoose.Types.Decimal128 },
     maniobras: [{ type: Schema.Types.ObjectId, ref: 'Maniobra' }],
   }],
   /////////////////////////////////////////////////
 
   ////////////////////IMPUESTOS/////////////////////
-  totalImpuestosRetenidos: { type: Number, required: true },
-  totalImpuestosTrasladados: { type: Number, required: true },
+  totalImpuestosRetenidos: { type: mongoose.Types.Decimal128, required: true },
+  totalImpuestosTrasladados: { type: mongoose.Types.Decimal128, required: true },
   //////////////////////////////////////////////////
 
+  informacionAdicional: { type: String },
   sucursal: { type: String },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
   fAlta: { type: Date, default: Date.now },
   fechaEmision: {type: String},
-  usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
   xmlTimbrado: {type: String},
 }, { collection: 'cfdis' });
