@@ -59,6 +59,9 @@ app.get('/', (req, res, next) => {
     });
 });
 
+// ==========================================
+// Obtener CFDIS TIMBRADOS Y SIN TIMBRAR
+// ==========================================
 app.get('/T_ST/:timbres', (req, res, next) => {
   let timbres = req.query.timbre || '';
   if (timbres === '') {
@@ -187,7 +190,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     usuarioAlta: req.usuario._id
   });
 
-  function maniobraCfdi() {
+  function maniobraCfdi() {  //! ESTA FUNCION SIRVE PARA BORRAR LOS ID DE MANIOBRAS REPETIDO
     let maniobra = [];
     body.conceptos.forEach(c => {
       c.maniobras.forEach(m => {
@@ -204,7 +207,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
 
   agregacion().then(() => {
     respuesta.forEach(m => {
-      Maniobra.updateMany({ "_id": m }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => {
+      Maniobra.updateMany({ "_id": m }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => { //! AQUI SE AGREGAN EN EL CAMPO CFDISASOCIADOS LOS ID DE LAS MANIBRAS 
         if (err) {
           return res.status(400).json({
             ok: false,
@@ -354,6 +357,8 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   //     });
   //   }
   // });
+
+  //! COMENTAR EL SIGUIENTE CODIGO PARA PASE A PRODUCCION
   Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
     if (err) {
       return res.status(400).json({
@@ -385,6 +390,7 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
   });
+  //! FIN DE COMENTARIO
 });
 
 // ==========================================
