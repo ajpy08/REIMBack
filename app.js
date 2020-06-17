@@ -22,8 +22,8 @@ app.use(cors(corsOptions));
 
 // Body Parser
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 
 // Importar Rutas
 var appRoutes = require('./routes/app');
