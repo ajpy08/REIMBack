@@ -3,7 +3,7 @@ var moment = require('moment');
 const path = require('path');
 const ti = require('../config/config').correosTI
 const sentMail = require('../routes/sendAlert');
-
+var variasBucket = require('../public/variasBucket');
 var ok = false;
 
 let tasaOCuotaR = ''
@@ -38,39 +38,6 @@ function splitEnd(valorSplit) { // ! SIRVE PARA VALIDAR SI TIENE DECIMALES Y REL
     return ValorUnitario;
 }
 
-function totalRedondeo(valor) {
-    var resp = valor.toString().indexOf('.');
-    if (resp != -1) {
-        var valores = valor.toString().split('.');
-        if (valores[1].length < 2) {
-            resp = valores[0] + '.' + valores[1] + '00000';
-
-        } else {
-            var red = redondeo(valor)
-            var sep = red.toString().indexOf('.');
-            if (sep != -1) {
-                var valorCortado = red.toString().split('.');
-                if (valorCortado[1].length > 6) {
-                    resp = valorCortado[1].substr(0, 6);
-                    resp = valorCortado[0] + '.' + resp;
-                } else {
-                    valor = valorCortado[1].padEnd(2, '0');
-                    resp = valorCortado[0] + '.' + valor
-                }
-
-            } else {
-                resp = red + '.' + '00';
-            }
-            separador = '';
-        }
-    } else {
-        resp = valor + '.' + '00';
-    }
-    return resp;
-}
-
-
-
 
 let ValorS = '';
 var total = '';
@@ -91,16 +58,6 @@ function splitStart(valorSplit) { // SIRVE PARA CORTAR A DOS DECIMALES Y SI NO T
     return ValorS;
 }
 
-let cantidadF = '';
-function cantidad(cantidad) {
-    if (cantidad < 10) {
-        cantidadF = '0' + cantidad + '.00'
-    } else {
-        cantidadF = cantidad + '.00'
-    }
-    return cantidadF;
-
-}
 
 function cortado(valor, truc, coma) {
     let totalCor = valor.toString().indexOf('.')
@@ -112,12 +69,14 @@ function cortado(valor, truc, coma) {
             resultado = totalCor[0] + '.' + total.substr(0, 6).padEnd(6, '0');
         } else if (truc === 2) {
             if (coma !== undefined) {
-                if (totalCor[0] >= '1000') {
+                if (totalCor[0].length === 4) {
                     resultado = totalCor[0].substr(0, 1) + ',' + totalCor[0].substr(1) + '.' + total.substr(0, 2).padStart(2, '0');
-                } else if (totalCor[0] >= '10000') {
+                } else if (totalCor[0].length === 5) {
                     resultado = totalCor[0].substr(0, 2) + ',' + totalCor[0].substr(2) + '.' + total.substr(0, 2).padStart(2, '0')
-                } else if (totalCor[0] >= '100000') {
+                } else if (totalCor[0].length == 6) {
                     resultado = totalCor[0].substr(0, 3) + ',' + totalCor[0].substr(3) + '.' + total.substr(0, 2).padStart(2, '0');
+                } else {
+                    resultado = totalCor[0] + '.' + totalCor[1];
                 }
             } else {
                 resultado = totalCor[0] + '.' + total.substr(0, 2);
@@ -156,7 +115,7 @@ function envioCooreo(mensaje, archivo) {
 
 async function CorreoFac(mensaje, archivo) {
     await envioCooreo(mensaje, archivo);
-    fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivo}`), (err) => {
+    fs.unlink(path.resolve(__dirname, `../archivosTemp/${archivo}`), (err) => {
         if (err) {
             console.log('Error al eliminar archivo sin timbrar XML');
         }
@@ -317,7 +276,7 @@ var numeroALetras = (function () {
         let cientos = Math.floor(num / divisor)
         let resto = num - (cientos * divisor)
 
-        let strMiles = Seccion(num, divisor, 'UN MIL', 'MIL');
+        let strMiles = Seccion(num, divisor, 'MIL', 'MIL');
         let strCentenas = Centenas(resto);
 
         if (strMiles == '')
@@ -391,7 +350,8 @@ function letraT(letra, numero) {
         if (valid >= '10') {
             centavos = punto[1].substr(0, 2);
         } else {
-            centavos =  '0' + punto[1].substr(0, 1)
+            centavos = punto[1].substr(-1);
+            centavos = '0' + centavos
         }
     } else {
         centavos = '00'
@@ -401,16 +361,75 @@ function letraT(letra, numero) {
 }
 
 
+
+async function envioArchivoCfdi(nombre, correo, archivos) {
+
+    let serie = archivos[0].split('-');
+    let folio = nombre_archivo[1].substr(-3);
+
+    let cuerpo = 'Encontrara sus comprobante fiscal digital por internet (CFDI- Factura Electronica) \n Misma que cumple con los reglamentación vigente del Servicio de Administración Tributaria (SAT) '
+
+    let cfdi = sentMail(nombre, correo, `FACTURACIÓN ${serie[0]}-${folio}`, cuerpo, 'emailAlert', null, true, archivos)
+
+    console.log(cfdi);
+    // let uploadXML = await subirArchivoBooket();
+}
+
+
+
+//! SUBIR ARCHIVOS A BOOKET 
+function subirArchivoBooket(ruta, nombreArchivo) {
+    read = path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`)
+
+    fs.readFile(read, (err, data) => {
+        if (err) {
+            funcion.CorreoFac('Fallo al leer archivo ', nombreArchivo, 0, 'Error read');
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al leer archivo XML temporal, validar LOG..'
+            });
+        }
+
+        variasBucket.SubirArchivoBucket(data, ruta, nombreArchivo).then((value) => {
+            if (value) {
+                console.log('El archivo ' + nombreArchivo + ' se ha subido Exitosamente a BOCKET');
+                fs.unlink(path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`), (err) => {
+                    if (err) {
+                        CorreoFac('Error al borrar archivo' + nombreArchivo + 'temporal', nombreArchivo);
+                        return res.status(400).json({
+                            ok: false,
+                            mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
+                            errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
+                        });
+                    }
+                });
+                return true
+                //   fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivoTemp}`), (err) => {
+                //     if (err) {
+                //       funcion.CorreoFac('Error al borrar archivo XML temporal', nombreArchivo, 1, 'error when deleting');
+                //       return res.status(400).json({
+                //         ok: false,
+                //         mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
+                //         errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
+                //       });
+                //     }
+                //   });
+            }
+        });
+    })
+}
+
+
 exports.punto = punto;
 exports.splitEnd = splitEnd;
 exports.splitStart = splitStart;
 exports.QrG = QrG;
-exports.totalRedondeo = totalRedondeo;
-exports.cantidad = cantidad;
+exports.subirArchivoBooket = subirArchivoBooket;
 exports.letraT = letraT;
 exports.impuestos = impuestos;
 exports.CorreoFac = CorreoFac;
 exports.cortado = cortado;
+exports.envioArchivoCfdi = envioArchivoCfdi;
 exports.numeroALetras = numeroALetras;
 exports.cadenaOriginalComplemeto = cadenaOriginalComplemeto;
 exports.cadenaOriginalComplemetoPDF = cadenaOriginalComplemetoPDF;

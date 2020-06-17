@@ -16,6 +16,8 @@ app.get('/documentoxtipo/:tipo/:nombre', (req, res, netx) => {
 
   if (tipo === 'cfdi') {
     tipo += '/xml'
+  } else if (tipo === 'cfdiP') {
+    tipo = 'cfdi/pdf'
   }
   if (nombreArchivo === 'xxx') {
     res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
