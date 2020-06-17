@@ -16,6 +16,7 @@ const { DATOS_REIM, DATOS } = require('../config/config')
 var fs = require('fs');
 const fuctions = require('../routes/fuctions');
 const { auto } = require('async');
+const { request } = require('./cfdis');
 
 // ===========================================
 //  OBTINE EL USO DE CADA FACTURA 
@@ -24,6 +25,7 @@ const { auto } = require('async');
 app.get('/uso/:uso', (req, res, next) => {
     var uso = req.query.uso || '';
     var filtro = '{';
+
     if (uso != 'undefined' && uso != '')
         filtro += '\"usoCFDI\":' + '\"' + uso + '\"' + '}';
 
@@ -134,7 +136,7 @@ app.get('/numerosLetras/:total', (req, res) => {
 // ===========================================
 app.get('/pdfCFDI/:id', (req, res) => {
     let id = req.params.id;
-
+    let nombrePdf = '';
     async function ok() {
         const Cf = await ConsultaPDF.cfdi(id);
         if (Cf === null) {
@@ -211,13 +213,13 @@ app.get('/pdfCFDI/:id', (req, res) => {
         }
 
         let dataPDF = {
-            pageMargins: [10, 48, 10, 20],
+            pageMargins: [15, 52, 15, 20],
             pageSize: 'LETTER',
             header: {
                 columns: [{
                     image: 'assets/logo_reim_container_park.jpg',
                     width: 150,
-                    margin: [-3, 2]
+                    margin: [13, 9]
                 },
                 {
                     type: 'none',
@@ -282,7 +284,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
                 { text: 'DESCRIPCIÓN', style: 'conceptos' }, { text: 'IMPUESTOS', style: 'conceptos' }, { text: 'IMPORTE', style: 'conceptos' }
                 ]),
                 {
-                    style: 'tableDatos',
+                    style: 'tablaTotales',
                     table: {
                         headerRows: 1,
                         widths: ['*', '*'],
@@ -290,18 +292,18 @@ app.get('/pdfCFDI/:id', (req, res) => {
                             // [{ text: 'RECEPTOR', fillColor: '#b2b4b5', alignment: 'left' }, { text: '', fillColor: '#b2b4b5', alignment: 'right' }],
                             [
                                 {
+                                    text: [''], alignment: 'right',
+                                },
+                                {
                                     type: 'none',
                                     ul: [
                                         { text: ['\n'] },
                                         { text: ['SUBTOTAL: $ ', ress.SubT] },
-                                        { text: ['TOTAL IMPORTES RETENIDOS: $ ', ress.Total_I_R ? ress.Total_I_R : 0] },
-                                        { text: ['TOTAL IMPORTES TRASLADADOS: $ ', ress.Total_I_T] },
+                                        { text: ['TOTAL IMPT. RETENIDOS: $ ', ress.Total_I_R ? ress.Total_I_R : 0] },
+                                        { text: ['TOTAL IMPT. TRASLADADOS: $ ', ress.Total_I_T] },
                                         { text: ['TOTAL: $', ress.Total], fontSize: 10, bold: true }
-                                    ], alignment: 'left', fontSize: 8,
+                                    ], alignment: 'left', fontSize: 8, margin: [60, 0, 0, 0]
                                 },
-                                {
-                                    text: [''], alignment: 'right', margin: [18, 15, 10, 0]
-                                }
                             ]
                         ]
                     }, layout: 'noBorders'
@@ -377,7 +379,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
                                     {
                                         margin: [-120, 13, 0, 0],
                                         table: {
-                                            dontBreakRows: true, 
+                                            dontBreakRows: true,
                                             // headerRows: 1,
                                             widths: ['*'],
                                             body: [
@@ -407,7 +409,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
             styles: {
                 header: {
                     fontSize: 8,
-                    margin: [0, 5, 10, 0],
+                    margin: [0, 11, 20, 0],
                     alignment: 'right',
                 },
                 QR: {
@@ -433,6 +435,12 @@ app.get('/pdfCFDI/:id', (req, res) => {
                     fontSize: 8,
                     margin: [0, 0],
                     alignment: 'center',
+
+                },
+                tablaTotales: {
+                    fontSize: 8,
+                    margin: [50, 0],
+                    // alignment: 'center',
 
                 },
                 tablaConceptos: {
@@ -510,9 +518,9 @@ app.get('/pdfCFDI/:id', (req, res) => {
             });
             return body;
         }
-        const nombre = `${ress.Cf.serie}-${ress.Cf.folio}-${ress.Cf._id}.pdf`
-        const PdfRout = path.resolve(__dirname, `../xmlTemp/T-${nombre}`);
-
+        const nombre = `${ress.Cf.serie}-${ress.Cf.folio}-${ress.Cf._id}.pdf`;
+        const PdfRout = path.resolve(__dirname, `../archivosTemp/${nombre}`);
+        nombrePdf = nombre;
 
         let pdfDoc = new PdfPrinter({
             Roboto: { normal: new Buffer(require('pdfmake/build/vfs_fonts.js').pdfMake.vfs['Roboto-Regular.ttf'], 'base64'), bold: new Buffer(require('pdfmake/build/vfs_fonts.js').pdfMake.vfs['Roboto-Medium.ttf'], 'base64') }
@@ -520,15 +528,39 @@ app.get('/pdfCFDI/:id', (req, res) => {
         pdfDoc.pipe(fs.createWriteStream(PdfRout));
         pdfDoc.end();
 
-    
-
-
-
-
         res.status(200).json({
             ok: true
         });
+
     });
 });
 
+app.get('/envioCorreo/:correo&:archivo&:nombre', (req, res) => {
+    let correo = req.params.correo,
+        archivoPDF = `${req.params.archivo}.pdf`,
+        archivoXML = `${req.params.archivo}.xml`,
+        nombre = req.params.nombre,
+        subir = req.params.subir;
+        const archivos = [];
+        archivos.push(archivoXML, archivoPDF);
+
+        funcion.envioArchivoCfdi(nombre, correo, archivos);
+    // if (subir === 'true') {
+    //     // //! SUBIR ARCHIVO PDF A BOOKET ///
+    //     console.log('SUBIENDO ARCHIVO PDF');
+    //     let upload = funcion.subirArchivoBooket('cfdi/pdf/', archivoPDF);
+
+    //     if (upload !== false) {
+
+
+    //     } else {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             mensaje: 'Error al subir archivo ' + archivoPDF + ' al booket ',
+    //             errors: {message: 'Error al subir archivo ' + archivoPDF + ' al booket '}
+    //         });
+    //     }
+    // }
+
+});
 module.exports = app;

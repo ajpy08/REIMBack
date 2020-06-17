@@ -79,7 +79,7 @@ app.get('/T_ST/:timbres', (req, res, next) => {
       return res.status(400).json({
         ok: false,
         mensaje: 'Error al buscar cfdis Timbrados/sin Timbrar',
-        errors: {message: 'Error al buscar cfdis Timbrados/sin Timbrar'}
+        errors: { message: 'Error al buscar cfdis Timbrados/sin Timbrar' }
       });
     }
     res.status(200).json({
@@ -332,7 +332,7 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   //           errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
   //         });
   //       } else {
-    
+
   //         CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
   //           if (err) {
   //             return res.status(500).json({
@@ -414,8 +414,16 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
     const fecha = moment(cfdi.fecha).format('YYYY-MM-DDTHH:mm:ss');
-    var total = funcion.cortado(cfdi.total, 6);
-    const subTotal = funcion.cortado(cfdi.subtotal, 2);
+    // var total = funcion.cortado(cfdi.total, 6);
+    // const subTotal = funcion.cortado(cfdi.subtotal, 2);
+
+    
+    let des = 0;
+    for (const c of cfdi.conceptos) {
+       let number =  parseFloat(c.descuento);
+       des = des + number
+    }
+
     cfdiXML = new CFDI({
       'Fecha': fecha,
       'Folio': cfdi.folio,
@@ -424,9 +432,10 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       'MetodoPago': cfdi.metodoPago,
       'Moneda': cfdi.moneda,
       'Serie': cfdi.serie,
-      'SubTotal': subTotal,
+      'SubTotal': cfdi.subtotal,
       'TipoDeComprobante': cfdi.tipoComprobante,
-      'Total': total,
+      'Total': cfdi.total,
+      'Descuento': des,
       'NoCertificado': DATOS.NoCertificado,
     });
 
@@ -449,18 +458,16 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 
 
     for (const c of cfdi.conceptos) {
-      let ValorUnitario = funcion.splitEnd(c.valorUnitario)
       let Importe = funcion.splitEnd(c.importe);
-      let Cantidad = funcion.cantidad(c.cantidad);
-
       const concepto = new Concepto({
-        'Cantidad': Cantidad,
+        'Cantidad': c.cantidad,
         'ClaveProdServ': c.claveProdServ,
         'ClaveUnidad': c.claveUnidad,
         'Descripcion': c.descripcion,
-        'Importe': Importe,
+        'Importe': c.importe,
         'NoIdentificacion': c.noIdentificacion,
-        'ValorUnitario': ValorUnitario,
+        'ValorUnitario': c.valorUnitario,
+        'Descuento': c.descuento
       });
 
 
@@ -468,10 +475,9 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
         var tasaOCuota = funcion.punto(im.tasaCuota);
 
         if (im.TR === 'TRASLADO') {
-          var importeT = funcion.splitEnd(im.importe);
           concepto.add(new Traslado({
             'Base': Importe,
-            'Importe': importeT,
+            'Importe': im.importe,
             'Impuesto': im.impuesto,
             'TasaOCuota': tasaOCuota,
             'TipoFactor': im.tipoFactor,
@@ -491,14 +497,9 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       }
       cfdiXML.add(concepto);
     }
-
-
-    var totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados);
-    var totalImpuestosRetenidos = funcion.splitStart(cfdi.totalImpuestosRetenidos);
     const totalimp = new Impuestos({
-
-      'TotalImpuestosRetenidos': totalImpuestosRetenidos,
-      'TotalImpuestosTrasladados': totalImpuestosTrasladados
+      'TotalImpuestosRetenidos': cfdi.totalImpuestosRetenidos,
+      'TotalImpuestosTrasladados': cfdi.totalImpuestosTrasladados
     });
 
     let tasaOCuotaR = ''
@@ -508,11 +509,9 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
           tasaOCuotaR = funcion.punto(im.tasaCuota);
         }
         if (im.TR === 'TRASLADO') {
-          let impR = im.impuesto;
-          let totalImpuestosTrasladados = funcion.splitStart(cfdi.totalImpuestosTrasladados)
           totalimp.add(new ImpTraslado({
-            'Importe': totalImpuestosTrasladados,
-            'Impuesto': impR,
+            'Importe': cfdi.totalImpuestosTrasladados,
+            'Impuesto': im.impuesto,
             'TasaOCuota': tasaOCuotaR,
             'TipoFactor': im.tipoFactor,
 
@@ -532,13 +531,13 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
       break
     }
 
-    var RouteFolder = path.resolve(__dirname, `../xmlTemp/`)
+    var RouteFolder = path.resolve(__dirname, `../archivosTemp/`)
     var folderexist = fs.existsSync(RouteFolder);
     if (folderexist === false) {
       fs.mkdirSync(RouteFolder)
     }
     var nombre = `${cfdi.serie}-${cfdi.folio}-${cfdi._id}.xml`;
-    var Route = path.resolve(__dirname, `../xmlTemp/${nombre}`);
+    var Route = path.resolve(__dirname, `../archivosTemp/${nombre}`);
 
     var xmlT = [];
     cfdiXML.getXml().then(xml => fs.writeFile(Route, xml, (err) => {
@@ -579,7 +578,7 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
   var nombre = req.params.nombre;
   let direccion = req.params.direccion;
   let info = req.params.info;
-  var Route = path.resolve(__dirname, `../xmlTemp/${nombre}`);
+  var Route = path.resolve(__dirname, `../archivosTemp/${nombre}`);
   xml = fs.readFileSync(Route, 'utf8');
 
   var url = KEYS.URL_TIM_DES,
@@ -674,7 +673,7 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
 
 
 
-    var TRoute = path.resolve(__dirname, `../xmlTemp/T-${nombre}`);
+    var TRoute = path.resolve(__dirname, `../archivosTemp/${nombre}`);
 
     cfdiXML.getXml().then(xmlT => fs.writeFile(TRoute, xmlT, (err) => {
       if (err) {
@@ -691,9 +690,6 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
           let CadenaOriginalComplemento = funcion.cadenaOriginalComplemeto(respuesta[val].Version, respuesta[val].UUID, respuesta[val].FechaTimbrado, respuesta[val].RfcProvCertif
             , respuesta[val].SelloCFD, respuesta[val].NoCertificadoSAT);
           cadenaOriginal = CadenaOriginalComplemento
-
-          //  var cfdiQR = conusltaCFDIdb();
-          //   codigoQR = funcion.codigoQR(respuesta[val].UUID, DATOS.Emisor_RFC, cfdiQR.rfc, cfdiQR.total);
         });
 
         if (cadenaOriginal != undefined) {
@@ -741,47 +737,10 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
         }
         console.log('Archivo temporal TIMBRADO Guardado');
 
-
-        // leer y mover el archivo timbrado a boocket 
-        var url = 'cfdi/xml/',
-          nombreArchivo = `T-${nombre}`,
-          archivoTemp = nombre,
-          read = path.resolve(__dirname, `../xmlTemp/T-${nombre}`);
-        fs.readFile(read, (err, fd) => {
-          if (err) {
-            funcion.CorreoFac('Fallo al leer archivo timbrado XML', nombreArchivo, 0, 'Error read');
-            return res.status(400).json({
-              ok: false,
-              mensaje: 'Error al leer archivo XML temporal, validar LOG..'
-            });
-          }
-          variasBucket.SubirArchivoBucket(fd, url, nombreArchivo).then((value) => {
-            if (value) {
-              console.log('El archivo XML TIMBRADO se ha subido Exitosamente a BOCKET');
-              fs.unlink(path.resolve(__dirname, `../xmlTemp/${nombreArchivo}`), (err) => {
-                if (err) {
-                  funcion.log('Error al borrar archivo XML TIMBRADO temporal', nombreArchivo, 1, 'error when deleting');
-                  return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
-                    errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
-                  });
-                }
-              });
-              fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivoTemp}`), (err) => {
-                if (err) {
-                  funcion.CorreoFac('Error al borrar archivo XML temporal', nombreArchivo, 1, 'error when deleting');
-                  return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
-                    errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
-                  });
-                }
-              });
-            }
-          });
-        });
-        // ! FIN leer y mover el archivo timbrado a boocket 
+        
+        
+        // console.log('SUBIENDO ARCHIVO XML TIMBRADO A BOOKET');
+        // funcion.subirArchivoBooket('cfdi/xml/', nombre);
       }
     }))
       .catch(e => console.log(e.toString(), '---> OCURRIO UN ERROR AL CREAR EL XML TIMBRADO del CFDI ' + `${nombre}`));
