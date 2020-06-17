@@ -7,7 +7,7 @@ var path = require('path'),
     pass = process.env.MAILER_PASSWORD || 'fmat*0348',
     nodemailer = require('nodemailer');
 
-module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url) => {
+module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url, arch, archivos) => {
     var smtpTransport = nodemailer.createTransport({
         //service: process.env.MAILER_SERVICE_PROVIDER || '192.168.2.246',
         // host: '192.168.2.246',
@@ -28,37 +28,67 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url)
     smtpTransport.use('compile', hbs(handlebarsOptions));
 
     //console.log(correoReceptor);
-    var data = {
-        to: correoReceptor,
-        from: email,
-        template: template,
-        subject: asunto,
-        attachments: [
-            {   // utf-8 string as an attachment
-                filename: 'text1.txt',
-                content: 'hello world!'
-            }
-        //     // {   // binary buffer as an attachment
-        //     //     filename: 'text2.txt',
-        //     //     content: new Buffer('hello world!','utf-8')
-        //     // },
-        //     // {   // file on disk as an attachment
-        //     //     filename: 'text3.txt',
-        //     //     path: '/path/to/file.txt' // stream this file
-        //     // }
-        ],
-        context: {
+
+    if (arch === true) {
+        const pdf = `${archivos}.pdf`;
+        const xml = `${archivos}.xml`;
+
+        var data = {
+            to: correoReceptor,
+            from: email,
+            template: template,
             subject: asunto,
-            body: cuerpo,
-            name: nombreReceptor,
-            url: url
-        }
-    };
+            attachments: [
+                {
+                    filename: pdf,
+                    path:  path.resolve(__dirname, `../archivosTemp/${pdf}`),
+                    contentType: 'application/pdf'
+                },
+                {
+                    filename: xml,
+                    path:  path.resolve(__dirname, `../archivosTemp/${xml}`),
+                    ccontentType: 'application/xml'
+                }
+            ],
+            context: {
+                subject: asunto,
+                body: cuerpo,
+                name: nombreReceptor,
+                url: url
+            }
+        };
+    } else {
+        var data = {
+            to: correoReceptor,
+            from: email,
+            template: template,
+            subject: asunto,
+            // attachments: [
+            //     {   // utf-8 string as an attachment
+            //         filename: 'text1.txt',
+            //         content: 'hello world!'
+            //     }
+            // //     // {   // binary buffer as an attachment
+            // //     //     filename: 'text2.txt',
+            // //     //     content: new Buffer('hello world!','utf-8')
+            // //     // },
+            // //     // {   // file on disk as an attachment
+            // //     //     filename: 'text3.txt',
+            // //     //     path: '/path/to/file.txt' // stream this file
+            // //     // }
+            // ],
+            context: {
+                subject: asunto,
+                body: cuerpo,
+                name: nombreReceptor,
+                url: url
+            }
+        };
+    }
 
     smtpTransport.sendMail(data, (error, info) => {
         if (!error) {
-            //console.log(info);
-            //return res.json({ message: 'Email Enviado!' });
+            return true
         } else {
             console.log(error);
             //return done(error);
