@@ -77,7 +77,7 @@ if (cliente != 'undefined' && cliente != '')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
-    .populate('solicitud', 'blBooking')
+    .populate('solicitud', 'blBooking rutaComprobante')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',
