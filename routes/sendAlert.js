@@ -8,6 +8,7 @@ var path = require('path'),
     nodemailer = require('nodemailer');
 
 module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url, arch, archivos) => {
+    let ok = true
     var smtpTransport = nodemailer.createTransport({
         //service: process.env.MAILER_SERVICE_PROVIDER || '192.168.2.246',
         // host: '192.168.2.246',
@@ -30,8 +31,8 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url,
     //console.log(correoReceptor);
 
     if (arch === true) {
-        const pdf = `${archivos}.pdf`;
-        const xml = `${archivos}.xml`;
+        const pdf = `${archivos[1]}`;
+        const xml = `${archivos[0]}`;
 
         var data = {
             to: correoReceptor,
@@ -88,10 +89,11 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url,
 
     smtpTransport.sendMail(data, (error, info) => {
         if (!error) {
-            return true
+            return ok
         } else {
+            ok = false
             console.log(error);
-            //return done(error);
+            return ok
         }
     });
 }
