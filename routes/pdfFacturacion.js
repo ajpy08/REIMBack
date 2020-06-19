@@ -539,28 +539,96 @@ app.get('/envioCorreo/:correo&:archivo&:nombre', (req, res) => {
     let correo = req.params.correo,
         archivoPDF = `${req.params.archivo}.pdf`,
         archivoXML = `${req.params.archivo}.xml`,
-        nombre = req.params.nombre,
-        subir = req.params.subir;
-        const archivos = [];
-        archivos.push(archivoXML, archivoPDF);
+        nombre = req.params.nombre;
 
-        funcion.envioArchivoCfdi(nombre, correo, archivos);
-    // if (subir === 'true') {
-    //     // //! SUBIR ARCHIVO PDF A BOOKET ///
-    //     console.log('SUBIENDO ARCHIVO PDF');
-    //     let upload = funcion.subirArchivoBooket('cfdi/pdf/', archivoPDF);
+    const archivos = [];
+    archivos.push(archivoXML, archivoPDF);
 
-    //     if (upload !== false) {
+    async function envio() {
+        await funcion.envioArchivoCfdi(nombre, correo, archivos);
+    }
+    envio().then(() => {
+        res.status(200).json({
+            ok: true,
+            archivos: archivos
+        });
+    });
+});
 
 
-    //     } else {
-    //         return res.status(400).json({
-    //             ok: false,
-    //             mensaje: 'Error al subir archivo ' + archivoPDF + ' al booket ',
-    //             errors: {message: 'Error al subir archivo ' + archivoPDF + ' al booket '}
-    //         });
-    //     }
+app.get('/envioCorreoB/:correo&:archivo&:nombre', (req, res) => {
+    let correo = req.params.correo,
+        archivos = req.params.archivo,
+        nombre = req.params.nombre;
+    let archivo = archivos.split('-'),
+        id = archivo[2],
+        archivoPDF = `${req.params.archivo}.pdf`,
+        archivoXML = `${req.params.archivo}.xml`;
+
+    const archivosB = [];
+    archivosB.push(archivoXML, archivoPDF);
+
+    async function cfdiXml() {
+        const xml = await ConsultaPDF.cfdi(id);
+        return xml;
+    }
+
+    async function createFile(serie, folio, xml) {
+        // let nombreArchivoCorreo = nombreFile.substr(0, 30);
+        const xmlRout = path.resolve(__dirname, `../archivosTemp/${archivosB[0]}`);
+        fs.writeFileSync(xmlRout, xml, 'utf8');
+        funcion.envioArchivoCfdi(nombre, correo, archivosB, true);
+    }
+
+    cfdiXml().then(ress => {
+        createFile(ress.serie, ress.folio, ress.xmlTimbrado).then(resFile => {
+            res.status(200).json({
+                ok: true
+            })
+        });
+    });
+
+
+
+    // const archivos = [];
+    // archivos.push(archivoXML, archivoPDF);
+
+    // async function envio() {
+    //     await funcion.envioArchivoCfdi(nombre, correo, archivos);
     // }
+    // envio().then(() => {
+    //     res.status(200).json({
+    //         ok: true,
+    //         archivos: archivos
+    //     });
+    // });
+});
 
+app.get('/booket/:archivos&:subir', (req, res) => {
+    let archivos = req.params.archivos;
+    let subir = req.params.subir;
+    let archivo = archivos.split(',');
+
+    if (subir === 'true') {
+        archivo.forEach(async ext => {
+            extencion = ext.split('.');
+            extencion = extencion[1]
+
+            if (extencion === 'pdf') {
+                ruta = 'cfdi/pdf/'
+            } else {
+                ruta = 'cfdi/xml/'
+            }
+            let uploadXML = await funcion.subirArchivoBooket(ruta, ext);
+        });
+    } else {
+        archivo.forEach(NombreArchivo => {
+            funcion.BorrarArchivosTemp(NombreArchivo)
+        });
+    }
+
+    res.status(200).json({
+        ok: true
+    })
 });
 module.exports = app;
