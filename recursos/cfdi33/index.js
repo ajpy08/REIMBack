@@ -11,6 +11,7 @@ const CuentaPredial = require('./lib/Node/CuentaPredial');
 const InformacionAduanera = require('./lib/Node/InformacionAduanera');
 const Parte = require('./lib/Node/Parte');
 const Pago = require('./lib/Node/Pago');
+const Addenda = require('./lib/Node/Addenda');
 const Impuestos = require('./lib/Node/Impuestos');
 const ImpTraslado = require('./lib/Node/ImpTraslado');
 const ImpRetencion = require('./lib/Node/ImpRetencion');
@@ -31,5 +32,6 @@ module.exports = {
   ImpTraslado,
   ImpRetencion,
   Pago,
+  Addenda,
   Complemento
 };
