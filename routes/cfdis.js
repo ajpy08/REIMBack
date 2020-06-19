@@ -179,6 +179,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
 
     nombre: body.nombre,
     rfc: body.rfc,
+    informacionAdicional: body.informacionAdicional,
     usoCFDI: body.usoCFDI,
     direccion: body.direccion,
     correo: body.correo,
@@ -279,6 +280,7 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
       cfdi.usoCFDI = body.usoCFDI,
       cfdi.direccion = body.direccion,
       cfdi.correo = body.correo,
+      cfdi.informacionAdicional = body.informacionAdicional,
       cfdi.conceptos = body.conceptos,
       cfdi.totalImpuestosRetenidos = body.totalImpuestosRetenidos,
       cfdi.totalImpuestosTrasladados = body.totalImpuestosTrasladados,

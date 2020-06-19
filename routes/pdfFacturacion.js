@@ -287,23 +287,34 @@ app.get('/pdfCFDI/:id', (req, res) => {
                     style: 'tablaTotales',
                     table: {
                         headerRows: 1,
+                        widths: [115, '*'],
+                        body: [
+
+                            [{ text: ['SUBTOTAL: $ '] }, { text: ress.SubT, margin: [-2, 0] }],
+                            [{ text: ['TOTAL IMPT. RETENIDOS: $ '] }, { text: ress.Total_I_R ? ress.Total_I_R : 0, margin: [-2, 0] }],
+                            [{ text: ['TOTAL IMPT. TRASLADADOS: $ '] }, { text: ress.Total_I_T, margin: [-2, 0] }],
+                            [{ text: ['TOTAL: $'] }, { text: ress.Total, margin: [-2, 0] }]
+
+                        ]
+                    }, layout: 'noBorders'
+                },
+                {
+                    style: 'tablaLetras',
+                    table: {
+                        headerRows: 1,
                         widths: ['*', '*'],
                         body: [
-                            // [{ text: 'RECEPTOR', fillColor: '#b2b4b5', alignment: 'left' }, { text: '', fillColor: '#b2b4b5', alignment: 'right' }],
+                            [{ text: 'INFORMACIÓN ADICIONAL', fillColor: '#b2b4b5', alignment: 'left' }, { text: '', fillColor: '#b2b4b5', alignment: 'right' }],
                             [
-                                {
-                                    text: [''], alignment: 'right',
-                                },
                                 {
                                     type: 'none',
                                     ul: [
-                                        { text: ['\n'] },
-                                        { text: ['SUBTOTAL: $ ', ress.SubT] },
-                                        { text: ['TOTAL IMPT. RETENIDOS: $ ', ress.Total_I_R ? ress.Total_I_R : 0] },
-                                        { text: ['TOTAL IMPT. TRASLADADOS: $ ', ress.Total_I_T] },
-                                        { text: ['TOTAL: $', ress.Total], fontSize: 10, bold: true }
-                                    ], alignment: 'left', fontSize: 8, margin: [60, 0, 0, 0]
+                                        { text: [ress.Cf.informacionAdicional ? ress.Cf.informacionAdicional: '' ] },
+                                    ], alignment: 'left', fontSize: 8
                                 },
+                                {
+                                    text: [''], alignment: 'right', margin: [18, 15, 10, 0]
+                                }
                             ]
                         ]
                     }, layout: 'noBorders'
@@ -439,7 +450,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
                 },
                 tablaTotales: {
                     fontSize: 8,
-                    margin: [50, 0],
+                    margin: [400, 0],
                     // alignment: 'center',
 
                 },
@@ -481,6 +492,13 @@ app.get('/pdfCFDI/:id', (req, res) => {
             let body = [];
             let claveDes = [];
             let c = [];
+            // let descuento = 0;
+
+            // data.forEach(function(dpt) {
+                
+            //     descuento = dpt.descuento.toFloat()
+            //     console.log(descuento)
+            // });
             body.push(columns);
 
             for (const clave of data) {
