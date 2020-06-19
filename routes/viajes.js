@@ -331,6 +331,7 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   var peso = req.query.peso;
   var patio = req.query.patio != undefined ? req.query.patio : undefined;
   var destinatario = req.query.destinatario;
+  var naviera = req.query.naviera;
   if (peso == 'VACIO') {
     maniobra = new Maniobra({
       viaje: id,
@@ -340,7 +341,8 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
       patio: patio,
       estatus: 'TRANSITO',
       destinatario: destinatario,
-      usuarioAlta: req.usuario._id
+      usuarioAlta: req.usuario._id,
+      naviera: naviera
     });
   } else {
     maniobra = new Maniobra({
@@ -351,7 +353,8 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
       patio: patio,
       estatus: 'APROBACION',
       destinatario: destinatario,
-      usuarioAlta: req.usuario._id
+      usuarioAlta: req.usuario._id,
+      naviera: naviera
     });
   }
   maniobra.save((err, maniobraGuardado) => {

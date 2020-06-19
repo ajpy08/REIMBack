@@ -4,6 +4,7 @@ const path = require('path');
 const ti = require('../config/config').correosTI
 const sentMail = require('../routes/sendAlert');
 var variasBucket = require('../public/variasBucket');
+const cfdi = require('../models/facturacion/cfdi');
 var ok = false;
 
 let tasaOCuotaR = ''
@@ -360,26 +361,25 @@ function letraT(letra, numero) {
     return letras
 }
 
-
-
-async function envioArchivoCfdi(nombre, correo, archivos) {
+function env(nombre, correo, archivos) {
 
     let serie = archivos[0].split('-');
-    let folio = nombre_archivo[1].substr(-3);
+    let folio = serie[1];
+    let cuerpo = 'Encontrara sus comprobante fiscal digital por internet (CFDI- Factura Electronica) \n Misma que cumple con el reglamento vigente del Servicio de Administración Tributaria (SAT) '
+    sentMail(nombre, correo, `FACTURA ${serie[0]}-${folio}`, cuerpo, 'emailAlert', null, true, archivos);
+}
 
-    let cuerpo = 'Encontrara sus comprobante fiscal digital por internet (CFDI- Factura Electronica) \n Misma que cumple con los reglamentación vigente del Servicio de Administración Tributaria (SAT) '
+async function envioArchivoCfdi(nombre, correo, archivos) {
+    let envioCFdi = await env(nombre, correo, archivos);
 
-    let cfdi = sentMail(nombre, correo, `FACTURACIÓN ${serie[0]}-${folio}`, cuerpo, 'emailAlert', null, true, archivos)
-
-    console.log(cfdi);
-    // let uploadXML = await subirArchivoBooket();
 }
 
 
 
 //! SUBIR ARCHIVOS A BOOKET 
 function subirArchivoBooket(ruta, nombreArchivo) {
-    read = path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`)
+    let mensaje = {};
+    read = path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`);
 
     fs.readFile(read, (err, data) => {
         if (err) {
@@ -393,30 +393,29 @@ function subirArchivoBooket(ruta, nombreArchivo) {
         variasBucket.SubirArchivoBucket(data, ruta, nombreArchivo).then((value) => {
             if (value) {
                 console.log('El archivo ' + nombreArchivo + ' se ha subido Exitosamente a BOCKET');
-                fs.unlink(path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`), (err) => {
-                    if (err) {
-                        CorreoFac('Error al borrar archivo' + nombreArchivo + 'temporal', nombreArchivo);
-                        return res.status(400).json({
-                            ok: false,
-                            mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
-                            errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
-                        });
-                    }
-                });
-                return true
-                //   fs.unlink(path.resolve(__dirname, `../xmlTemp/${archivoTemp}`), (err) => {
-                //     if (err) {
-                //       funcion.CorreoFac('Error al borrar archivo XML temporal', nombreArchivo, 1, 'error when deleting');
-                //       return res.status(400).json({
-                //         ok: false,
-                //         mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
-                //         errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
-                //       });
-                //     }
-                //   });
+                BorrarArchivosTemp(nombreArchivo);
             }
         });
+        return mensaje
     })
+}
+
+function BorrarArchivosTemp(nombreArchivo) {
+    
+    fs.unlink(path.resolve(__dirname, `../archivosTemp/${nombreArchivo}`), (err) => {
+        if (err) {
+            CorreoFac('Error al borrar archivo' + nombreArchivo + 'temporal', nombreArchivo);
+            mensaje = {
+                ok: false,
+                mensaje: 'Error al borrar archivo temporal' + nombreArchivo,
+                errors: { message: 'Error al borrar archivo temporal' + nombreArchivo }
+            }
+        } else {
+            mensaje = {
+                ok: true
+            }
+        }
+    });
 }
 
 
@@ -429,6 +428,7 @@ exports.letraT = letraT;
 exports.impuestos = impuestos;
 exports.CorreoFac = CorreoFac;
 exports.cortado = cortado;
+exports.BorrarArchivosTemp = BorrarArchivosTemp;
 exports.envioArchivoCfdi = envioArchivoCfdi;
 exports.numeroALetras = numeroALetras;
 exports.cadenaOriginalComplemeto = cadenaOriginalComplemeto;
