@@ -157,6 +157,9 @@ app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verific
 app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   let respuesta = [];
+  if (body.informacionAdicional === '@') {
+    body.informacionAdicional = '';
+  }
   var cfdi = new CFDIS({
     fecha: body.fecha,
     folio: body.folio,
@@ -579,7 +582,7 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
   var id = req.params.id;
   var nombre = req.params.nombre;
   let direccion = req.params.direccion;
-  let info = req.params.info;
+  let info = req.params.info || '';
   var Route = path.resolve(__dirname, `../archivosTemp/${nombre}`);
   xml = fs.readFileSync(Route, 'utf8');
 
@@ -660,10 +663,10 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
       cfdiXML.add(complemento);
     });
 
-    if (info !== '' || info !== undefined) {
+    if (info !== '@' || info !== undefined) {
       const addenda = new Addenda({
         'xmlns:REIM': 'http://reimcontainerpark.com.mx',
-        'xsi:schemaLocation': 'http://advans.mx/adicionales/adicionales_advans.xsd',
+        'xsi:schemaLocation': 'http://reimcontainerpark.com.mx/REIM_adicionales.xsd',
         'Version': '1.0',
         'InformacionAdicional': info,
         'ReceptorDireccion': direccion,

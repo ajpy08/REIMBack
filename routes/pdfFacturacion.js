@@ -547,7 +547,8 @@ app.get('/pdfCFDI/:id', (req, res) => {
         pdfDoc.end();
 
         res.status(200).json({
-            ok: true
+            ok: true,
+            pdfCFDI: ress.Cf
         });
 
     });
