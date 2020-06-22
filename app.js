@@ -262,6 +262,9 @@ io.on('connection', function (socket) {
   socket.on('timbradocfdi', function (data) {
     io.emit('timbrado-cfdi', {data: data});
   });
+  socket.on('alerttimbre', function (data) {
+    io.emit('alert-timbre', {data: data})
+  })
 
   // ! SOCKET PARA CLIENTES
 
