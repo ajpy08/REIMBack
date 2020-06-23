@@ -110,9 +110,9 @@ app.get('/series/:serie', (req, res) => {
       });
 });
 
-// // ==========================================
-// // Obtener todos los regimenes fiscales
-// // ==========================================
+// ==========================================
+// Obtener todos los regimenes fiscales
+// ==========================================
 app.get('/regimenes-fiscales', (req, res, next) => {
   RegimenFiscal.find({})
     .sort({ claveRegimenFiscal: 1 })
@@ -132,9 +132,9 @@ app.get('/regimenes-fiscales', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas las formas de pago
-// // ==========================================
+// ==========================================
+// Obtener todas las formas de pago
+// ==========================================
 app.get('/formas-pago', (req, res, next) => {
   FormaPago.find({})
     .sort({ formaPago: 1 })
@@ -154,9 +154,9 @@ app.get('/formas-pago', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los metodos de pago
-// // ==========================================
+// ==========================================
+//Obtener todas los metodos de pago
+//==========================================
 app.get('/metodos-pago', (req, res, next) => {
   MetodoPago.find({})
     .sort({ metodoPago: 1 })
@@ -176,9 +176,9 @@ app.get('/metodos-pago', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los Tipos de Comprobante
-// // ==========================================
+// ==========================================
+// Obtener todas los Tipos de Comprobante
+// ==========================================
 app.get('/tipos-comprobante', (req, res, next) => {
   TipoComprobante.find({})
     .sort({ descripcion: 1 })
@@ -198,9 +198,9 @@ app.get('/tipos-comprobante', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los Tipos de Comprobante
-// // ==========================================
+// ==========================================
+// Obtener todas los Tipos de Comprobante
+// ==========================================
 app.get('/usos-CFDI', (req, res, next) => {
   UsoCFDI.find({})
     .sort({ usoCFDI: 1 })
@@ -218,6 +218,16 @@ app.get('/usos-CFDI', (req, res, next) => {
         total: usosCFDI.length
       });
     });
+});
+
+// ============================================
+//   Borrar MANIOBRA DE CONCEPTOS INDIVIDUAL
+// ============================================
+
+app.get('/deleteConceptoManiobra/:maniobras', (req, res,next) => {
+  let maniobras = req.params.maniobras;
+  maniobras = maniobras.split(',');
+  console.log(maniobras);
 });
 
 module.exports = app;
