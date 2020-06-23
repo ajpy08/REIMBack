@@ -9,6 +9,7 @@ var FormaPago = require('../models/facturacion/forma-pago');
 var MetodoPago = require('../models/facturacion/metodo-pago');
 var TipoComprobante = require('../models/facturacion/tipo-comprobante');
 var UsoCFDI = require('../models/facturacion/uso-CFDI');
+var Maniobra = require('../models/maniobra');
 var app = express();
 
 // // ==========================================
@@ -86,28 +87,28 @@ app.get('/series', (req, res, next) => {
 app.get('/series/:serie', (req, res) => {
   var serie = req.params.serie;
 
-  Serie.find({serie: serie})
-      .exec((err, serie) => {
-          if (err) {
-              return res.status(500).json({
-                  ok: false,
-                  mensaje: 'Error al buscar serie',
-                  errors: err
-              });
-          }
-          if (!serie) {
-              return res.status(400).json({
-                  ok: false,
-                  mensaje: 'La serie ' + serie + ' no existe',
-                  errors: { message: 'No existe una serie con ' + serie }
-              });
-          }
-          res.status(200).json({
-              ok: true,
-              serie: serie[0],
-              // total: serie.length
-          });
+  Serie.find({ serie: serie })
+    .exec((err, serie) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar serie',
+          errors: err
+        });
+      }
+      if (!serie) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La serie ' + serie + ' no existe',
+          errors: { message: 'No existe una serie con ' + serie }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        serie: serie[0],
+        // total: serie.length
       });
+    });
 });
 
 // ==========================================
@@ -224,10 +225,22 @@ app.get('/usos-CFDI', (req, res, next) => {
 //   Borrar MANIOBRA DE CONCEPTOS INDIVIDUAL
 // ============================================
 
-app.get('/deleteConceptoManiobra/:maniobras', (req, res,next) => {
-  let maniobras = req.params.maniobras;
-  maniobras = maniobras.split(',');
-  console.log(maniobras);
+app.get('/deleteConceptoManiobra/:cfdi&:maniobra', (req, res, next) => {
+  let maniobra = req.params.maniobra,
+    cfdi = req.params.cfdi;
+  Maniobra.updateMany({ '_id': maniobra }, { $pull: { 'cfdisAsociados': cfdi } }, (err) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al borrar CFDI Asociado con el id' + cfdi + ' de la maniobra ' + maniobra,
+        errors: { message: 'Error al borrar CFDI Asociado con el id' + cfdi + ' de la maniobra ' + maniobra }
+      });
+    }
+    res.status(200).json({
+      ok: true
+    });
+
+  });
 });
 
 module.exports = app;
