@@ -9,6 +9,7 @@ var FormaPago = require('../models/facturacion/forma-pago');
 var MetodoPago = require('../models/facturacion/metodo-pago');
 var TipoComprobante = require('../models/facturacion/tipo-comprobante');
 var UsoCFDI = require('../models/facturacion/uso-CFDI');
+var Maniobra = require('../models/maniobra');
 var app = express();
 
 // // ==========================================
@@ -86,33 +87,33 @@ app.get('/series', (req, res, next) => {
 app.get('/series/:serie', (req, res) => {
   var serie = req.params.serie;
 
-  Serie.find({serie: serie})
-      .exec((err, serie) => {
-          if (err) {
-              return res.status(500).json({
-                  ok: false,
-                  mensaje: 'Error al buscar serie',
-                  errors: err
-              });
-          }
-          if (!serie) {
-              return res.status(400).json({
-                  ok: false,
-                  mensaje: 'La serie ' + serie + ' no existe',
-                  errors: { message: 'No existe una serie con ' + serie }
-              });
-          }
-          res.status(200).json({
-              ok: true,
-              serie: serie[0],
-              // total: serie.length
-          });
+  Serie.find({ serie: serie })
+    .exec((err, serie) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar serie',
+          errors: err
+        });
+      }
+      if (!serie) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La serie ' + serie + ' no existe',
+          errors: { message: 'No existe una serie con ' + serie }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        serie: serie[0],
+        // total: serie.length
       });
+    });
 });
 
-// // ==========================================
-// // Obtener todos los regimenes fiscales
-// // ==========================================
+// ==========================================
+// Obtener todos los regimenes fiscales
+// ==========================================
 app.get('/regimenes-fiscales', (req, res, next) => {
   RegimenFiscal.find({})
     .sort({ claveRegimenFiscal: 1 })
@@ -132,9 +133,9 @@ app.get('/regimenes-fiscales', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas las formas de pago
-// // ==========================================
+// ==========================================
+// Obtener todas las formas de pago
+// ==========================================
 app.get('/formas-pago', (req, res, next) => {
   FormaPago.find({})
     .sort({ formaPago: 1 })
@@ -154,9 +155,9 @@ app.get('/formas-pago', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los metodos de pago
-// // ==========================================
+// ==========================================
+//Obtener todas los metodos de pago
+//==========================================
 app.get('/metodos-pago', (req, res, next) => {
   MetodoPago.find({})
     .sort({ metodoPago: 1 })
@@ -176,9 +177,9 @@ app.get('/metodos-pago', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los Tipos de Comprobante
-// // ==========================================
+// ==========================================
+// Obtener todas los Tipos de Comprobante
+// ==========================================
 app.get('/tipos-comprobante', (req, res, next) => {
   TipoComprobante.find({})
     .sort({ descripcion: 1 })
@@ -198,9 +199,9 @@ app.get('/tipos-comprobante', (req, res, next) => {
     });
 });
 
-// // ==========================================
-// // Obtener todas los Tipos de Comprobante
-// // ==========================================
+// ==========================================
+// Obtener todas los Tipos de Comprobante
+// ==========================================
 app.get('/usos-CFDI', (req, res, next) => {
   UsoCFDI.find({})
     .sort({ usoCFDI: 1 })
@@ -218,6 +219,28 @@ app.get('/usos-CFDI', (req, res, next) => {
         total: usosCFDI.length
       });
     });
+});
+
+// ============================================
+//   Borrar MANIOBRA DE CONCEPTOS INDIVIDUAL
+// ============================================
+
+app.get('/deleteConceptoManiobra/:cfdi&:maniobra', (req, res, next) => {
+  let maniobra = req.params.maniobra,
+    cfdi = req.params.cfdi;
+  Maniobra.updateMany({ '_id': maniobra }, { $pull: { 'cfdisAsociados': cfdi } }, (err) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al borrar CFDI Asociado con el id' + cfdi + ' de la maniobra ' + maniobra,
+        errors: { message: 'Error al borrar CFDI Asociado con el id' + cfdi + ' de la maniobra ' + maniobra }
+      });
+    }
+    res.status(200).json({
+      ok: true
+    });
+
+  });
 });
 
 module.exports = app;
