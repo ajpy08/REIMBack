@@ -25,6 +25,7 @@ var QRCode = require('qrcode');
 const Complemento = require('@alexotano/cfdi33').Complemento;
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
+const { Route53Resolver } = require('aws-sdk');
 let cfdiXML;
 var options = {
   object: true,
@@ -157,6 +158,7 @@ app.get('/cfdis/Maniobra/Concepto/:maniobra&:concepto/', mdAutenticacion.verific
 app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   let respuesta = [];
+  let cenceptoCFDI = [];
   if (body.informacionAdicional === '@') {
     body.informacionAdicional = '';
   }
@@ -198,7 +200,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     let maniobra = [];
     body.conceptos.forEach(c => {
       c.maniobras.forEach(m => {
-        maniobra.push(m._id);
+        maniobra.push({maniobras: m._id, productoSer: c._id, cfdi: cfdi._id});
       });
     });
     maniobra = new Set(maniobra);
@@ -207,11 +209,15 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
 
   async function agregacion() {
     respuesta = await maniobraCfdi();
+
   }
 
   agregacion().then(() => {
-    respuesta.forEach(m => {
-      Maniobra.updateMany({ "_id": m }, { $push: { 'cfdisAsociados': { $each: [cfdi._id] } } }, (err, maniobra) => { //! AQUI SE AGREGAN EN EL CAMPO CFDISASOCIADOS LOS ID DE LAS MANIBRAS 
+    
+    respuesta.forEach(async m => {
+      let concepto_CFDI = [];
+      concepto_CFDI.push(m.productoSer, m.cfdi)
+      Maniobra.update({ "_id": m.maniobras }, { $push: { 'cfdisAsociados': { $each: [{ 'id_Concepto': m.productoSer, 'id_Cfdi': m.cfdi}] } } }, (err, maniobra) => {
         if (err) {
           return res.status(400).json({
             ok: false,
@@ -227,6 +233,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
           });
         }
       });
+      // // Maniobra.updateMany({ "_id": m.maniobras }, { $push: { 'cfdisAsociados.id_Concepto': { $each: [cfdi._id] } }}, {$push: {'cfdisAsociados.id_Cfdi': { $each:[body.conceptos]}}}, (err, maniobra) => { //! AQUI SE AGREGAN EN EL CAMPO CFDISASOCIADOS LOS ID DE LAS MANIBRAS 
     });
   });
 
@@ -313,7 +320,7 @@ app.put('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
-  //! DESCOMENTAR PARA PASE A PRODUCCION
+  //! DESCOMENTAR PARA PASE A PRODUCCION ( OPCIONAL -> YA QUE SE VA A DESACTIVAR DESDEL DEL FRONT)
   // CFDIS.findById(id, (err, valcfdi) => {
   //   if (err || !valcfdi) {
   //     return res.status(404).json({
@@ -363,8 +370,7 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   //   }
   // });
 
-  //! COMENTAR EL SIGUIENTE CODIGO PARA PASE A PRODUCCION
-  Maniobra.updateMany({ 'cfdisAsociados': id }, { $pull: { 'cfdisAsociados': id } }, (err) => {
+  Maniobra.updateMany({ 'cfdisAsociados.id_Cfdi': id }, { $pull: { 'cfdisAsociados':{'id_Cfdi': id} } }, (err) => {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -372,7 +378,6 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'Error al borrar CFDi Asociado con el id ' + id }
       });
     } else {
-
       CFDIS.findByIdAndRemove(id, (err, cfdiBorrado) => {
         if (err) {
           return res.status(500).json({
@@ -395,7 +400,6 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
   });
-  //! FIN DE COMENTARIO
 });
 
 // ==========================================
