@@ -10,7 +10,7 @@ var maniobraSchema = new Schema({
   viaje: { type: Schema.Types.ObjectId, ref: 'Viaje' },
   cliente: { type: Schema.Types.ObjectId, ref: 'Cliente' },
   destinatario: { type: String, required: false },
-  sello: { type: String},
+  sello: { type: String },
   agencia: { type: Schema.Types.ObjectId, ref: 'Cliente' },
   naviera: { type: Schema.Types.ObjectId, ref: 'Cliente' },
   transportista: { type: Schema.Types.ObjectId, ref: 'Cliente' },
@@ -58,15 +58,20 @@ var maniobraSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
-  cfdisAsociados: [{ type: Schema.Types.ObjectId, ref: 'CFDI' }],
+  cfdisAsociados: [{
+    _id: false,
+    id_Concepto: { type: Schema.Types.ObjectId, ref: 'fac_ProductosServicios' },
+    id_Cfdi: { type: Schema.Types.ObjectId, ref: 'cfdis' }
+  }],
+  // cfdisAsociados: [{ type: Schema.Types.ObjectId, ref: 'CFDI' }],
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
-maniobraSchema.pre('save', function(next) {
+maniobraSchema.pre('save', function (next) {
   var doc = this;
   if (this.cargaDescarga === 'D' && this.peso != 'VACIO' && (this.folio === undefined || this.folio === '') ||
     (this.cargaDescarga === 'C' && (this.folio === undefined || this.folio === ''))) {
-    Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function(error, cont) {
+    Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function (error, cont) {
       if (error)
         return next(error);
       doc.folio = cont.seq;
