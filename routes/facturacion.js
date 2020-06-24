@@ -225,10 +225,11 @@ app.get('/usos-CFDI', (req, res, next) => {
 //   Borrar MANIOBRA DE CONCEPTOS INDIVIDUAL
 // ============================================
 
-app.get('/deleteConceptoManiobra/:cfdi&:maniobra', (req, res, next) => {
+app.get('/deleteConceptoManiobra/:cfdi&:maniobra&:concepto', (req, res, next) => {
   let maniobra = req.params.maniobra,
-    cfdi = req.params.cfdi;
-  Maniobra.updateMany({ '_id': maniobra }, { $pull: { 'cfdisAsociados': cfdi } }, (err) => {
+    cfdi = req.params.cfdi,
+    concepto = req.params.concepto;
+  Maniobra.updateMany({ '_id': maniobra }, { $pull: { 'cfdisAsociados':{'id_Cfdi': cfdi, 'id_Concepto': concepto} } }, (err) => {
     if (err) {
       return res.status(400).json({
         ok: false,
