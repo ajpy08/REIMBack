@@ -41,9 +41,9 @@ app.get('', (req, res, netx) => {
     filtro += '\"viaje\":' + '\"' + viaje + '\",';
   if (naviera != 'undefined' && naviera != '')
     filtro += '\"naviera\":' + '\"' + naviera + '\",';
-if (cliente != 'undefined' && cliente != '')
+  if (cliente != 'undefined' && cliente != '')
     filtro += '\"cliente\":' + '\"' + cliente + '\",';
-    
+
   // if (peso != 'undefined' && peso != '')
   //   filtro += '\"peso\":' + '\"' + peso + '\",';
   peso = peso.replace(/,/g, '\",\"');
@@ -57,7 +57,7 @@ if (cliente != 'undefined' && cliente != '')
 
   if (reparacion === 'true') {
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
-  } 
+  }
 
   if (finillegada != '' && ffinllegada) {
     fIni = moment(finillegada, 'DD-MM-YYYY', true).utc().startOf('day').format();
@@ -125,8 +125,8 @@ if (cliente != 'undefined' && cliente != '')
 app.get('/maniobra/:id', (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
-  .populate('solicitud', 'blBooking')
-  .populate('naviera', 'nombreComercial')
+    .populate('solicitud', 'blBooking')
+    .populate('naviera', 'nombreComercial')
     .exec((err, maniobra) => {
       if (err) {
         return res.status(500).json({
@@ -383,14 +383,14 @@ app.get('/maniobra/:id/includes', (req, res) => {
         select: 'nombreComercial'
       }
     })
-      .populate({
-        path: "viaje",
-        select: "viaje",
-        populate: {
-          path: "buque",
-          select: "nombre"
-        }
-      })
+    .populate({
+      path: "viaje",
+      select: "viaje",
+      populate: {
+        path: "buque",
+        select: "nombre"
+      }
+    })
 
 
     .exec((err, maniobra) => {
@@ -438,7 +438,7 @@ app.get('/facturacion-vacios', (req, res, netx) => {
   peso = peso.replace(/,/g, '\",\"');
 
   if (peso != 'undefined' && peso != '')
-  filtro += '\"peso\":' + '\"' + peso + '\",';
+    filtro += '\"peso\":' + '\"' + peso + '\",';
 
 
   if (lavado === 'true') {
@@ -545,25 +545,33 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
     // filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
   } else {
-    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+    if (reparacion === 'false') {
+      filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+    }
   }
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
-  }  else {
-    filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': true},';
+  } else {
+    if (sinFactura === 'false') {
+      filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': true},';
+    }
   }
 
   if (descargados === 'true') {
     filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': true},';
   } else {
-    filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': false},';
+    if (descargados === 'false') {
+      filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': false},';
+    }
   }
 
   if (yaLavados === 'true') {
     filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
   } else {
-    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
+    if (yaLavados === 'false') {
+      filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
+    }
   }
 
   if (filtro != '{')
