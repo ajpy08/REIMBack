@@ -9,6 +9,7 @@ var soap = require('soap');
 var funcion = require('../routes/fuctions');
 var moment = require('moment');
 var CFDIS = require('../models/facturacion/cfdi');
+var CONTADOR = require('../models/contador');
 const CFDI = require('@alexotano/cfdi33').CFDI
 const Emisor = require('@alexotano/cfdi33').Emisor
 const Impuestos = require('@alexotano/cfdi33').Impuestos
@@ -26,6 +27,7 @@ const Complemento = require('@alexotano/cfdi33').Complemento;
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 const { Route53Resolver } = require('aws-sdk');
+const contador = require('../models/contador');
 let cfdiXML;
 var options = {
   object: true,
@@ -200,7 +202,7 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
     let maniobra = [];
     body.conceptos.forEach(c => {
       c.maniobras.forEach(m => {
-        maniobra.push({maniobras: m._id, productoSer: c._id, cfdi: cfdi._id});
+        maniobra.push({ maniobras: m._id, productoSer: c._id, cfdi: cfdi._id });
       });
     });
     maniobra = new Set(maniobra);
@@ -213,11 +215,11 @@ app.post('/cfdi/', mdAutenticacion.verificaToken, (req, res) => {
   }
 
   agregacion().then(() => {
-    
+
     respuesta.forEach(async m => {
       let concepto_CFDI = [];
       concepto_CFDI.push(m.productoSer, m.cfdi)
-      Maniobra.update({ "_id": m.maniobras }, { $push: { 'cfdisAsociados': { $each: [{ 'id_Concepto': m.productoSer, 'id_Cfdi': m.cfdi}] } } }, (err, maniobra) => {
+      Maniobra.update({ "_id": m.maniobras }, { $push: { 'cfdisAsociados': { $each: [{ 'id_Concepto': m.productoSer, 'id_Cfdi': m.cfdi }] } } }, (err, maniobra) => {
         if (err) {
           return res.status(400).json({
             ok: false,
@@ -370,7 +372,7 @@ app.delete('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   //   }
   // });
 
-  Maniobra.updateMany({ 'cfdisAsociados.id_Cfdi': id }, { $pull: { 'cfdisAsociados':{'id_Cfdi': id} } }, (err) => {
+  Maniobra.updateMany({ 'cfdisAsociados.id_Cfdi': id }, { $pull: { 'cfdisAsociados': { 'id_Cfdi': id } } }, (err) => {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -426,11 +428,11 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
     // var total = funcion.cortado(cfdi.total, 6);
     // const subTotal = funcion.cortado(cfdi.subtotal, 2);
 
-    
+
     let des = 0;
     for (const c of cfdi.conceptos) {
-       let number =  parseFloat(c.descuento);
-       des = des + number
+      let number = parseFloat(c.descuento);
+      des = des + number
     }
 
     cfdiXML = new CFDI({
@@ -746,8 +748,8 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
         }
         console.log('Archivo temporal TIMBRADO Guardado');
 
-        
-        
+
+
         // console.log('SUBIENDO ARCHIVO XML TIMBRADO A BOOKET');
         // funcion.subirArchivoBooket('cfdi/xml/', nombre);
       }
@@ -805,6 +807,154 @@ app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 
+// ==========================================
+// CANCELACION DE CFDI 
+// ==========================================
+
+app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', (req, res) => {
+  let rfcReceptor = req.params.rfcEmisor,
+    uuid = req.params.uuid,
+    total = req.params.total,
+    rfcEmisor = DATOS.Emisor_RFC
+  url = KEYS.URL_CANCELACION;
+
+
+  async function read() {
+    const key = await ReadCerKey(KEYS.key);
+    const cer = await ReadCerKey(KEYS.cer);
+    const archivo = await writeArchivo(key, cer, total, rfcReceptor, uuid);
+
+    return { archivo }
+  }
+
+  function writeArchivo(key, cer, total, rfcReceptor, uuid) {
+
+    let mensaje = `<SOAP-ENV:Envelope SOAPENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAPENV="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAPENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="urn:advans-cfdicancelacion">
+    <SOAP-ENV:Body>
+    <tns:Cancelar>
+    <CancelarRequest><ApiKey
+    xsi:type="xsd:string">${KEYS.API_KEY}</ApiKey>
+    <PrivateKeyPem xsi:type="xsd:string">${key}</PrivateKeyPem>
+    <PublicKeyPem xsi:type="xsd:string">${cer}</PublicKeyPem>
+    <Uuid>${uuid}</Uuid>
+    <RfcReceptor>${rfcReceptor}</RfcReceptor>
+    <Total>${total}</Total>
+    </CancelarRequest>
+    </tns:Cancelar>
+    </SOAP-ENV:Body>
+    </SOAP-ENV:Envelope>
+    `
+    //   let mensaje = `${KEYS.API_KEY}\n
+    // ${key}\n
+    // ${cer}\n
+    // ${uuid}\n
+    // ${rfcEmisor}\n
+    // ${total}`
+
+    var CRoute = path.resolve(__dirname, `../archivosTemp/cancelacion.txt`);
+    let ROUTE = fs.writeFileSync(CRoute, mensaje);
+
+    return CRoute
+  }
+  function ReadCerKey(key) {
+    let text = fs.readFileSync(key, 'utf-8');
+    return text;
+  }
+  read().then(ress => {
+
+    soap.createClient(url, (err, cliente) => {
+      if (err) {
+        funcion.envioCooreo('Error al contectar con el web Services Cancelacion' + err, 'UUID: ' + uuid);
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al conectar con Web Services Cancelacion, validar LOG..',
+          errors: { message: 'Error al conectar con Web Services Timbrado, validar LOG..' }
+        });
+      }
+
+      cliente.Cancelar(ress.archivo, (errorC, result) => {
+        if (errorC) {
+          funcion.envioCooreo('Se produkp un error al cancelar' + result.return.$value + '-' + result.return.Code.$value + ' - ' + result.return.Message.$value, 'UUID: ' + uuid)
+          return res.status(400).json({
+            ok: false,
+            mensaje: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}`,
+            errors: { message: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}` }
+          });
+        }
+        if (result.return === undefined) {
+          funcion.envioCooreo('No se obtuvo respuesta del PAC', 'null');
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'No hay respuesta de timbrado',
+            errors: { message: 'No hay respuesta del provedor de timbrado' }
+          });
+        }
+        if (result.return.Code.$value !== '200') {
+          funcion.envioCooreo('Error de cancelacion' + result.return.Message.$value, ' CANCELACIÓN: UUID: ' + uuid);
+          return res.status(400).json({
+            ok: false,
+            mensaje: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}`,
+            errors: { message: `Code: (${result.return.Code.$value}) - Mensaje: ${result.return.Message.$value}` }
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          result: result
+        });
+      });
+    });
+  });
+});
+
+
+app.put('/creditos/:creditos', (req, res) => {
+  let creditos = req.params.creditos;
+  creditos = parseInt(creditos)
+
+  CONTADOR.findById('CreditosTimbre', (err, contador) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ERROR CONTADOR',
+        errors: err
+      });
+    }
+    contador.seq = creditos;
+
+    contador.save((err, contadorGuardado) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Error al actualizar el CFDI',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        cfdi: contadorGuardado
+      });
+    });
+  });
+});
+
+app.get('/getCreditos/:id', (req, res) => {
+  let id = req.params.id;
+  CONTADOR.findById(id, (erro, getCreditos) => {
+    if (erro) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ERROR GET CONTADOR',
+        errors: err
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      creditos: getCreditos
+    });
+  });
+});
 
 
 module.exports = app;
