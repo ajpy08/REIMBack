@@ -8,6 +8,7 @@ var ConsultaPDF = require('../routes/PDFMongo');
 var MetodoPago = require('../models/facturacion/metodo-pago');
 const path = require('path');
 var PdfPrinter = require('pdfmake');
+var CONTADOR = require('../models/contador');
 var printer = new PdfPrinter();
 const { DATOS_REIM, DATOS } = require('../config/config')
 
@@ -623,6 +624,10 @@ app.get('/envioCorreoB/:correo&:archivo&:nombre', (req, res) => {
     // });
 });
 
+// ===========================================
+//  SUBIR ARCHIVOS A BOCKET
+// ===========================================
+
 app.get('/booket/:archivos&:subir', (req, res) => {
     let archivos = req.params.archivos;
     let subir = req.params.subir;
@@ -649,5 +654,24 @@ app.get('/booket/:archivos&:subir', (req, res) => {
     res.status(200).json({
         ok: true
     })
+});
+
+// ===========================================
+//  QUITA UN CREDITO DE TIMBRES
+// ===========================================
+
+app.get('/QuitCredito/', (req, res) => {
+    CONTADOR.findByIdAndUpdate({_id: 'CreditosTimbre'}, {$inc: {seq: -1}}, (err, creditos) => {
+        if(err) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'ERROR AL RESTAR CREDITOS',
+                errors: err
+            });
+        }
+        res.status(200).json({
+            ok: true
+        });
+    });
 });
 module.exports = app;

@@ -427,6 +427,7 @@ exports.subirArchivoBooket = subirArchivoBooket;
 exports.letraT = letraT;
 exports.impuestos = impuestos;
 exports.CorreoFac = CorreoFac;
+exports.envioCooreo = envioCooreo;
 exports.cortado = cortado;
 exports.BorrarArchivosTemp = BorrarArchivosTemp;
 exports.envioArchivoCfdi = envioArchivoCfdi;

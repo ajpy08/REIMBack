@@ -184,10 +184,12 @@ app.get('/solicitud/:id/enviacorreo', (req, res) => {
               correos += agrupado[g][0].maniobra.transportista.correo + ',';
             }
 
-            if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
-              error += 'Agencia - '
-            } else if (!correos.includes(solicitud.agencia.correo)) {
-              correos += solicitud.agencia.correo;
+            if (solicitud.agencia != undefined) {
+              if (solicitud.agencia.correo === '' || solicitud.agencia.correo === undefined) {
+                error += 'Agencia - '
+              } else if (!correos.includes(solicitud.agencia.correo)) {
+                correos += solicitud.agencia.correo;
+              }
             }
 
             console.log(correos);
@@ -335,8 +337,8 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
     });
   }
 
-
-  Agencia.findById({ _id: solicitud.agencia })
+if (solicitud.agencia != undefined) {
+  Agencia.findById({ _id: solicitud.agencia})
     .exec((err, agencia) => {
       if (err) {
         return res.status(500).json({
@@ -355,6 +357,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
 
       this.razonSocialAgencia = agencia.razonSocial;
     });
+}
 
 
   if (solicitud.tipo == 'D') {
@@ -409,7 +412,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
     sentMail('Estimado Container Park', correosContainerPark,
       'Solicitud de ' + tipo + ' Creada', cuerpoCorreo, 'emailAlert');
 
-    res.status(201).json({
+    res.status(200).json({
       ok: true,
       solicitud: solicitudGuardado
     });
