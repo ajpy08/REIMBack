@@ -294,7 +294,7 @@ app.post('/solicitud/', mdAutenticacion.verificaToken, (req, res) => {
       facturarA: body.facturarA,
       rfc: body.rfc,
       razonSocial: body.razonSocial,
-      calle: body.razonSocial,
+      calle: body.calle,
       noExterior: body.noExterior,
       noInterior: body.noInterior,
       colonia: body.colonia,
