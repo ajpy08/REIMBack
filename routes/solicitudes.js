@@ -877,8 +877,5 @@ app.put('/solicitud/maniobra/descarga/:id', mdAutenticacion.verificaToken, (req,
       });
 });
 
-
-
-
 // export
 module.exports = app;

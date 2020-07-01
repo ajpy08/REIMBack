@@ -5,6 +5,7 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
+var Solicitud = require('../models/solicitud');
 var variasBucket = require('../public/variasBucket');
 const sentMail = require('../routes/sendAlert');
 var fileUpload = require('express-fileupload');
@@ -1301,4 +1302,52 @@ app.get('/Lavado/Reparacion', (req, res, next) => {
     });
 });
 
+
+// ==============================================================================
+// Actualizar Maniobra asignando su solicitud sin mdAutenticacion.verificaToken
+// ==============================================================================
+
+// SOLO SE ACTIVARA CUANDO SE NECESITE NO BORRAR ES PARA CUANDO LAS MANIOBRAS
+// PIERDAN SU CAMPO SOLICITUD
+
+// app.put('/actualiza/maniobras/', (req, res) => {
+//   Solicitud.find()
+//     .sort({ fAlta: -1 })
+//     .exec(
+//       (err, solicitudes) => {
+//         if (err) {
+//           return res.status(500).json({
+//             ok: false,
+//             mensaje: 'Error cargando solicitudes',
+//             errors: err
+//           });
+//         }
+//         solicitudes.forEach(s => {
+//           s.contenedores.forEach(c => {
+//             if (c.maniobra) {
+//               Maniobra.updateMany({ '_id': c.maniobra }, {
+//                 $set: {
+//                   'solicitud': s._id
+//                 }
+//               }, (err) => {
+//                 if (err) {
+//                   return res.status(400).json({
+//                     ok: false,
+//                     mensaje: 'Error al actualizar la maniobra con el id ' + c.maniobra,
+//                     errors: { message: 'Error al actualizar la maniobra con el id ' + c.maniobra }
+//                   });
+//                 }
+//               });
+//             }
+//           });
+//         });
+
+//         res.status(200).json({
+//           ok: true,
+//           solicitudes: solicitudes,
+//           total: solicitudes.length
+//         });
+
+//       });
+// });
 module.exports = app;
