@@ -100,7 +100,7 @@ app.get('/:id', mdAutenticacion.verificaToken, (req, res) => {
         cliente: cliente
       });
     })
-})
+});
 
 // ==========================================
 // Obtener todas los clientes por id empresas (deben estar separados por ",")
