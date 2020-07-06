@@ -361,7 +361,7 @@ app.get('/inventarioLR/', mdAutenticacion.verificaToken, (req, res, netx) => {
 
 // ==========================================
 //  Obtener Maniobra por ID CON INCLUDES
-// ==========================================
+// ==============================================
 app.get('/maniobra/:id/includes',mdAutenticacion.verificaToken,  (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
