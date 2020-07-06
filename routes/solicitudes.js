@@ -16,7 +16,7 @@ var Agencia = require('../models/agencia');
 // =======================================
 // Obtener solicitudes TODAS
 // =======================================
-app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?',mdAutenticacion.verificaToken, (req, res) => {
+app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?', (req, res) => {
 
   var tipo = req.query.tipo || '';
   var estatus = req.query.estatus || '';
@@ -74,7 +74,7 @@ app.get('/:tipo?:estatus?:finialta?:ffinalta?:agencias?',mdAutenticacion.verific
 // ==========================================
 //  Obtener solicitud por ID
 // ==========================================
-app.get('/solicitud/:id',mdAutenticacion.verificaToken, (req, res) => {
+app.get('/solicitud/:id', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
     .populate('contenedores.maniobra', 'contenedor tipo estatus grado')
@@ -104,7 +104,7 @@ app.get('/solicitud/:id',mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 //  Envia correo 
 // ==========================================
-app.get('/solicitud/:id/enviacorreo', mdAutenticacion.verificaToken,(req, res) => {
+app.get('/solicitud/:id/enviacorreo', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
     .populate('cliente', 'rfc razonSocial nombreComercial')
@@ -234,7 +234,7 @@ app.get('/solicitud/:id/enviacorreo', mdAutenticacion.verificaToken,(req, res) =
 //  Obtener solicitud por ID, CON INCLUDES
 // ==========================================
 
-app.get('/solicitud/:id/includes',mdAutenticacion.verificaToken, (req, res) => {
+app.get('/solicitud/:id/includes', (req, res) => {
   var id = req.params.id;
   Solicitud.findById(id)
     .populate('agencia', 'razonSocial nombreComercial')

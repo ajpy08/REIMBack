@@ -10,7 +10,7 @@ var app = express();
 // ==========================================
 // Obtener todas las agencias aduanales
 // ==========================================
-app.get('/:tf', mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/:tf', (req, res, next) => {
   var role = 'AA_ROLE';
   var tf = req.params.tf
 
@@ -39,7 +39,7 @@ app.get('/:tf', mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 //  Obtener Agencia por ID
 // ==========================================
-app.get('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/agencia/:id', (req, res) => {
   var id = req.params.id;
   Agencia.findById(id)
     .exec((err, agencia) => {
@@ -67,7 +67,7 @@ app.get('/agencia/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 //  Obtener Agencias por ID de usuario
 // ==========================================
-app.get('/usuario/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/usuario/:id', (req, res) => {
   var id = req.params.id;
   Agencia.find({ usuarios: id })
     .populate('usuarioAlta', 'nombre img email')

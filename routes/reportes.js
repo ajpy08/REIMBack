@@ -3,10 +3,9 @@ var app = express();
 var moment = require('moment');
 var mongoose = require('mongoose');
 var Maniobra = require('../models/maniobra');
-var mdAutenticacion = require('../middlewares/autenticacion');
 
 
-app.get('/lavado/',  mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/lavado/', (req, res, next) => {
     var tipos = req.query.tipo
     var finillegada = req.query.finillegada || '';
     var ffinllegada = req.query.ffinllegada || '';
@@ -52,7 +51,7 @@ app.get('/lavado/',  mdAutenticacion.verificaToken, (req, res, next) => {
         });
 });
 
-app.get('/reparacion/', mdAutenticacion.verificaToken,(req, res, next) => {
+app.get('/reparacion/', (req, res, next) => {
     var tipos = req.query.tipo
     var finillegada = req.query.finillegada || '';
     var ffinllegada = req.query.ffinllegada || '';
@@ -107,7 +106,7 @@ app.get('/reparacion/', mdAutenticacion.verificaToken,(req, res, next) => {
         });
 });
 
-app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/', (req, res, next) => {
     var filtro = '{'
     filtro += '\"lavado\":' + '{\"$in\": [\"E\", \"B\"]},';
     filtro += '\"fIniLavado\":' + '{\"$exists\"' + ':false},' + '\"hIniLavado\":' +
@@ -132,7 +131,7 @@ app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
     });
 });
 
-app.get('/reparacionesPen/',mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/reparacionesPen/', (req, res, next) => {
     var filtro = '{'
     filtro += '\"reparaciones.0.reparacion\":' + '{\"$exists\"' + ':true},' + '\"fIniReparacion\":' +
         '{\"$exists\":' + 'false}}';

@@ -6,7 +6,7 @@ var path = require('path');
 const AWS = require('aws-sdk');
 
 
-app.get('/:tipo/:img',  (req, res, netx) => {
+app.get('/:tipo/:img', (req, res, netx) => {
   var tipo = req.params.tipo;
   var img = req.params.img;
   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
