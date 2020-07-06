@@ -15,7 +15,7 @@ var mongoose = require('mongoose');
 // Activo : true / false
 // ==========================================
 
-app.get('/', (req, res, next) => {
+app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
   var transportista = req.query.transportista || '';
   var activo = req.query.activo || '';
   var filtro = '{';
@@ -52,7 +52,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener Operador por ID
 // ==========================================
-app.get('/operador/:id', (req, res) => {
+app.get('/operador/:id',mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Operador.findById(id)
     .exec((err, operadores) => {
@@ -80,7 +80,7 @@ app.get('/operador/:id', (req, res) => {
 // ==========================================
 //  Obtener Operador por ID, con includes
 // ==========================================
-app.get('/operador/:id/includes', (req, res) => {
+app.get('/operador/:id/includes',mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Operador.findById(id)
     .populate('usuarioAlta', 'nombre email')

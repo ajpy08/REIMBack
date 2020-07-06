@@ -8,7 +8,7 @@ var Buque = require('../models/buque');
 // ==========================================
 // Obtener todos los buques
 // ==========================================
-app.get('/:tf', (req, res, next) => {
+app.get('/:tf', mdAutenticacion.verificaToken, (req, res, next) => {
   var tf = req.params.tf;
 
   Buque.find({ "activo": tf })
@@ -34,7 +34,7 @@ app.get('/:tf', (req, res, next) => {
 // ==========================================
 // Obtener todos los buques por naviera
 // ==========================================
-app.get('/naviera/:id', (req, res, next) => {
+app.get('/naviera/:id', mdAutenticacion.verificaToken, (req, res, next) => {
   var id = req.params.id;
   Buque.find({ naviera: id })
     .populate('naviera', 'naviera nombreComercial')
@@ -60,7 +60,7 @@ app.get('/naviera/:id', (req, res, next) => {
 // ==========================================
 //  Obtener Buque por ID
 // ==========================================
-app.get('/buque/:id', (req, res) => {
+app.get('/buque/:id',mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Buque.findById(id)
     .populate('usuario', 'nombre img email')

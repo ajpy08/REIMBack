@@ -23,7 +23,7 @@ const { request } = require('./cfdis');
 //  OBTINE EL USO DE CADA FACTURA 
 // ===========================================
 
-app.get('/uso/:uso', (req, res, next) => {
+app.get('/uso/:uso',mdAutenticacion.verificaToken, (req, res, next) => {
     var uso = req.query.uso || '';
     var filtro = '{';
 
@@ -50,7 +50,7 @@ app.get('/uso/:uso', (req, res, next) => {
 // ===========================================
 //  OBTINE EL METODO PAGO DE CADA FACTURA 
 // ===========================================
-app.get('/metodoPago/:metodoPago', (req, res) => {
+app.get('/metodoPago/:metodoPago',mdAutenticacion.verificaToken, (req, res) => {
     let metod = req.query.metodoPago || '';
     let filtro = '{';
     if (metod !== undefined && metod !== '') {
@@ -76,7 +76,7 @@ app.get('/metodoPago/:metodoPago', (req, res) => {
 //  OBTINE EL CLAVE UNIDAD DE CADA FACTURA 
 // ===========================================
 
-app.get('/clave/unidad/:unidad', (req, res, next) => {
+app.get('/clave/unidad/:unidad',mdAutenticacion.verificaToken, (req, res, next) => {
     var unidad = req.params.unidad || '';
     var filtro = '{';
     if (unidad != 'undefined' || unidad != '') {
@@ -101,7 +101,7 @@ app.get('/clave/unidad/:unidad', (req, res, next) => {
 // ===========================================
 //  OBTINE EN LETRAS EL TOTAL
 // ===========================================
-app.get('/numerosLetras/:total', (req, res) => {
+app.get('/numerosLetras/:total',mdAutenticacion.verificaToken, (req, res) => {
     var total = req.params.total;
 
     if (total === undefined || total === '') {
@@ -135,7 +135,7 @@ app.get('/numerosLetras/:total', (req, res) => {
 // ===========================================
 //  GENERAR PDF CFDI
 // ===========================================
-app.get('/pdfCFDI/:id', (req, res) => {
+app.get('/pdfCFDI/:id',mdAutenticacion.verificaToken, (req, res) => {
     let id = req.params.id;
     let nombrePdf = '';
     let DTO = 0;
@@ -559,7 +559,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
     });
 });
 
-app.get('/envioCorreo/:correo&:archivo&:nombre', (req, res) => {
+app.get('/envioCorreo/:correo&:archivo&:nombre', mdAutenticacion.verificaToken,(req, res) => {
     let correo = req.params.correo,
         archivoPDF = `${req.params.archivo}.pdf`,
         archivoXML = `${req.params.archivo}.xml`,
@@ -580,7 +580,7 @@ app.get('/envioCorreo/:correo&:archivo&:nombre', (req, res) => {
 });
 
 
-app.get('/envioCorreoB/:correo&:archivo&:nombre', (req, res) => {
+app.get('/envioCorreoB/:correo&:archivo&:nombre',mdAutenticacion.verificaToken, (req, res) => {
     let correo = req.params.correo,
         archivos = req.params.archivo,
         nombre = req.params.nombre;
@@ -632,7 +632,7 @@ app.get('/envioCorreoB/:correo&:archivo&:nombre', (req, res) => {
 //  SUBIR ARCHIVOS A BOCKET
 // ===========================================
 
-app.get('/booket/:archivos&:subir', (req, res) => {
+app.get('/booket/:archivos&:subir',mdAutenticacion.verificaToken, (req, res) => {
     let archivos = req.params.archivos;
     let subir = req.params.subir;
     let archivo = archivos.split(',');
@@ -664,7 +664,7 @@ app.get('/booket/:archivos&:subir', (req, res) => {
 //  QUITA UN CREDITO DE TIMBRES
 // ===========================================
 
-app.get('/QuitCredito/', (req, res) => {
+app.get('/QuitCredito/', mdAutenticacion.verificaToken,(req, res) => {
     CONTADOR.findByIdAndUpdate({_id: 'CreditosTimbre'}, {$inc: {seq: -1}}, (err, creditos) => {
         if(err) {
             return res.status(400).json({
