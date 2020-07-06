@@ -100,7 +100,7 @@ app.get('/:id', (req, res) => {
         cliente: cliente
       });
     })
-})
+});
 
 // ==========================================
 // Obtener todas los clientes por id empresas (deben estar separados por ",")
