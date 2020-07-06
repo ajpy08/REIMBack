@@ -14,7 +14,7 @@ var mongoose = require('mongoose');
 // Por el query podrian pasar como parametro el filtro por transportista        
 // ==========================================
 
-app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/', (req, res, next) => {
   var transportista = req.query.transportista || '';
   var act = req.query.act || '';
 
@@ -54,7 +54,7 @@ app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 //  Obtener Camiones por ID
 // ==========================================
-app.get('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/camion/:id', (req, res) => {
   var id = req.params.id;
   Camion.findById(id)
     .exec((err, camion) => {
