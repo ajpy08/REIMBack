@@ -362,8 +362,9 @@ app.get('/inventarioLR/', (req, res, netx) => {
 
 // ==========================================
 //  Obtener Maniobra por ID CON INCLUDES
-// ==========================================
-app.get('/maniobra/:id/includes', (req, res) => {
+
+// ==============================================
+app.get('/maniobra/:id/includes',mdAutenticacion.verificaToken,  (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .populate('operador', 'nombre foto')
