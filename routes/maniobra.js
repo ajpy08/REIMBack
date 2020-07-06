@@ -610,7 +610,7 @@ app.put('/:id/habilita_deshabilita_mostrarFotosReparacion', mdAutenticacion.veri
   });
 });
 
-app.put('/:id/corrige_contenedor', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/:id/corrige_contenedor', (req, res) => {
 
   var id = req.params.id;
   var body = req.body;

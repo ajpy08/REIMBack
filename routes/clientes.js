@@ -44,7 +44,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 // Obtener todas los clientes por role
 // ==========================================
-app.get('/role/:role?', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/role/:role?', (req, res) => {
   var filtro = ParamsToJSON.ParamsToJSON(req);
   //console.log({filtro})
   Cliente.find(filtro)
@@ -75,7 +75,7 @@ app.get('/role/:role?', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // Obtener Clientes por ID
 // ==========================================
-app.get('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/:id', (req, res) => {
   var id = req.params.id;
   Cliente.findById(id)
     // .populate('empresas', 'razonSocial')
@@ -140,7 +140,7 @@ app.get('/empresa/:id', (req, res) => {
 // Obtener todas los clientes por id empresas
 // ==========================================
 
-app.get('/empresas/:idsEmpresa', mdAutenticacion.verificaToken,(req, res) => {
+app.get('/empresas/:idsEmpresa', (req, res) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   var arrayIdsEmpresa = req.params.idsEmpresa.split(',');

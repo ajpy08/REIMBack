@@ -41,7 +41,7 @@ var options = {
 // ==========================================
 // Obtener todos los CFDIS
 // ==========================================
-app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/', (req, res, next) => {
   CFDIS.find({})
     // .populate('claveSAT', 'claveProdServ descripcion')
     // .populate('unidadSAT', 'claveUnidad nombre')
@@ -65,7 +65,7 @@ app.get('/',mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 // Obtener CFDIS TIMBRADOS Y SIN TIMBRAR
 // ==========================================
-app.get('/T_ST/:timbres', mdAutenticacion.verificaToken,(req, res, next) => {
+app.get('/T_ST/:timbres', (req, res, next) => {
   let timbres = req.query.timbre || '';
   if (timbres === '') {
     timbres = 'false';
@@ -96,7 +96,7 @@ app.get('/T_ST/:timbres', mdAutenticacion.verificaToken,(req, res, next) => {
 // ==========================================
 //  Obtener CFDI por ID
 // ==========================================
-app.get('/cfdi/:id', mdAutenticacion.verificaToken,(req, res) => {
+app.get('/cfdi/:id', (req, res) => {
   var id = req.params.id;
   CFDIS.findById(id)
     .populate('usuario', 'nombre img email')
@@ -584,7 +584,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // TIMBRAR XML Y GENERAL CADENA ORIGINAL COMPLEMENTO 
 // ==========================================
-app.get('/timbrado/:nombre&:id&:direccion&:info/',mdAutenticacion.verificaToken, (req, res) => {
+app.get('/timbrado/:nombre&:id&:direccion&:info/', (req, res) => {
   var id = req.params.id;
   var nombre = req.params.nombre;
   let direccion = req.params.direccion;
@@ -811,7 +811,7 @@ app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken, (req, res) => {
 // CANCELACION DE CFDI 
 // ==========================================
 
-app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', mdAutenticacion.verificaToken,(req, res) => {
+app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', (req, res) => {
   let rfcReceptor = req.params.rfcEmisor,
     uuid = req.params.uuid,
     total = req.params.total,
@@ -909,7 +909,7 @@ app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', mdAutenticacion.verificaTok
 });
 
 
-app.put('/creditos/:creditos',mdAutenticacion.verificaToken, (req, res) => {
+app.put('/creditos/:creditos', (req, res) => {
   let creditos = req.params.creditos;
   creditos = parseInt(creditos)
 
@@ -939,7 +939,7 @@ app.put('/creditos/:creditos',mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
-app.get('/getCreditos/:id', mdAutenticacion.verificaToken,(req, res) => {
+app.get('/getCreditos/:id', (req, res) => {
   let id = req.params.id;
   CONTADOR.findById(id, (erro, getCreditos) => {
     if (erro) {
