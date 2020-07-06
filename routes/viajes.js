@@ -15,7 +15,7 @@ app.use(fileUpload());
 // Obtener todas los viajes, de acuerdo a los filtros solicitados.
 // las fechas deben ir en formato DD-MM-YYYY
 // ==========================================
-app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
+app.get('/:viaje?:buque?:finiarribo?:ffinarribo?',mdAutenticacion.verificaToken,(req, res, next) => {
   var viaje = req.query.viaje || '';
   var buque = req.query.buque || '';
   var finiarribo = req.query.finiarribo || '';
@@ -58,7 +58,7 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', (req, res, next) => {
 // ==========================================
 //  Obtener viaje por ID
 // ==========================================
-app.get('/viaje/:id', (req, res) => {
+app.get('/viaje/:id',mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Viaje.findById(id)
     .exec((err, viaje) => {
@@ -97,7 +97,7 @@ app.get('/viaje/:id', (req, res) => {
 // ==========================================
 //  Obtener viaje por ID
 // ==========================================
-app.get('/viaje/:id/includes/', (req, res) => {
+app.get('/viaje/:id/includes/', mdAutenticacion.verificaToken,(req, res) => {
   var id = req.params.id;
   Viaje.findById(id)
     .exec((err, viaje) => {
@@ -415,7 +415,7 @@ app.put('/viaje/removecontenedor/:id&:contenedor', mdAutenticacion.verificaToken
 // ==========================================
 // Obtener los ultimos N viajes JAVI
 // ==========================================
-app.get('/anio/:anio', (req, res, next) => {
+app.get('/anio/:anio', mdAutenticacion.verificaToken,(req, res, next) => {
   var fechaInicio = req.params.anio;
   var fechaFin = req.params.anio;
 

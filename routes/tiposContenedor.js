@@ -6,7 +6,7 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 // ==========================================
 //  Obtener todos los tipos Contenedores
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
   TipoContenedor.find({})
     .exec(
       (err, tipos) => {
@@ -28,7 +28,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener tipo por ID
 // ==========================================
-app.get('/tipoContenedor/:id', (req, res) => {
+app.get('/tipoContenedor/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   TipoContenedor.findById(id)
     .exec((err, tipo) => {
@@ -56,7 +56,7 @@ app.get('/tipoContenedor/:id', (req, res) => {
 // ==========================================
 //  Obtener tipo Contenedor por Tipo
 // ==========================================
-app.get('/tipoCont/:tipo', (req, res) => {
+app.get('/tipoCont/:tipo',mdAutenticacion.verificaToken,  (req, res) => {
   var t = req.params.tipo;
   var tipo = unescape(t);
   // console.log(tipo)

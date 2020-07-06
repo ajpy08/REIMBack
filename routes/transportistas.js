@@ -11,7 +11,7 @@ var Maniobra = require('../models/maniobra');
 // ==========================================
 // Obtener todos los transportistas
 // ==========================================
-app.get('/:tf', (req, res, next) => {
+app.get('/:tf', mdAutenticacion.verificaToken, (req, res, next) => {
   var role = 'TRANSPORTISTA_ROLE';
   var tf = req.params.tf;
   Transportista.find({ role: role, "activo": tf })
@@ -39,7 +39,7 @@ app.get('/:tf', (req, res, next) => {
 // ==========================================
 // Obtener transportistas por ID
 // ==========================================
-app.get('/transportista/:id', (req, res) => {
+app.get('/transportista/:id',mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Transportista.findById(id)
     .exec((err, transportista) => {
