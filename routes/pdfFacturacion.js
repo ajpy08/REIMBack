@@ -138,6 +138,7 @@ app.get('/numerosLetras/:total', (req, res) => {
 app.get('/pdfCFDI/:id', (req, res) => {
     let id = req.params.id;
     let nombrePdf = '';
+    let DTO = 0;
     async function ok() {
         const Cf = await ConsultaPDF.cfdi(id);
         if (Cf === null) {
@@ -282,7 +283,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
                     }, layout: 'noBorders'
                 },
                 table(ress.Cf.conceptos, [{ text: 'CÓDIGO', style: 'conceptos' }, { text: 'CANT', style: 'conceptos' }, { text: 'UNIDAD', style: 'conceptos' },
-                { text: 'DESCRIPCIÓN', style: 'conceptos' }, { text: 'IMPUESTOS', style: 'conceptos' }, { text: 'IMPORTE', style: 'conceptos' }
+                { text: 'DESCRIPCIÓN', style: 'conceptos' }, { text: 'IMPUESTOS', style: 'conceptos' }, { text: 'IMPORTE', style: 'conceptos' }, {text: 'DTO', style: 'conceptos'}
                 ]),
                 {
                     style: 'tablaTotales',
@@ -294,6 +295,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
                             [{ text: ['SUBTOTAL: $ '] }, { text: ress.SubT, margin: [-2, 0] }],
                             [{ text: ['TOTAL IMPT. RETENIDOS: $ '] }, { text: ress.Total_I_R ? ress.Total_I_R : 0, margin: [-2, 0] }],
                             [{ text: ['TOTAL IMPT. TRASLADADOS: $ '] }, { text: ress.Total_I_T, margin: [-2, 0] }],
+                            [{ text: ['DESCUENTO: $ '] }, { text: DTO, margin: [-2, 0] }],
                             [{ text: ['TOTAL: $'] }, { text: ress.Total, margin: [-2, 0] }]
 
                         ]
@@ -483,7 +485,7 @@ app.get('/pdfCFDI/:id', (req, res) => {
             return {
                 table: {
                     headerRows: 1,
-                    widths: ['auto', 25, '*', '*', '*', '*'],
+                    widths: ['auto', 25, '*', '*', '*', '*', '*'],
                     style: 'tablaConceptos',
                     body: builTable(data, columns)
                 }, layout: 'lightHorizontalLines'
@@ -511,13 +513,14 @@ app.get('/pdfCFDI/:id', (req, res) => {
                 let impuesto = '';
                 let claveUnidad = '';
                 let importePipe = '';
+
                 let imp = '';
                 let tr = '';
                 let TC = '';
                 let F = '';
                 let imps = [];
                 importePipe = `$ ${funcion.cortado(row.importe, 2, true)}`
-
+               let descuento = parseFloat(row.descuento);
                 row.impuestos.forEach(function (TR) {
 
                     tr = TR.TR == 'TRASLADO' ? '(T)' : '(R)';
@@ -530,8 +533,9 @@ app.get('/pdfCFDI/:id', (req, res) => {
                     });
                 });
 
+                DTO = DTO + descuento;
 
-                dataRow.push(row.noIdentificacion, row.cantidad, claveUnidad, row.descripcion, imps, importePipe);
+                dataRow.push(row.noIdentificacion, row.cantidad, claveUnidad, row.descripcion, imps, importePipe, descuento);
 
                 body.push(dataRow);
             });
