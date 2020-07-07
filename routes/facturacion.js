@@ -15,7 +15,7 @@ var app = express();
 // // ==========================================
 // // Obtener todas las Claves SAT
 // // ==========================================
-app.get('/clavesSAT', (req, res, next) => {
+app.get('/clavesSAT',  mdAutenticacion.verificaToken, (req, res, next) => {
   ClaveSAT.find({})
     .sort({ claveProdServ: 1 })
     .limit(100)
@@ -38,7 +38,7 @@ app.get('/clavesSAT', (req, res, next) => {
 // // ==========================================
 // // Obtener todas las Claves Unidad
 // // ==========================================
-app.get('/clavesUnidad', (req, res, next) => {
+app.get('/clavesUnidad',  mdAutenticacion.verificaToken, (req, res, next) => {
   ClaveUnidad.find({})
     .sort({ nombre: 1 })
     .limit(100)
@@ -61,7 +61,7 @@ app.get('/clavesUnidad', (req, res, next) => {
 // // ==========================================
 // // Obtener todas las Series
 // // ==========================================
-app.get('/series', (req, res, next) => {
+app.get('/series',  mdAutenticacion.verificaToken,  (req, res, next) => {
   Serie.find({})
     .populate('regimenFiscal', 'claveRegimenFiscal descripcion Fisica Moral')
     .sort({ serie: 1 })
@@ -84,7 +84,7 @@ app.get('/series', (req, res, next) => {
 // ==========================================
 //  Obtener Serie por Serie
 // ==========================================
-app.get('/series/:serie', (req, res) => {
+app.get('/series/:serie', mdAutenticacion.verificaToken, (req, res) => {
   var serie = req.params.serie;
 
   Serie.find({ serie: serie })
@@ -114,7 +114,7 @@ app.get('/series/:serie', (req, res) => {
 // ==========================================
 // Obtener todos los regimenes fiscales
 // ==========================================
-app.get('/regimenes-fiscales', (req, res, next) => {
+app.get('/regimenes-fiscales', mdAutenticacion.verificaToken,  (req, res, next) => {
   RegimenFiscal.find({})
     .sort({ claveRegimenFiscal: 1 })
     .exec((err, regimenes) => {
@@ -136,7 +136,7 @@ app.get('/regimenes-fiscales', (req, res, next) => {
 // ==========================================
 // Obtener todas las formas de pago
 // ==========================================
-app.get('/formas-pago', (req, res, next) => {
+app.get('/formas-pago', mdAutenticacion.verificaToken,  (req, res, next) => {
   FormaPago.find({})
     .sort({ formaPago: 1 })
     .exec((err, formasPago) => {
@@ -158,7 +158,7 @@ app.get('/formas-pago', (req, res, next) => {
 // ==========================================
 //Obtener todas los metodos de pago
 //==========================================
-app.get('/metodos-pago', (req, res, next) => {
+app.get('/metodos-pago', mdAutenticacion.verificaToken,  (req, res, next) => {
   MetodoPago.find({})
     .sort({ metodoPago: 1 })
     .exec((err, metodosPago) => {
@@ -180,7 +180,7 @@ app.get('/metodos-pago', (req, res, next) => {
 // ==========================================
 // Obtener todas los Tipos de Comprobante
 // ==========================================
-app.get('/tipos-comprobante', (req, res, next) => {
+app.get('/tipos-comprobante', mdAutenticacion.verificaToken,  (req, res, next) => {
   TipoComprobante.find({})
     .sort({ descripcion: 1 })
     .exec((err, tiposComprobante) => {
@@ -202,7 +202,7 @@ app.get('/tipos-comprobante', (req, res, next) => {
 // ==========================================
 // Obtener todas los Tipos de Comprobante
 // ==========================================
-app.get('/usos-CFDI', (req, res, next) => {
+app.get('/usos-CFDI', mdAutenticacion.verificaToken,  (req, res, next) => {
   UsoCFDI.find({})
     .sort({ usoCFDI: 1 })
     .exec((err, usosCFDI) => {
@@ -225,7 +225,7 @@ app.get('/usos-CFDI', (req, res, next) => {
 //   Borrar MANIOBRA DE CONCEPTOS INDIVIDUAL
 // ============================================
 
-app.get('/deleteConceptoManiobra/:cfdi&:maniobra&:concepto', (req, res, next) => {
+app.get('/deleteConceptoManiobra/:cfdi&:maniobra&:concepto', mdAutenticacion.verificaToken,  (req, res, next) => {
   let maniobra = req.params.maniobra,
     cfdi = req.params.cfdi,
     concepto = req.params.concepto;

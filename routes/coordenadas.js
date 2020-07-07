@@ -7,7 +7,7 @@ var varias = require('../public/varias');
 // ==========================================
 // Obtener todas las coordenadas
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/',  mdAutenticacion.verificaToken, (req, res, next) => {
     var bahia = req.query.bahia || '';
     var tipo = req.query.tipo || '';
     var activo = req.query.activo || true;
@@ -51,7 +51,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener Coordenada por bahia y posicion
 // ==========================================
-app.get('/coordenada/bahia_posicion', (req, res) => {
+app.get('/coordenada/bahia_posicion', mdAutenticacion.verificaToken,  (req, res) => {
     var bahia = req.query.bahia;
     var posicion = req.query.posicion;
 

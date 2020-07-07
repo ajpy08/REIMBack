@@ -377,13 +377,13 @@ app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud', mdAutenticacion.v
 
   Solicitud.findById(solicitud).exec((err, solicitudes) => {
     if (err) {
-      return res.status(500).json ({
+      return res.status(500).json({
         ok: false,
         mensaje: 'Error al buscar solicictud',
         errors: err
       })
     } else {
-      if (solicitudes.contenedores.length <= 1 ) {
+      if (solicitudes.contenedores.length <= 1) {
         Solicitud.findByIdAndRemove(solicitud, (err, solicictudBorrada) => {
           if (err) {
             return res.status(500).json({
@@ -610,7 +610,7 @@ app.put('/:id/habilita_deshabilita_mostrarFotosReparacion', mdAutenticacion.veri
   });
 });
 
-app.put('/:id/corrige_contenedor', (req, res) => {
+app.put('/:id/corrige_contenedor', mdAutenticacion.verificaToken, (req, res) => {
 
   var id = req.params.id;
   var body = req.body;

@@ -6,7 +6,7 @@ var ProductoServicio = require('../models/facturacion/producto-servicio');
 // ==========================================
 // Obtener todos los Productos o Servicios
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken,(req, res, next) => {
   ProductoServicio.find({})
     .populate('claveSAT', 'claveProdServ descripcion')
     .populate('unidadSAT', 'claveUnidad nombre')
@@ -30,7 +30,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener Producto o Servicio por ID
 // ==========================================
-app.get('/producto-servicio/:id', (req, res) => {
+app.get('/producto-servicio/:id', mdAutenticacion.verificaToken,(req, res) => {
   var id = req.params.id;
   ProductoServicio.findById(id)
     .populate('claveSAT', 'claveProdServ')

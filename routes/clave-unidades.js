@@ -8,7 +8,7 @@ var ClaveUnidad = require('../models/facturacion/claveUnidad');
 // Obtener todas las claves unidad
 // ==========================================
 
-app.get('/', (req, res, next) => {
+app.get('/',  mdAutenticacion.verificaToken,(req, res, next) => {
     ClaveUnidad.find({})
         .exec((err, clave_unidad) => {
             if (err) {
@@ -30,7 +30,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener CLAVE UNIDAD por ID
 // ==========================================
-app.get('/clave-unidad/:id', (req, res) => {
+app.get('/clave-unidad/:id',  mdAutenticacion.verificaToken,(req, res) => {
     var id = req.params.id;
     ClaveUnidad.findById(id)
       .exec((err, clave_unidad) => {
