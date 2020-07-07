@@ -10,7 +10,7 @@ var Maniobra = require('../models/maniobra');
 // ==========================================
 // Obtener todos los clientes
 // ==========================================
-app.get('/',  mdAutenticacion.verificaToken,(req, res, next) => {
+app.get('/',(req, res, next) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   var role = 'CLIENT_ROLE';

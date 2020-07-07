@@ -1,6 +1,7 @@
 var express = require('express')
 var app = express();
 var moment = require('moment');
+var mdAutenticacion = require('../middlewares/autenticacion');
 var mongoose = require('mongoose');
 var Maniobra = require('../models/maniobra');
 
