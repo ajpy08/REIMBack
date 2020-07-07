@@ -8,7 +8,7 @@ var ClaveProductoServicio = require('../models/facturacion/claveSAT');
 //=============================================================
 //  OBTENER TODAS LAS CLAVES PRODUCTOS SERVICIOS
 //=============================================================
-app.get('/', (req, res, next) => {
+app.get('/',  mdAutenticacion.verificaToken,(req, res, next) => {
     ClaveProductoServicio.find({})
         .exec((err, clave) => {
             if (err) {
@@ -31,7 +31,7 @@ app.get('/', (req, res, next) => {
 //  OBTENER POR ID CLAVES PRODUCTOS SERVICIOS
 //=============================================================
 
-app.get('/clave-producto-servicio/:id', (req, res) => {
+app.get('/clave-producto-servicio/:id',  mdAutenticacion.verificaToken,(req, res) => {
     var id = req.params.id;
     ClaveProductoServicio.findById(id).exec((err, clave) => {
         if (err) {

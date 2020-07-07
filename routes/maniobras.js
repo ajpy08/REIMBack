@@ -15,7 +15,7 @@ app.use(fileUpload());
 // =======================================
 // Obtener Maniobras G E N E R A L
 // =======================================
-app.get('', (req, res, netx) => {
+app.get('', mdAutenticacion.verificaToken, (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
@@ -123,7 +123,7 @@ app.get('', (req, res, netx) => {
 // ==========================================
 //  Obtener Maniobra por ID
 // ==========================================
-app.get('/maniobra/:id', (req, res) => {
+app.get('/maniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .populate('solicitud', 'blBooking')
@@ -153,7 +153,7 @@ app.get('/maniobra/:id', (req, res) => {
 // ==========================================
 //  Envia Correo
 // ==========================================
-app.get('/maniobra/:id/enviacorreo', (req, res) => {
+app.get('/maniobra/:id/enviacorreo', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .populate('cliente', 'rfc razonSocial nombreComercial')
@@ -260,7 +260,7 @@ app.get('/maniobra/:id/enviacorreo', (req, res) => {
 // =======================================
 // Obtener Maniobras NAVIERA
 // =======================================
-app.get('/inventarioLR/', (req, res, netx) => {
+app.get('/inventarioLR/',mdAutenticacion.verificaToken, (req, res, netx) => {
   var naviera = req.query.naviera || '';
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
@@ -420,7 +420,7 @@ app.get('/maniobra/:id/includes',mdAutenticacion.verificaToken,  (req, res) => {
 // =======================================
 // Obtener maniobras que son VACIOS
 // =======================================
-app.get('/facturacion-vacios', (req, res, netx) => {
+app.get('/facturacion-vacios', mdAutenticacion.verificaToken,(req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
@@ -516,7 +516,7 @@ app.get('/facturacion-vacios', (req, res, netx) => {
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
 // =======================================
-app.get('/facturacion-maniobras', (req, res, netx) => {
+app.get('/facturacion-maniobras', mdAutenticacion.verificaToken,(req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
@@ -622,7 +622,7 @@ app.get('/facturacion-maniobras', (req, res, netx) => {
 // ============================================
 // Obtener Maniobras que tuvieron lavado o reparacion (de alguna naviera o de todas las navieras)
 // ============================================
-app.get('/LR', (req, res, next) => {
+app.get('/LR', mdAutenticacion.verificaToken, (req, res, next) => {
   var naviera = req.query.naviera || '';
   var buque = req.query.buque || '';
   var viaje = req.query.viaje || '';
@@ -713,7 +713,7 @@ app.get('/LR', (req, res, next) => {
 });
 
 
-app.get('/xviaje/:idviaje/importacion', (req, res, netx) => {
+app.get('/xviaje/:idviaje/importacion', mdAutenticacion.verificaToken,(req, res, netx) => {
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   var idViaje = req.params.idviaje;
   Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
@@ -1215,7 +1215,7 @@ app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, r
 // ============================================
 // Obtener Maniobras que tuvieron lavado  (de alguna naviera o de todas las navieras)
 // ============================================
-app.get('/Lavado/Reparacion', (req, res, next) => {
+app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res, next) => {
   var naviera = req.query.naviera || '';
   var buque = req.query.buque || '';
   var viaje = req.query.viaje || '';
