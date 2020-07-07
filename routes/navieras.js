@@ -11,7 +11,7 @@ var app = express();
 // Obtener todas las navieras
 // ==========================================
 
-app.get('/:tf', (req, res, next) => {
+app.get('/:tf', mdAutenticacion.verificaToken, (req, res, next) => {
   var role = 'NAVIERA_ROLE';
   var tf = req.params.tf;
 
@@ -40,7 +40,7 @@ app.get('/:tf', (req, res, next) => {
 // ==========================================
 //  Obtener Naviera por ID
 // ==========================================
-app.get('/naviera/:id', (req, res) => {
+app.get('/naviera/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Naviera.findById(id)
   .populate('usoCFDI', 'usoCFDI descripcion')

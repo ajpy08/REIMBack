@@ -6,7 +6,7 @@ var Reparacion = require('../models/reparacion');
 // ==========================================
 // Obtener todas las reparaciones
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken,(req, res, next) => {
 
   Reparacion.find({})
     .populate('usuarioAlta', 'nombre email')
@@ -32,7 +32,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 //  Obtener Reparaciones por ID
 // ==========================================
-app.get('/reparacion/:id', (req, res) => {
+app.get('/reparacion/:id', mdAutenticacion.verificaToken,(req, res) => {
   var id = req.params.id;
   Reparacion.findById(id)
     .populate('usuario', 'nombre img email')

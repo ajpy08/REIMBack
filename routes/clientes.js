@@ -10,7 +10,7 @@ var Maniobra = require('../models/maniobra');
 // ==========================================
 // Obtener todos los clientes
 // ==========================================
-app.get('/', (req, res, next) => {
+app.get('/',  mdAutenticacion.verificaToken,(req, res, next) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   var role = 'CLIENT_ROLE';
@@ -44,7 +44,7 @@ app.get('/', (req, res, next) => {
 // ==========================================
 // Obtener todas los clientes por role
 // ==========================================
-app.get('/role/:role?', (req, res) => {
+app.get('/role/:role?',  mdAutenticacion.verificaToken,(req, res) => {
   var filtro = ParamsToJSON.ParamsToJSON(req);
   //console.log({filtro})
   Cliente.find(filtro)
@@ -75,7 +75,7 @@ app.get('/role/:role?', (req, res) => {
 // ==========================================
 // Obtener Clientes por ID
 // ==========================================
-app.get('/:id', (req, res) => {
+app.get('/:id',  mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Cliente.findById(id)
     // .populate('empresas', 'razonSocial')
