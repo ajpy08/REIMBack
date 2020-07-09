@@ -22,8 +22,8 @@ app.use(cors(corsOptions));
 
 // Body Parser
 // parse application/x-www-form-urlencoded
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
 
 // Importar Rutas
 var appRoutes = require('./routes/app');
@@ -251,19 +251,19 @@ io.on('connection', function (socket) {
 
   // ! SOCKET PARA CFDI
   socket.on('updatecfdi', function (data) {
-    io.emit('update-cfdi', {data: data});
+    io.emit('update-cfdi', { data: data });
   });
   socket.on('deletecfdi', function (data) {
-    io.emit('delete-cfdi', {data: data});
+    io.emit('delete-cfdi', { data: data });
   });
   socket.on('newcfdi', function (data) {
-    io.emit('new-cfdi', {data: data});
+    io.emit('new-cfdi', { data: data });
   });
   socket.on('timbradocfdi', function (data) {
-    io.emit('timbrado-cfdi', {data: data});
+    io.emit('timbrado-cfdi', { data: data });
   });
   socket.on('alerttimbre', function (data) {
-    io.emit('alert-timbre', {data: data})
+    io.emit('alert-timbre', { data: data })
   })
 
   // ! SOCKET PARA CLIENTES
@@ -283,7 +283,15 @@ io.on('connection', function (socket) {
   socket.on('cambiomaniobra', function (data) {
     io.emit('cambio-maniobra', { data: data });
   });
+
   /* #endregion */
+
+  /* #region  SOCKET USUARIO */
+  socket.on('actualizarperfil', function (data) {
+    io.emit('actualizar-perfil', { data: data });
+  });
+  /* #endregion */
+
 });
 /* #endregion */
 
