@@ -28,6 +28,7 @@ var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 const { Route53Resolver } = require('aws-sdk');
 const contador = require('../models/contador');
+const https = require('https');
 let cfdiXML;
 var options = {
   object: true,
@@ -41,7 +42,7 @@ var options = {
 // ==========================================
 // Obtener todos los CFDIS
 // ==========================================
-app.get('/',  mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
   CFDIS.find({})
     // .populate('claveSAT', 'claveProdServ descripcion')
     // .populate('unidadSAT', 'claveUnidad nombre')
@@ -65,7 +66,7 @@ app.get('/',  mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 // Obtener CFDIS TIMBRADOS Y SIN TIMBRAR
 // ==========================================
-app.get('/T_ST/:timbres',  mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/T_ST/:timbres', mdAutenticacion.verificaToken, (req, res, next) => {
   let timbres = req.query.timbre || '';
   if (timbres === '') {
     timbres = 'false';
@@ -96,7 +97,7 @@ app.get('/T_ST/:timbres',  mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 //  Obtener CFDI por ID
 // ==========================================
-app.get('/cfdi/:id',  mdAutenticacion.verificaToken, (req, res) => {
+app.get('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   CFDIS.findById(id)
     .populate('usuario', 'nombre img email')
@@ -584,7 +585,7 @@ app.get('/cfdi/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // TIMBRAR XML Y GENERAL CADENA ORIGINAL COMPLEMENTO 
 // ==========================================
-app.get('/timbrado/:nombre&:id&:direccion&:info/',  mdAutenticacion.verificaToken, (req, res) => {
+app.get('/timbrado/:nombre&:id&:direccion&:info/', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var nombre = req.params.nombre;
   let direccion = req.params.direccion;
@@ -811,7 +812,7 @@ app.put('/datosTimbrado/:id/', mdAutenticacion.verificaToken, (req, res) => {
 // CANCELACION DE CFDI 
 // ==========================================
 
-app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/',  mdAutenticacion.verificaToken, (req, res) => {
+app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', mdAutenticacion.verificaToken, (req, res) => {
   let rfcReceptor = req.params.rfcEmisor,
     uuid = req.params.uuid,
     total = req.params.total,
@@ -820,50 +821,33 @@ app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/',  mdAutenticacion.verificaTo
 
 
   async function read() {
-    const key = await ReadCerKey(KEYS.key);
-    const cer = await ReadCerKey(KEYS.cer);
-    const archivo = await writeArchivo(key, cer, total, rfcReceptor, uuid);
+    // const key = await ReadCerKey(KEYS.key);
+    // const cer = await ReadCerKey(KEYS.cer);
+    const archivo = await writeArchivo();
 
     return { archivo }
   }
 
-  function writeArchivo(key, cer, total, rfcReceptor, uuid) {
+  function writeArchivo() {
 
-    let mensaje = `<SOAP-ENV:Envelope SOAPENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAPENV="http://schemas.xmlsoap.org/soap/envelope/"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAPENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="urn:advans-cfdicancelacion">
-    <SOAP-ENV:Body>
-    <tns:Cancelar>
-    <CancelarRequest><ApiKey
-    xsi:type="xsd:string">${KEYS.API_KEY}</ApiKey>
-    <PrivateKeyPem xsi:type="xsd:string">${key}</PrivateKeyPem>
-    <PublicKeyPem xsi:type="xsd:string">${cer}</PublicKeyPem>
-    <Uuid>${uuid}</Uuid>
-    <RfcReceptor>${rfcReceptor}</RfcReceptor>
-    <Total>${total}</Total>
-    </CancelarRequest>
-    </tns:Cancelar>
-    </SOAP-ENV:Body>
-    </SOAP-ENV:Envelope>
-    `
-    //   let mensaje = `${KEYS.API_KEY}\n
-    // ${key}\n
-    // ${cer}\n
-    // ${uuid}\n
-    // ${rfcEmisor}\n
-    // ${total}`
+    // const ARCHIVO = fs.readFileSync(path.resolve(__dirname, `../templates/cancelacion.xml`));
 
-    var CRoute = path.resolve(__dirname, `../archivosTemp/cancelacion.txt`);
-    let ROUTE = fs.writeFileSync(CRoute, mensaje);
+    var Route = path.resolve(__dirname, `../templates/cancelacion.xml`);
+    var xml = fs.readFileSync(Route, 'utf8');
+    // var CRoute = path.resolve(__dirname, `../archivosTemp/cancelacion.txt`);
+    // let ROUTE = fs.writeFileSync(CRoute, mensaje);
 
-    return CRoute
+    return xml
   }
   function ReadCerKey(key) {
     let text = fs.readFileSync(key, 'utf-8');
     return text;
   }
   read().then(ress => {
-
+    let options = {
+      solicitud: ress.archivo,
+    }
+    const Route = path.resolve(__dirname, `../templates/cancelacion.xml`);
     soap.createClient(url, (err, cliente) => {
       if (err) {
         funcion.envioCooreo('Error al contectar con el web Services Cancelacion' + err, 'UUID: ' + uuid);
@@ -874,7 +858,7 @@ app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/',  mdAutenticacion.verificaTo
         });
       }
 
-      cliente.Cancelar(ress.archivo, (errorC, result) => {
+      cliente.Cancelar(ress.archivo,  function(errorC, result) {
         if (errorC) {
           funcion.envioCooreo('Se produkp un error al cancelar' + result.return.$value + '-' + result.return.Code.$value + ' - ' + result.return.Message.$value, 'UUID: ' + uuid)
           return res.status(400).json({
@@ -909,7 +893,7 @@ app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/',  mdAutenticacion.verificaTo
 });
 
 
-app.put('/creditos/:creditos',  mdAutenticacion.verificaToken,(req, res) => {
+app.put('/creditos/:creditos', mdAutenticacion.verificaToken, (req, res) => {
   let creditos = req.params.creditos;
   creditos = parseInt(creditos)
 
