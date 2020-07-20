@@ -96,7 +96,7 @@ solicitudScheme.pre('remove', function (next) {
     next();
   } else {
     if (this.tipo == 'D') {
-      Maniobra.updateMany({ $unset: {'solicitud': this._id } }).exec();
+      Maniobra.updateMany({'solicitud': this._id }, {$unset: {'solicitud': this._id}} ).exec();
       next();
     } else {
       next();
