@@ -65,6 +65,7 @@ var cfdiSchema = new Schema({
     }],
     unidad: { type: String },
     descuento: { type: mongoose.Types.Decimal128 },
+    cfdis: { type: Schema.Types.ObjectId, ref: 'cfdis'},
     maniobras: [{ type: Schema.Types.ObjectId, ref: 'Maniobra' }],
   }],
   /////////////////////////////////////////////////
@@ -82,6 +83,10 @@ var cfdiSchema = new Schema({
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
   xmlTimbrado: {type: String},
+
+  /// NOTAS DE CREDITO ////
+
+  notaDeCreditoRelacionada: { type: Schema.Types.ObjectId, ref: 'cfdis'},
 }, { collection: 'cfdis' });
 
 cfdiSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
