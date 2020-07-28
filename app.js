@@ -267,8 +267,18 @@ io.on('connection', function (socket) {
   socket.on('alerttimbre', function (data) {
     io.emit('alert-timbre', { data: data })
   })
+  // ! SOCKET PARA NOTAS
+
+  socket.on('alertimbreNota', function (data) {
+    io.emit('alerttimbre-Nota', { data: data });
+
+    socket.on('timbrandoNota', function (data) {
+      io.emit('timbrado-Nota', { data: data });
+    });
+  })
 
   // ! SOCKET PARA CLIENTES
+
 
   socket.on('newcliente', function (data) {
     io.emit('new-cliente', { data: data });
@@ -278,6 +288,12 @@ io.on('connection', function (socket) {
   });
   socket.on('deletecliente', function (data) {
     io.emit('delete-cliente', { data: data });
+  });
+
+  // ! SOCKET NOTAS DE CREDITO 
+
+  socket.on('notaTimbre', function (data) {
+    io.emit('nota-Timbre', { data: data });
   });
 
   //! SOCKET MANIOBRAS 

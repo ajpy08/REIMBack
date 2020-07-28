@@ -42,8 +42,9 @@ var options = {
 // ==========================================
 // Obtener todos los CFDIS
 // ==========================================
-app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
-  CFDIS.find({})
+app.get('/:serie/', mdAutenticacion.verificaToken, (req, res, next) => {
+  const serie = req.params.serie;
+  CFDIS.find({'serie': serie})
     // .populate('claveSAT', 'claveProdServ descripcion')
     // .populate('unidadSAT', 'claveUnidad nombre')
     .sort({ serie: 1, folio: 1 })

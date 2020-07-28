@@ -111,7 +111,7 @@ function envioCooreo(mensaje, archivo) {
         Archivo: ${archivo}
         Mensaje Error: ${mensaje}`
     sentMail('TI', ti, 'LOG_FACTURACION_TIMBRADO', mensaje, 'emailAlert');
-    console.log('correo enviado');
+    console.log('correo de Error enviado');
 }
 
 async function CorreoFac(mensaje, archivo) {
@@ -366,7 +366,7 @@ function env(nombre, correo, archivos) {
     let serie = archivos[0].split('-');
     let folio = serie[1];
     let cuerpo = 'Encontrara sus comprobante fiscal digital por internet (CFDI- Factura Electronica) \n Misma que cumple con el reglamento vigente del Servicio de Administración Tributaria (SAT) '
-    sentMail(nombre, correo, `FACTURA ${serie[0]}-${folio}`, cuerpo, 'emailAlert', null, true, archivos);
+    sentMail(nombre, correo,  serie[0] === 'A' ? `FACTURA ${serie[0]}-${folio}`: `NOTA ${serie[0]}-${folio}` , cuerpo, 'emailAlert', null, true, archivos);
 }
 
 async function envioArchivoCfdi(nombre, correo, archivos) {
@@ -418,6 +418,17 @@ function BorrarArchivosTemp(nombreArchivo) {
     });
 }
 
+function cfdiRel(cfdis) {
+    let cfdisR = '';
+    for (const c of cfdis) {
+        for (const u of c.cfdis) {
+            cfdisR += u.uuid + ', ';
+        }
+    }
+    cfdisR = cfdisR.slice(0, -2);
+    return cfdisR;
+}
+
 
 exports.punto = punto;
 exports.splitEnd = splitEnd;
@@ -434,6 +445,7 @@ exports.envioArchivoCfdi = envioArchivoCfdi;
 exports.numeroALetras = numeroALetras;
 exports.cadenaOriginalComplemeto = cadenaOriginalComplemeto;
 exports.cadenaOriginalComplemetoPDF = cadenaOriginalComplemetoPDF;
+exports.cfdiRel = cfdiRel;
 
 
 
