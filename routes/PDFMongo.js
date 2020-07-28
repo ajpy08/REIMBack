@@ -2,6 +2,7 @@ var MetodoPago = require('../models/facturacion/metodo-pago');
 var UsoCFDI = require('../models/facturacion/uso-CFDI');
 var ClaveUnidad = require('../models/facturacion/claveUnidad');
 var CFDIS = require('../models/facturacion/cfdi');
+var TipoRelacion = require('../models/facturacion/tipoRelacion');
 
 module.exports = {
     cfdi: async (req, res, next) => {
@@ -67,5 +68,19 @@ module.exports = {
         } catch (e) {
             return false
         }
+    },
+    Tipo: async (req, res, next) => {
+        let tipo = req;
+        try {
+            const tipos = await TipoRelacion.find({'clave': tipo})
+            return tipos;
+        } catch(e) {
+            return {
+                ok: false,
+                mensaje: 'Error al buscar Tipo Relacion PDF Nota de Credito'
+            }
+        }
     }
+
+
 }

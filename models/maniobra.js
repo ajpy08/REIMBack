@@ -59,7 +59,6 @@ var maniobraSchema = new Schema({
   usuarioModifico: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date },
   cfdisAsociados: [{
-    _id: false,
     id_Concepto: { type: Schema.Types.ObjectId, ref: 'fac_ProductosServicios' },
     id_Cfdi: { type: Schema.Types.ObjectId, ref: 'cfdis' }
   }],

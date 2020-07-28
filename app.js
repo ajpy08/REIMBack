@@ -22,8 +22,8 @@ app.use(cors(corsOptions));
 
 // Body Parser
 // parse application/x-www-form-urlencoded
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
 
 // Importar Rutas
 var appRoutes = require('./routes/app');
@@ -253,22 +253,32 @@ io.on('connection', function (socket) {
 
   // ! SOCKET PARA CFDI
   socket.on('updatecfdi', function (data) {
-    io.emit('update-cfdi', {data: data});
+    io.emit('update-cfdi', { data: data });
   });
   socket.on('deletecfdi', function (data) {
-    io.emit('delete-cfdi', {data: data});
+    io.emit('delete-cfdi', { data: data });
   });
   socket.on('newcfdi', function (data) {
-    io.emit('new-cfdi', {data: data});
+    io.emit('new-cfdi', { data: data });
   });
   socket.on('timbradocfdi', function (data) {
-    io.emit('timbrado-cfdi', {data: data});
+    io.emit('timbrado-cfdi', { data: data });
   });
   socket.on('alerttimbre', function (data) {
-    io.emit('alert-timbre', {data: data})
+    io.emit('alert-timbre', { data: data })
+  })
+  // ! SOCKET PARA NOTAS
+
+  socket.on('alertimbreNota', function (data) {
+    io.emit('alerttimbre-Nota', { data: data });
+
+    socket.on('timbrandoNota', function (data) {
+      io.emit('timbrado-Nota', { data: data });
+    });
   })
 
   // ! SOCKET PARA CLIENTES
+
 
   socket.on('newcliente', function (data) {
     io.emit('new-cliente', { data: data });
@@ -278,6 +288,12 @@ io.on('connection', function (socket) {
   });
   socket.on('deletecliente', function (data) {
     io.emit('delete-cliente', { data: data });
+  });
+
+  // ! SOCKET NOTAS DE CREDITO 
+
+  socket.on('notaTimbre', function (data) {
+    io.emit('nota-Timbre', { data: data });
   });
 
   //! SOCKET MANIOBRAS 

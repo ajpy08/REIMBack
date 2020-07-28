@@ -357,6 +357,8 @@ if (solicitud.agencia != undefined) {
 
       this.razonSocialAgencia = agencia.razonSocial;
     });
+} else {
+  this.razonSocialAgencia = solicitud.razonSocial
 }
 
 
