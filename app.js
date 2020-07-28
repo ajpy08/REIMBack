@@ -301,7 +301,15 @@ io.on('connection', function (socket) {
   socket.on('cambiomaniobra', function (data) {
     io.emit('cambio-maniobra', { data: data });
   });
+
   /* #endregion */
+
+  /* #region  SOCKET USUARIO */
+  socket.on('actualizarperfil', function (data) {
+    io.emit('actualizar-perfil', { data: data });
+  });
+  /* #endregion */
+
 });
 /* #endregion */
 
