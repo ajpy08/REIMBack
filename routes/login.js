@@ -179,6 +179,7 @@ function obtenerMenu(ROLE) {
 
     menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
     menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });  
+    menu[5].submenu.unshift({ titulo: 'Complemento de Pago', url: '/complementos' });
     menu[5].submenu.unshift({ titulo: 'CFDIS', url: '/cfdis' });  
 
     return menu;
