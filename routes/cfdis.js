@@ -671,7 +671,7 @@ app.get('/timbrado/:nombre&:id&:direccion&:info/', mdAutenticacion.verificaToken
       cfdiXML.add(complemento);
     });
 
-    if (info !== '@' || info !== undefined) {
+    if (info !== '@') {
       const addenda = new Addenda({
         'xmlns:REIM': 'http://reimcontainerpark.com.mx',
         'xsi:schemaLocation': 'http://reimcontainerpark.com.mx/REIM_adicionales.xsd',
