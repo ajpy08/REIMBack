@@ -374,10 +374,9 @@ app.get('/nota/:id/xml/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // TIMBRAR XML Y GENERAL CADENA ORIGINAL COMPLEMENTO 
 // ==========================================
-app.get('/notaTimbre/:nombre&:id&:direccion/', mdAutenticacion.verificaToken, (req, res) => {
+app.get('/notaTimbre/:nombre&:id/', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
     var nombre = req.params.nombre;
-    let direccion = req.params.direccion;
     var Route = path.resolve(__dirname, `../archivosTemp/${nombre}`);
     xml = fs.readFileSync(Route, 'utf8');
   
