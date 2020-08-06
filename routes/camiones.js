@@ -5,26 +5,31 @@ var Operador = require('../models/operador');
 var Transportista = require('../models/transportista');
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
-var fs = require('fs');
 var app = express();
-var mongoose = require('mongoose');
 
 // ==========================================
 // Obtener todos los camiones
 // Por el query podrian pasar como parametro el filtro por transportista        
 // ==========================================
 
-app.get('/',  mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken, (req, res) => {
   var transportista = req.query.transportista || '';
-  var act = req.query.act || '';
+  var activo = req.query.activo || '';
+  // var j = {
+  //   transportista: transportista,
+  //   activo: activo
+  // }
+
+  // var j2 = JSON.stringify(j);
+  // var json = JSON.parse(j2);
 
   var filtro = '{';
   if (transportista != 'undefined' && transportista != '')
     filtro += '\"transportista\":' + '\"' + transportista + '\",';
 
-  if (act != 'undefined' && act !== '') {
-    filtro += '\"activo\":' + '\"' + act + '\",';
-  }
+  if (activo != 'undefined' && activo != '')
+    filtro += '\"activo\":' + '\"' + activo + '\",';
+
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
@@ -54,7 +59,7 @@ app.get('/',  mdAutenticacion.verificaToken, (req, res, next) => {
 // ==========================================
 //  Obtener Camiones por ID
 // ==========================================
-app.get('/camion/:id',  mdAutenticacion.verificaToken, (req, res) => {
+app.get('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Camion.findById(id)
     .exec((err, camion) => {
@@ -176,7 +181,7 @@ app.put('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ============================================
 app.delete('/camion/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Maniobra.find({ $or: [{"camion": id}]})
+  Maniobra.find({ $or: [{ "camion": id }] })
     .exec(
       (err, maniobra) => {
         if (err) {
@@ -302,7 +307,7 @@ app.put('/camionDes/:id', mdAutenticacion.verificaToken, (req, res) => {
       return res.status(400).json({
         ok: false,
         mensaje: 'El estatus del camion ya se encuentra en ' + hab,
-        errors: {message: 'El estatus del camion ya se encuentra en ' + hab}
+        errors: { message: 'El estatus del camion ya se encuentra en ' + hab }
       })
     }
     camion.activo = body.activo;
