@@ -138,6 +138,35 @@ app.get('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
 });
 
+// ==========================================
+// Obtener CFDI con UUID
+// ==========================================
+app.get('/uuid/:uuid', mdAutenticacion.verificaToken, (req, res, next) => {
+  let uuid = req.query.uuid || '';
+
+  let filtro = '{';
+
+  if (uuid != 'undefined' && uuid != '')
+    filtro += '\"uuid\":' + '\"' + uuid + '\",';
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  CFDIS.findOne(json).exec((err, cfdi) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al buscar cfdi con UUID',
+        errors: { message: 'Error al buscar cfdi con UUID' }
+      });
+    }
+    res.status(200).json({
+      cfdi
+    });
+  });
+});
 
 // ==========================================
 //  VALIDAR SI NO EXISTE MANIOBRA Y CONCEPTO YA AGREGADOS EN LA BD 

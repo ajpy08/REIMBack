@@ -10,7 +10,7 @@ var Maniobra = require('../models/maniobra');
 // ==========================================
 // Obtener todos los clientes
 // ==========================================
-app.get('/',(req, res, next) => {
+app.get('/', (req, res, next) => {
   var desde = req.query.desde || 0;
   desde = Number(desde);
   var role = 'CLIENT_ROLE';
@@ -44,7 +44,7 @@ app.get('/',(req, res, next) => {
 // ==========================================
 // Obtener todas los clientes por role
 // ==========================================
-app.get('/role/:role?',  mdAutenticacion.verificaToken,(req, res) => {
+app.get('/role/:role?', mdAutenticacion.verificaToken, (req, res) => {
   var filtro = ParamsToJSON.ParamsToJSON(req);
   //console.log({filtro})
   Cliente.find(filtro)
@@ -75,7 +75,7 @@ app.get('/role/:role?',  mdAutenticacion.verificaToken,(req, res) => {
 // ==========================================
 // Obtener Clientes por ID
 // ==========================================
-app.get('/:id',  mdAutenticacion.verificaToken, (req, res) => {
+app.get('/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Cliente.findById(id)
     // .populate('empresas', 'razonSocial')
@@ -178,6 +178,39 @@ app.get('/empresas/:idsEmpresa', (req, res) => {
           total: clientes.length
         });
       });
+});
+
+
+// ==========================================
+// Obtener cliente con Nombre
+// ==========================================
+app.get('/razonSocial/:razonSocial', mdAutenticacion.verificaToken, (req, res, next) => {
+  let razonSocial = req.params.razonSocial || '';
+
+  let filtro = '{';
+
+  if (razonSocial != 'undefined' && razonSocial != '')
+    filtro += '\"razonSocial\":' + '\"' + razonSocial + '\",';
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  Cliente.findOne(json)
+  .populate('usoCFDI', 'usoCFDI descripcion')
+  .exec((err, cliente) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al buscar cliente con Razón Social',
+        errors: { message: 'Error al buscar cliente con Razón Social' }
+      });
+    }
+    res.status(200).json({
+      cliente
+    });
+  });
 });
 
 // ==========================================
@@ -298,7 +331,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
           fs.unlink('./uploads/clientes/' + cliente.formatoR1, (err) => {
             if (err) console.log(err);
             // else
-              // console.log('Imagen anterior fue borrada con éxito');
+            // console.log('Imagen anterior fue borrada con éxito');
           });
         }
         fs.rename('./uploads/temp/' + body.formatoR1, './uploads/clientes/' + body.formatoR1, (err) => {
@@ -333,7 +366,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
-Maniobra.find({$or: [{"cliente": id}]}).exec((err, maniobras) => {
+  Maniobra.find({ $or: [{ "cliente": id }] }).exec((err, maniobras) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -343,10 +376,10 @@ Maniobra.find({$or: [{"cliente": id}]}).exec((err, maniobras) => {
     }
 
     if (maniobras && maniobras.length > 0) {
-       res.status(400).json({
+      res.status(400).json({
         ok: false,
         mensaje: 'Existen' + maniobras.length + ' maniobras asociadas, por lo tanto no se permite eliminar el cliente',
-        errors: {message:  'Existen (' + maniobras.length + ')  maniobras asociadas, por lo tanto no se permite eliminar el cliente'},
+        errors: { message: 'Existen (' + maniobras.length + ')  maniobras asociadas, por lo tanto no se permite eliminar el cliente' },
         resultadoError: maniobras
       });
     } else {
@@ -395,7 +428,7 @@ app.put('/clienteDes/:id', mdAutenticacion.verificaToken, (req, res) => {
       return res.status(400).json({
         ok: false,
         mensaje: 'El Cliente con el id ' + id + ' no existe',
-        errors: {message: 'El Cliente con el id ' + id + ' no existe'}
+        errors: { message: 'El Cliente con el id ' + id + ' no existe' }
       });
     }
     if (cliente.activo === body) {
@@ -408,7 +441,7 @@ app.put('/clienteDes/:id', mdAutenticacion.verificaToken, (req, res) => {
       return res.status(400).json({
         ok: false,
         mensaje: 'El estatus del Cliente ya se encuentra en ' + hab,
-        errors: {message: 'El estatus del Cliente ya se encuentra en ' + hab}
+        errors: { message: 'El estatus del Cliente ya se encuentra en ' + hab }
       });
     }
     cliente.activo = body
