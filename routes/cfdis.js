@@ -42,9 +42,22 @@ var options = {
 // ==========================================
 // Obtener todos los CFDIS
 // ==========================================
-app.get('/:serie/', mdAutenticacion.verificaToken, (req, res, next) => {
-  const serie = req.params.serie;
-  CFDIS.find({'serie': serie})
+app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
+  var serie = req.query.serie || '';
+  var metodoPago = req.query.metodoPago || '';
+
+  var filtro = '{';
+  if (serie != 'undefined' && serie != '')
+    filtro += '\"serie\":' + '\"' + serie + '\",';
+  if (metodoPago != 'undefined' && metodoPago != '')
+    filtro += '\"metodoPago\":' + '\"' + metodoPago + '\",';
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  CFDIS.find(json)
     // .populate('claveSAT', 'claveProdServ descripcion')
     // .populate('unidadSAT', 'claveUnidad nombre')
     .sort({ serie: 1, folio: 1 })
@@ -125,6 +138,35 @@ app.get('/cfdi/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
 });
 
+// ==========================================
+// Obtener CFDI con UUID
+// ==========================================
+app.get('/uuid/:uuid', mdAutenticacion.verificaToken, (req, res, next) => {
+  let uuid = req.query.uuid || '';
+
+  let filtro = '{';
+
+  if (uuid != 'undefined' && uuid != '')
+    filtro += '\"uuid\":' + '\"' + uuid + '\",';
+
+  if (filtro != '{')
+    filtro = filtro.slice(0, -1);
+  filtro = filtro + '}';
+  var json = JSON.parse(filtro);
+
+  CFDIS.findOne(json).exec((err, cfdi) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al buscar cfdi con UUID',
+        errors: { message: 'Error al buscar cfdi con UUID' }
+      });
+    }
+    res.status(200).json({
+      cfdi
+    });
+  });
+});
 
 // ==========================================
 //  VALIDAR SI NO EXISTE MANIOBRA Y CONCEPTO YA AGREGADOS EN LA BD 
@@ -859,7 +901,7 @@ app.get('/cancelacionCFDI/:rfcEmisor&:uuid&:total/', mdAutenticacion.verificaTok
         });
       }
 
-      cliente.Cancelar(ress.archivo,  function(errorC, result) {
+      cliente.Cancelar(ress.archivo, function (errorC, result) {
         if (errorC) {
           funcion.envioCooreo('Se produkp un error al cancelar' + result.return.$value + '-' + result.return.Code.$value + ' - ' + result.return.Message.$value, 'UUID: ' + uuid)
           return res.status(400).json({
