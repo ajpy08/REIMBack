@@ -210,6 +210,7 @@ function obtenerMenu(ROLE) {
       submenu: []
     }
     ];
+    menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
