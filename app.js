@@ -39,6 +39,7 @@ var navieraRoutes = require('./routes/navieras');
 var agenciaRoutes = require('./routes/agencias');
 var transportistaRoutes = require('./routes/transportistas');
 var buqueRoutes = require('./routes/buques');
+var vigenciasRoutes = require('./routes/vigencias');
 var operadorRoutes = require('./routes/operadores');
 var camionRoutes = require('./routes/camiones');
 var tiposContenedorRoutes = require('./routes/tiposContenedor');
@@ -81,6 +82,7 @@ app.use('/navieras', navieraRoutes);
 app.use('/agencias', agenciaRoutes);
 app.use('/transportistas', transportistaRoutes);
 app.use('/buques', buqueRoutes);
+app.use('/vigencias', vigenciasRoutes);
 app.use('/operadores', operadorRoutes);
 app.use('/registros', registroRoutes);
 app.use('/camiones', camionRoutes);
@@ -307,6 +309,21 @@ io.on('connection', function (socket) {
   /* #region  SOCKET USUARIO */
   socket.on('actualizarperfil', function (data) {
     io.emit('actualizar-perfil', { data: data });
+  });
+  /* #endregion */
+
+  /* #region  SOCKET VIGENCIA */
+  socket.on('newvigencia', function (data) {
+    io.emit('new-vigencia', { data: data });
+    // console.log('Agregaste un buque!!! =D ');
+  });
+  socket.on('updatevigencia', function (data) {
+    io.emit('update-vigencia', { data: data });
+    // console.log('Actualizaste un buque!!! =) ');
+  });
+  socket.on('deletevigencia', function (data) {
+    io.emit('delete-vigencia', { data: data });
+    // console.log('Eliminaste un buque!!! =( ');
   });
   /* #endregion */
 
