@@ -23,7 +23,7 @@ const ImpRetencion = require('@alexotano/cfdi33').ImpRetencion
 // const parser = require('xml2json');
 var xml2js = require('xml2js').parseString;
 var QRCode = require('qrcode');
-const Complemento = require('@alexotano/cfdi33').Complemento;
+// const Complemento = require('@alexotano/cfdi33').Complemento;
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 const { Route53Resolver } = require('aws-sdk');
@@ -982,6 +982,108 @@ app.get('/getCreditos/:id', (req, res) => {
     });
   });
 });
+
+
+// ==========================================
+// Crear nuevo Complemento
+// ==========================================
+app.post('/complemento/', mdAutenticacion.verificaToken, (req, res) => {
+  var body = req.body;
+  if (body.informacionAdicional === '@') {
+    body.informacionAdicional = '';
+  }
+  var complemento = new Complemento({
+    fecha: body.fecha,
+    folio: body.folio,
+    formaPago: body.formaPago,
+    // lugarExpedicion: body.lugarExpedicion,
+    metodoPago: body.metodoPago,
+    moneda: body.moneda,
+    serie: body.serie,
+    subtotal: body.subtotal,
+    tipoComprobante: body.tipoComprobante,
+    total: body.total,
+    // version:  body.version,
+    // noCertificado: body.noCertificado,
+    // sello: body.sello,
+    // certificado: body.certificado,
+
+    // nombreEmisor: body.certificado,
+    // regimenFiscal: body.regimenFiscal,
+    // rfcEmisor: body.rfcEmisor,
+
+    nombre: body.nombre,
+    rfc: body.rfc,
+    informacionAdicional: body.informacionAdicional,
+    usoCFDI: body.usoCFDI,
+    direccion: body.direccion,
+    correo: body.correo,
+    conceptos: body.conceptos,
+    totalImpuestosRetenidos: body.totalImpuestosRetenidos,
+    totalImpuestosTrasladados: body.totalImpuestosTrasladados,
+    sucursal: body.sucursal,
+    fechaEmision: moment().format('YYYY-MM-DD HH:mm:ss'),
+    usuarioAlta: req.usuario._id
+  });
+
+  // function maniobraCfdi() {  //! ESTA FUNCION SIRVE PARA BORRAR LOS ID DE MANIOBRAS REPETIDO
+  //   let maniobra = [];
+  //   body.conceptos.forEach(c => {
+  //     c.maniobras.forEach(m => {
+  //       maniobra.push({ maniobras: m._id, productoSer: c._id, cfdi: cfdi._id });
+  //     });
+  //   });
+  //   maniobra = new Set(maniobra);
+  //   return maniobra
+  // }
+
+  // async function agregacion() {
+  //   respuesta = await maniobraCfdi();
+
+  // }
+
+  // agregacion().then(() => {
+
+  //   respuesta.forEach(async m => {
+  //     let concepto_CFDI = [];
+  //     concepto_CFDI.push(m.productoSer, m.cfdi)
+  //     Maniobra.update({ "_id": m.maniobras }, { $push: { 'cfdisAsociados': { $each: [{ 'id_Concepto': m.productoSer, 'id_Cfdi': m.cfdi }] } } }, (err, maniobra) => {
+  //       if (err) {
+  //         return res.status(400).json({
+  //           ok: false,
+  //           mensaje: 'Error al agregar cfdi asociado en la Maniobra' + maniobra,
+  //           errors: { message: 'Error al agregar cfdi asociado en la Maniobra' + maniobra }
+  //         })
+  //       }
+  //       if (!maniobra) {
+  //         return res.status(500).json({
+  //           ok: false,
+  //           mensaje: 'Error al buscar maniobra asociada',
+  //           errors: { message: 'Error al buscar maniobra asociada' }
+  //         });
+  //       }
+  //     });
+  //     // // Maniobra.updateMany({ "_id": m.maniobras }, { $push: { 'cfdisAsociados.id_Concepto': { $each: [cfdi._id] } }}, {$push: {'cfdisAsociados.id_Cfdi': { $each:[body.conceptos]}}}, (err, maniobra) => { //! AQUI SE AGREGAN EN EL CAMPO CFDISASOCIADOS LOS ID DE LAS MANIBRAS 
+  //   });
+  // });
+
+  complemento.save((err, complementoGuardado) => {
+    var Time_Emision = moment
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Error al crear el Complemento de Pago',
+        errors: err
+      });
+    }
+    res.status(201).json({
+      ok: true,
+      cfdi: complementoGuardado,
+
+    });
+  });
+});
+
 
 
 module.exports = app;
