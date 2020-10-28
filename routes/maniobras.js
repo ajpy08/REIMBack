@@ -103,7 +103,7 @@ app.get('', mdAutenticacion.verificaToken, (req, res, netx) => {
     })
     .populate('naviera', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
-    .sort({ contenedor: 1 })
+    .sort({fAlta: -1})
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
