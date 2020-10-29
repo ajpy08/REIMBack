@@ -53,7 +53,7 @@ app.get('', mdAutenticacion.verificaToken, (req, res, netx) => {
     filtro += '\"peso\":{\"$in\":[\"' + peso + '\"]},';
 
   if (lavado === 'true') {
-    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
+    filtro += '\"lavado\"' + ': {\"$in\": [\"A\", \"B\", \"E\"]},';
   }
 
   if (reparacion === 'true') {
@@ -292,7 +292,7 @@ app.get('/inventarioLR/',mdAutenticacion.verificaToken, (req, res, netx) => {
     filtro += '\"peso\":{\"$in\":[\"' + peso + '\"]},';
 
   if (lavado === 'true') {
-    filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
+    filtro += '\"lavado\"' + ': {\"$in\": [\"A\", \"B\", \"E\"]},';
   }
 
   if (reparacion === 'true') {
