@@ -177,6 +177,7 @@ function obtenerMenu(ROLE) {
     menu[4].submenu.unshift({ titulo: 'Papeleta', url: '/solicitudes_transportista' });
     menu[4].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });
     menu[4].submenu.unshift({ titulo: 'Camiones', url: '/camiones' });
+    menu[4].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
 
     menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
     menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });  
