@@ -78,7 +78,7 @@ app.get('', mdAutenticacion.verificaToken, (req, res, netx) => {
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('operador', 'nombre')
     .populate('camion', 'placa noEconomico')
-    .populate('solicitud', 'blBooking rutaComprobante')
+    .populate('solicitud', 'folio blBooking rutaComprobante')
     .populate({
       path: "viaje",
       select: 'viaje fechaArribo fVigenciaTemporal pdfTemporal',

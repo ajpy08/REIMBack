@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
-
 var Contador = require('./contador');
 
 var maniobraSchema = new Schema({
