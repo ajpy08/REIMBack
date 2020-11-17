@@ -159,6 +159,7 @@ function obtenerMenu(ROLE) {
       menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Productos Servicios', url: '/clave-productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Unidades', url: '/clave-unidades' });
+      menu[1].submenu.unshift({ titulo: 'Materiales', url: '/materiales' });
     }
 
 

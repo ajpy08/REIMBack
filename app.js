@@ -68,6 +68,8 @@ var CFDIRoutes = require('./routes/cfdis');
 var NOTASRoutes = require('./routes/notas-de-credito');
 // var jobsRoutes = require('./routes/jobs');
 var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
+var materialesRoutes = require('./routes/materiales');
+var unidadesRoutes = require('./routes/unidades');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -111,6 +113,8 @@ app.use('/notas', NOTASRoutes);
 app.use('/reportes', reportesRoutes);
 // app.use('/jobs', jobsRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
+app.use('/materiales', materialesRoutes);
+app.use('/unidades', unidadesRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
@@ -324,6 +328,22 @@ io.on('connection', function (socket) {
   socket.on('deletevigencia', function (data) {
     io.emit('delete-vigencia', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
+  });
+  /* #endregion */
+
+
+  /* #region  SOCKET MATERIALES */
+  socket.on('newmaterial', function (data) {
+    io.emit('new-material', { data: data });
+    // console.log('Agregaste un material!!! =D ');
+  });
+  socket.on('updatematerial', function (data) {
+    io.emit('update-material', { data: data });
+    // console.log('Actualizaste un material!!! =) ');
+  });
+  socket.on('deletematerial', function (data) {
+    io.emit('delete-material', { data: data });
+    // console.log('Eliminaste un material!!! =( ');
   });
   /* #endregion */
 
