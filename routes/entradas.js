@@ -1,0 +1,197 @@
+var express = require('express');
+var mdAutenticacion = require('../middlewares/autenticacion');
+var Entrada = require('../models/entrada');
+var app = express();
+
+// ==========================================
+//  Obtener todos las Entradas
+// ==========================================
+
+app.get('/', mdAutenticacion.verificaToken, (req, res) => {
+    var noFactura = req.query.noFactura || '';
+    var proveedor = req.query.proveedor || '';
+    var filtro = '{';
+    if (noFactura != 'undefined' && noFactura != '')
+        filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
+    if (proveedor != 'undefined' && proveedor != '')
+        filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+    Entrada.find(json)
+        .populate('usuarioAlta', 'nombre email')
+        .populate('usuarioMod', 'nombre email')
+        .populate('proveedor', 'razonSocial')
+        .sort({ fAlta: -1 })
+        .exec(
+            (err, entradas) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando entradas',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    entradas: entradas,
+                    totalRegistros: entradas.length
+                });
+            });
+});
+
+// ==========================================
+//  Obtener Entrada por ID
+// ==========================================
+app.get('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    Entrada.findById(id)
+        .exec((err, entrada) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar entrada',
+                    errors: err
+                });
+            }
+            if (!entrada) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El entrada con el id ' + id + 'no existe',
+                    errors: { message: 'No existe un entrada con ese ID' }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                entrada: entrada
+            });
+        });
+});
+
+// ==========================================
+// Crear una nueva entrada
+// ==========================================
+app.post('/entrada/', mdAutenticacion.verificaToken, (req, res) => {
+    var body = req.body;
+    var entrada = new Entrada({
+        noFactura: body.noFactura,
+        proveedor: body.proveedor,
+        fFactura: body.fFactura,
+        detalles: body.detalles,
+        usuarioAlta: req.usuario._id
+    });
+
+    entrada.save((err, entradaGuardada) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al crear entrada',
+                errors: err
+            });
+        }
+        res.status(201).json({
+            ok: true,
+            mensaje: 'Entrada creada con éxito.',
+            entrada: entradaGuardada
+        });
+    });
+});
+
+// ==========================================
+// Actualizar entrada
+// ==========================================
+
+app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+    Entrada.findById(id, (err, entrada) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar entrada',
+                errors: err
+            });
+        }
+        if (!entrada) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La entrada con el id ' + id + ' no existe',
+                errors: { message: 'No existe una entrada con ese ID' }
+            });
+        }
+        entrada.noFactura = body.noFactura;
+        entrada.proveedor = body.proveedor;
+        entrada.fFactura = body.fFactura;
+        entrada.detalles = body.detalles;
+        entrada.usuarioMod = req.usuario._id;
+        entrada.fMod = new Date();
+
+        entrada.save((err, materialGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar al entrada',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                entrada: materialGuardado
+            });
+        });
+    });
+});
+
+// ============================================
+//  Borrar un Entrada por el id
+// ============================================
+app.delete('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+
+    Entrada.findByIdAndRemove(id, (err, entradaBorrada) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar entrada',
+                errors: err
+            });
+        }
+        if (!entradaBorrada) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe una entrada con ese id',
+                errors: { message: 'No existe una entrada con ese id' }
+            });
+        }
+        res.status(200).json({
+            ok: true,
+            entrada: entradaBorrada
+        });
+    });
+
+    // DetalleMaterial.find({
+    //     $or: [
+    //         { 'entrada': id }
+    //     ]
+    // })
+    //     .exec(
+    //         (err, detalleMaterial) => {
+    //             if (err) {
+    //                 return res.status(500).json({
+    //                     ok: false,
+    //                     mensaje: 'Error al intentar validar la eliminacion del entrada',
+    //                     errors: err
+    //                 });
+    //             }
+    //             if (detalleMaterial && detalleMaterial.length > 0) {
+    //                 res.status(400).json({
+    //                     ok: false,
+    //                     mensaje: 'El entrada ya tiene detalles registrados, por lo tanto no puede eliminarse.',
+    //                     errors: { message: 'El entrada ya tiene detalles registrados, por lo tanto no puede eliminarse.' },
+    //                     resultadoError: detalleMaterial
+    //                 });
+    //             }               
+    //         });
+});
+module.exports = app;
