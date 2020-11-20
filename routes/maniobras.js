@@ -103,7 +103,7 @@ app.get('', mdAutenticacion.verificaToken, (req, res, netx) => {
     })
     .populate('naviera', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
-    .sort({fAlta: -1})
+    .sort({ fAlta: -1 })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -260,7 +260,7 @@ app.get('/maniobra/:id/enviacorreo', mdAutenticacion.verificaToken, (req, res) =
 // =======================================
 // Obtener Maniobras NAVIERA
 // =======================================
-app.get('/inventarioLR/',mdAutenticacion.verificaToken, (req, res, netx) => {
+app.get('/inventarioLR/', mdAutenticacion.verificaToken, (req, res, netx) => {
   var naviera = req.query.naviera || '';
   var estatus = req.query.estatus || '';
   var transportista = req.query.transportista || '';
@@ -364,7 +364,7 @@ app.get('/inventarioLR/',mdAutenticacion.verificaToken, (req, res, netx) => {
 //  Obtener Maniobra por ID CON INCLUDES
 
 // ==============================================
-app.get('/maniobra/:id/includes',mdAutenticacion.verificaToken,  (req, res) => {
+app.get('/maniobra/:id/includes', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Maniobra.findById(id)
     .populate('operador', 'nombre foto')
@@ -395,32 +395,32 @@ app.get('/maniobra/:id/includes',mdAutenticacion.verificaToken,  (req, res) => {
     })
 
 
-    .exec((err, maniobra) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar la maniobra',
-          errors: err
-        });
-      }
-      if (!maniobra) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'La maniobra con el id ' + id + 'no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        maniobra: maniobra
+  .exec((err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
       });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + 'no existe',
+        errors: { message: 'No existe maniobra con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      maniobra: maniobra
     });
+  });
 });
 
 // =======================================
 // Obtener maniobras que son VACIOS
 // =======================================
-app.get('/facturacion-vacios', mdAutenticacion.verificaToken,(req, res, netx) => {
+app.get('/facturacion-vacios', mdAutenticacion.verificaToken, (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
@@ -516,7 +516,7 @@ app.get('/facturacion-vacios', mdAutenticacion.verificaToken,(req, res, netx) =>
 // =======================================
 // Obtener maniobras que no incluyen VACIOS
 // =======================================
-app.get('/facturacion-maniobras', mdAutenticacion.verificaToken,(req, res, netx) => {
+app.get('/facturacion-maniobras', mdAutenticacion.verificaToken, (req, res, netx) => {
   var cargadescarga = req.query.cargadescarga || '';
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
@@ -668,8 +668,8 @@ app.get('/LR', mdAutenticacion.verificaToken, (req, res, next) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-    json
-  )
+      json
+    )
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
@@ -713,7 +713,7 @@ app.get('/LR', mdAutenticacion.verificaToken, (req, res, next) => {
 });
 
 
-app.get('/xviaje/:idviaje/importacion', mdAutenticacion.verificaToken,(req, res, netx) => {
+app.get('/xviaje/:idviaje/importacion', mdAutenticacion.verificaToken, (req, res, netx) => {
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   var idViaje = req.params.idviaje;
   Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
@@ -1145,7 +1145,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
             'estatus': 'CARGADO',
             'maniobraAsociada': maniobra._id
           }
-        }, function (err, data) {
+        }, function(err, data) {
           if (err) {
             console.log(err);
           }
@@ -1156,7 +1156,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
               'estatus': 'DISPONIBLE',
               'maniobraAsociada': null
             }
-          }, function (err, data) {
+          }, function(err, data) {
             if (err) {
               console.log(err);
             }
@@ -1269,8 +1269,8 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res, next) =>
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-    json
-  )
+      json
+    )
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
@@ -1304,6 +1304,136 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res, next) =>
 });
 
 
+// ==========================================
+// Agregar Cevento a la maniobra
+// ==========================================
+
+app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+
+  // var tipo = req.query.tipo;
+  // var peso = req.query.peso;
+  // var patio = req.query.patio != undefined ? req.query.patio : undefined;
+  // var destinatario = req.query.destinatario;
+
+  // tipoEvento: { type: String },
+  // tipoLavado: { type: String },
+  // Observaciones: { type: String },
+  // fIni: { type: Date },
+  // hIni: { type: String },
+  // fFin: { type: Date },
+  // hFin: { type: String },
+  console.log(body);
+
+  Maniobra.findOneAndUpdate({ _id: id }, { $push: { eventos: { tipoEvento: body.tipoEvento, observaciones: body.observaciones } } }, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Evento agregado con éxito',
+      eventos: maniobra.eventos
+    });
+
+  });
+});
+
+// ==========================================
+// Remover eventos de la maniobra
+// ==========================================
+
+app.put('/maniobra/:id/removeevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var idevento = req.params.idevento;
+  var body = req.body;
+
+  Maniobra.findOneAndUpdate({ _id: id }, { $pull: { eventos: { _id: idevento } } }, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    console.log(err);
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Evento Eliminado con éxito',
+      eventos: maniobra.eventos
+    });
+
+  });
+  // Maniobra.findOne({ 'viaje': id, 'contenedor': contenedor })
+  //   .exec((err, conte) => {
+  //     if (err) {
+  //       return res.status(500).json({
+  //         ok: false,
+  //         mensaje: 'Error al buscar viaje - Contenedor',
+  //         errors: err
+  //       });
+  //     }
+  //     if (!conte) {
+  //       return res.status(400).json({
+  //         ok: false,
+  //         mensaje: 'El contenedor ' + contenedor + ' no existe',
+  //         errors: { message: 'No existe un contendor con ese Numero' }
+  //       });
+  //     } else if ((conte.peso != 'VACIO' && conte.estatus != "APROBACION") || (conte.peso == 'VACIO' && conte.estatus != "TRANSITO")) {
+  //       return res.status(400).json({
+  //         ok: false,
+  //         mensaje: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus,
+  //         errors: { message: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus }
+  //       });
+  //     }
+  //     conte.remove();
+  //     res.status(200).json({
+  //       ok: true,
+  //       contenedor: conte.contenedor
+  //     });
+  //   });
+});
+
+
+// =======================================
+// Obtener eventosñ
+// =======================================
+app.get('/maniobra/:id/getEventos', (req, res) => {
+  var id = req.params.id;
+
+  Maniobra.findById(id)
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando eventos',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        eventos: maniobra.eventos
+      });
+    });
+});
 // ==============================================================================
 // Actualizar Maniobra asignando su solicitud sin mdAutenticacion.verificaToken
 // ==============================================================================

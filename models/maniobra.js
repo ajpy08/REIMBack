@@ -35,6 +35,20 @@ var maniobraSchema = new Schema({
   reparacionesObservacion: { type: String },
   mostrarFotosRNaviera: { type: Boolean, default: false },
   mostrarFotosRAA: { type: Boolean, default: false },
+  eventos: [{
+    tipoEvento: { type: String },
+    tipoLavado: { type: String },
+    observaciones: { type: String },
+    fIni: { type: Date },
+    hIni: { type: String },
+    fFin: { type: Date },
+    hFin: { type: String },
+    materiales: [{
+      id: { type: Schema.Types.ObjectId, ref: 'materiales' },
+      cantidad: { type: String },
+      costo: { type: String }
+    }]
+  }],
   descargaAutorizada: { type: Boolean, default: false },
   hDescarga: { type: String },
   hSalida: { type: String },
@@ -65,11 +79,11 @@ var maniobraSchema = new Schema({
 }, { collection: 'maniobras' });
 
 maniobraSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
-maniobraSchema.pre('save', function (next) {
+maniobraSchema.pre('save', function(next) {
   var doc = this;
   if (this.cargaDescarga === 'D' && this.peso != 'VACIO' && (this.folio === undefined || this.folio === '') ||
     (this.cargaDescarga === 'C' && (this.folio === undefined || this.folio === ''))) {
-    Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function (error, cont) {
+    Contador.findByIdAndUpdate({ _id: 'maniobras' }, { $inc: { seq: 1 } }, function(error, cont) {
       if (error)
         return next(error);
       doc.folio = cont.seq;
