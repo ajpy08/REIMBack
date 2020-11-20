@@ -73,6 +73,8 @@ var detallesRoutes = require('./routes/detallesMaterial');
 var unidadesRoutes = require('./routes/unidades');
 var entradasRoutes = require('./routes/entradas');
 
+var proveedorRoutes = require('./routes/proveedores');
+
 // Rutas
 app.use('/login', loginRoutes);
 app.use('/uploadFile', UploadFile);
@@ -115,6 +117,7 @@ app.use('/notas', NOTASRoutes);
 app.use('/reportes', reportesRoutes);
 // app.use('/jobs', jobsRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
+app.use('/proveedores', proveedorRoutes);
 app.use('/materiales', materialesRoutes);
 app.use('/detalles', detallesRoutes);
 app.use('/unidades', unidadesRoutes);
@@ -142,7 +145,7 @@ mongoose.connection.on('error', (error) => {
   console.log('ERROR: ' + error);
 });
 
-const run = async () => {
+const run = async() => {
   await mongoose.connect(entorno.CONEXION_MONGO, {
     autoReconnect: true,
     reconnectTries: 1000000,
@@ -175,114 +178,114 @@ var io = require('socket.io').listen(server, {
 });
 
 /* #region  SOCKETS */
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
   // ! USERS
-  socket.on('loginuser', function (data) {
+  socket.on('loginuser', function(data) {
     io.emit('login-user', { data: data });
     // console.log('Alguien inicio sesion!!! =D');
   });
-  socket.on('logoutuser', function (data) {
+  socket.on('logoutuser', function(data) {
     io.emit('logout-user', { data: data });
     // console.log('Alguien cerró sesion!!! =(');
   });
   //! BUQUES
-  socket.on('newbuque', function (data) {
+  socket.on('newbuque', function(data) {
     io.emit('new-buque', { data: data });
     // console.log('Agregaste un buque!!! =D ');
   });
-  socket.on('updatebuque', function (data) {
+  socket.on('updatebuque', function(data) {
     io.emit('update-buque', { data: data });
     // console.log('Actualizaste un buque!!! =) ');
   });
-  socket.on('deletebuque', function (data) {
+  socket.on('deletebuque', function(data) {
     io.emit('delete-buque', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
 
   // ! SOLICITUDES
 
-  socket.on('newsolicitud', function (data) {
+  socket.on('newsolicitud', function(data) {
     io.emit('new-solicitud', { data: data });
     // console.log('nueva solicitud');
   });
-  socket.on('updatesolicitud', function (data) {
+  socket.on('updatesolicitud', function(data) {
     io.emit('update-solicitud', { data: data });
     // console.log('actualizacion solicitud');
   });
-  socket.on('deletesolicitud', function (data) {
+  socket.on('deletesolicitud', function(data) {
     io.emit('delete-solicitud', { data: data });
     // console.log('eliminar solicitud');
   });
-  socket.on('aprobarsolicitud', function (data) {
+  socket.on('aprobarsolicitud', function(data) {
     io.emit('aprobar-solicitud', { data: data });
   });
-  socket.on('deletemaniobra', function (data) {
+  socket.on('deletemaniobra', function(data) {
     io.emit('delete-maniobra', { data: data });
   });
-  socket.on('deletemaniobradescarga', function (data) {
+  socket.on('deletemaniobradescarga', function(data) {
     io.emit('delete-maniobra-descarga', { data: data });
   });
 
   // ! SOCKET PARA TRANSPORTISTA 
 
-  socket.on('newcamion', function (data) {
+  socket.on('newcamion', function(data) {
     io.emit('new-camion', { data: data });
     // console.log('SE AGREGO UN NUEVO CAMION');
   });
-  socket.on('updatecamion', function (data) {
+  socket.on('updatecamion', function(data) {
     io.emit('update-camion', { data: data });
     // console.log('UPDATE CAMION');
   });
-  socket.on('deletecamion', function (data) {
+  socket.on('deletecamion', function(data) {
     io.emit('delete-camion', { data: data });
     // console.log('DELETE CAMION');
   });
 
-  socket.on('newoperador', function (data) {
+  socket.on('newoperador', function(data) {
     io.emit('new-operador', { data: data });
 
   });
-  socket.on('updateoperador', function (data) {
+  socket.on('updateoperador', function(data) {
     io.emit('update-operador', { data: data });
 
   });
-  socket.on('deleteoperador', function (data) {
+  socket.on('deleteoperador', function(data) {
     io.emit('delete-operador', { data: data });
   });
 
 
   // ! SOCKET PARA PAPELETA
 
-  socket.on('updatepapeleta', function (data) {
+  socket.on('updatepapeleta', function(data) {
     io.emit('update-papeleta', { data: data });
   });
 
-  socket.on('asignacionpapeleta', function (data) {
+  socket.on('asignacionpapeleta', function(data) {
     io.emit('asignacion-papeleta', { data: data });
   });
 
   // ! SOCKET PARA CFDI
-  socket.on('updatecfdi', function (data) {
+  socket.on('updatecfdi', function(data) {
     io.emit('update-cfdi', { data: data });
   });
-  socket.on('deletecfdi', function (data) {
+  socket.on('deletecfdi', function(data) {
     io.emit('delete-cfdi', { data: data });
   });
-  socket.on('newcfdi', function (data) {
+  socket.on('newcfdi', function(data) {
     io.emit('new-cfdi', { data: data });
   });
-  socket.on('timbradocfdi', function (data) {
+  socket.on('timbradocfdi', function(data) {
     io.emit('timbrado-cfdi', { data: data });
   });
-  socket.on('alerttimbre', function (data) {
-    io.emit('alert-timbre', { data: data })
-  })
-  // ! SOCKET PARA NOTAS
+  socket.on('alerttimbre', function(data) {
+      io.emit('alert-timbre', { data: data })
+    })
+    // ! SOCKET PARA NOTAS
 
-  socket.on('alertimbreNota', function (data) {
+  socket.on('alertimbreNota', function(data) {
     io.emit('alerttimbre-Nota', { data: data });
 
-    socket.on('timbrandoNota', function (data) {
+    socket.on('timbrandoNota', function(data) {
       io.emit('timbrado-Nota', { data: data });
     });
   })
@@ -290,47 +293,63 @@ io.on('connection', function (socket) {
   // ! SOCKET PARA CLIENTES
 
 
-  socket.on('newcliente', function (data) {
+  socket.on('newcliente', function(data) {
     io.emit('new-cliente', { data: data });
   });
-  socket.on('updatecliente', function (data) {
+  socket.on('updatecliente', function(data) {
     io.emit('update-cliente', { data: data });
   });
-  socket.on('deletecliente', function (data) {
+  socket.on('deletecliente', function(data) {
     io.emit('delete-cliente', { data: data });
   });
 
   // ! SOCKET NOTAS DE CREDITO 
 
-  socket.on('notaTimbre', function (data) {
+  socket.on('notaTimbre', function(data) {
     io.emit('nota-Timbre', { data: data });
   });
 
   //! SOCKET MANIOBRAS 
 
-  socket.on('cambiomaniobra', function (data) {
+  socket.on('cambiomaniobra', function(data) {
     io.emit('cambio-maniobra', { data: data });
   });
 
   /* #endregion */
 
   /* #region  SOCKET USUARIO */
-  socket.on('actualizarperfil', function (data) {
+  socket.on('actualizarperfil', function(data) {
     io.emit('actualizar-perfil', { data: data });
   });
   /* #endregion */
 
   /* #region  SOCKET VIGENCIA */
-  socket.on('newvigencia', function (data) {
+  socket.on('newvigencia', function(data) {
     io.emit('new-vigencia', { data: data });
     // console.log('Agregaste un buque!!! =D ');
   });
-  socket.on('updatevigencia', function (data) {
+  socket.on('updatevigencia', function(data) {
     io.emit('update-vigencia', { data: data });
     // console.log('Actualizaste un buque!!! =) ');
   });
-  socket.on('deletevigencia', function (data) {
+  socket.on('deletevigencia', function(data) {
     io.emit('delete-vigencia', { data: data });
+    // console.log('Eliminaste un buque!!! =( ');
+  });
+  /* #endregion */
+
+
+  /* #region  SOCKET Proveedores */
+  socket.on('newproveedor', function(data) {
+    io.emit('new-proveedor', { data: data });
+    // console.log('Agregaste un buque!!! =D ');
+  });
+  socket.on('updateproveedor', function(data) {
+    io.emit('update-proveedor', { data: data });
+    // console.log('Actualizaste un buque!!! =) ');
+  });
+  socket.on('deleteproveedor', function(data) {
+    io.emit('delete-proveedor', { data: data });
     // console.log('Eliminaste un buque!!! =( ');
   });
   /* #endregion */
@@ -369,3 +388,6 @@ io.on('connection', function (socket) {
 });
 /* #endregion */
 
+
+});
+/* #endregion */

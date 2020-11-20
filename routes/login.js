@@ -66,7 +66,7 @@ app.post('/', (req, res) => {
     var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4hrs
     //var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 70 }); // 1.1 min
 
-    Usuario.findByIdAndUpdate({ _id: usuarioDB._id }, { status: true, fActivo: new  Date() }).exec(function (err, user) {
+    Usuario.findByIdAndUpdate({ _id: usuarioDB._id }, { status: true, fActivo: new Date() }).exec(function(err, user) {
       if (!user) {
         return res.status(400).json({
           ok: true,
@@ -91,51 +91,51 @@ function obtenerMenu(ROLE) {
 
   if (ROLE === 'ADMIN_ROLE') {
     let menu = [{
-      titulo: 'Principal',
+        titulo: 'Principal',
 
-      icono: 'fas fa-home',
+        icono: 'fas fa-home',
 
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
-    {
-      titulo: 'Catálogos',
-      icono: 'fas fa-ellipsis-v',
-      submenu: []
-    },
-    {
-      titulo: 'Agencia',
-      icono: 'far fa-bookmark',
-      submenu: []
-    },
-    {
-      titulo: 'Naviera',
-      icono: 'fas fa-ship',
-      submenu: []
-    },
-    {
-      titulo: 'Transportista',
-      icono: 'fas fa-truck-moving',
-      submenu: []
-    },
-    {
-      titulo: 'Facturación',
-      icono: 'fas fa-dollar-sign',
-      submenu: []
-      // submenu: [{
-      //     titulo: 'Catálogos Facturación',
-      //     icono: 'fas fa-ellipsis-v',
-      //     submenu2: []
-      // }]
-    }
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      {
+        titulo: 'Catálogos',
+        icono: 'fas fa-ellipsis-v',
+        submenu: []
+      },
+      {
+        titulo: 'Agencia',
+        icono: 'far fa-bookmark',
+        submenu: []
+      },
+      {
+        titulo: 'Naviera',
+        icono: 'fas fa-ship',
+        submenu: []
+      },
+      {
+        titulo: 'Transportista',
+        icono: 'fas fa-truck-moving',
+        submenu: []
+      },
+      {
+        titulo: 'Facturación',
+        icono: 'fas fa-dollar-sign',
+        submenu: []
+          // submenu: [{
+          //     titulo: 'Catálogos Facturación',
+          //     icono: 'fas fa-ellipsis-v',
+          //     submenu2: []
+          // }]
+      }
     ];
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
-    menu[0].submenu.unshift({titulo: 'Reportes', url: '/reportes'});
+    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
@@ -150,7 +150,8 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
-    
+    menu[1].submenu.unshift({ titulo: 'Proveedores', url: '/proveedores' });
+
 
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
@@ -182,9 +183,9 @@ function obtenerMenu(ROLE) {
     menu[4].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
 
     menu[5].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
-    menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });  
+    menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
     menu[5].submenu.unshift({ titulo: 'Complemento de Pago', url: '/complementos' });
-    menu[5].submenu.unshift({ titulo: 'CFDIS', url: '/cfdis' });  
+    menu[5].submenu.unshift({ titulo: 'CFDIS', url: '/cfdis' });
 
     return menu;
 
@@ -194,30 +195,30 @@ function obtenerMenu(ROLE) {
 
   if (ROLE === 'PATIOADMIN_ROLE') {
     let menu = [{
-      titulo: 'Principal',
+        titulo: 'Principal',
 
-      icono: 'fas fa-home',
+        icono: 'fas fa-home',
 
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
-    {
-      titulo: 'Catálogos',
-      icono: 'fas fa-ellipsis-v',
-      submenu: []
-    },
-    {
-      titulo: 'Facturación',
-      icono: 'fas fa-dollar-sign',
-      submenu: []
-    }
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      {
+        titulo: 'Catálogos',
+        icono: 'fas fa-ellipsis-v',
+        submenu: []
+      },
+      {
+        titulo: 'Facturación',
+        icono: 'fas fa-dollar-sign',
+        submenu: []
+      }
     ];
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
-    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes'});
+    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes' });
     menu[0].submenu.unshift({ titulo: 'Viajes', url: '/viajes' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes/aprobaciones' });
@@ -233,6 +234,7 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
 
+
     menu[2].submenu.unshift({ titulo: 'Facturación Vacios', url: '/vacios' });
     menu[2].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
     return menu;
@@ -243,14 +245,14 @@ function obtenerMenu(ROLE) {
 
   if (ROLE === 'REIM_ROLE') {
     let menu = [{
-      titulo: 'Principal',
+        titulo: 'Principal',
 
-      icono: 'fas fa-home',
+        icono: 'fas fa-home',
 
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
       // {
       //   titulo: 'Catálogos',
       //   icono: 'fas fa-ellipsis-v',
@@ -316,19 +318,19 @@ function obtenerMenu(ROLE) {
 
   if (ROLE === 'AA_ROLE') {
     let menu = [{
-      titulo: 'Principal',
-      icono: 'fas fa-home',
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
-    {
-      titulo: 'Agencia',
-      icono: 'far fa-bookmark',
-      submenu: [
+        titulo: 'Principal',
+        icono: 'fas fa-home',
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      {
+        titulo: 'Agencia',
+        icono: 'far fa-bookmark',
+        submenu: [
 
-      ]
-    },
+        ]
+      },
     ];
 
     menu[1].submenu.unshift({ titulo: 'Solicitudes', url: '/solicitudes' });
@@ -343,55 +345,54 @@ function obtenerMenu(ROLE) {
       submenu: [
         { titulo: 'Dashboard', url: '/dashboard' }
       ]
-    },
-    ];
+    }, ];
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
-    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes'});
+    menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes' });
     return menu;
   }
 
   if (ROLE === 'NAVIERA_ROLE') {
     let menu = [{
-      titulo: 'Principal',
-      icono: 'fas fa-home',
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
-    {
-      titulo: 'Naviera',
-      icono: 'fas fa-ship',
-      submenu: [
+        titulo: 'Principal',
+        icono: 'fas fa-home',
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      {
+        titulo: 'Naviera',
+        icono: 'fas fa-ship',
+        submenu: [
 
-      ]
-    },
+        ]
+      },
     ];
     // menu[1].submenu.unshift({ titulo: 'Liberacion Booking', url: '/liberaciones_bk' });
     menu[1].submenu.unshift({ titulo: 'Maniobras', url: '/maniobras_reporte' });
     menu[1].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[1].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
-        menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
+    menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     return menu;
   }
   if (ROLE === 'TRANSPORTISTA_ROLE') {
     let menu = [{
-      titulo: 'Principal',
-      icono: 'fas fa-home',
-      submenu: [
-        { titulo: 'Dashboard', url: '/dashboard' }
-      ]
-    },
-    {
-      titulo: 'Transportista',
-      icono: 'fas fa-truck-moving',
-      submenu: [
+        titulo: 'Principal',
+        icono: 'fas fa-home',
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard' }
+        ]
+      },
+      {
+        titulo: 'Transportista',
+        icono: 'fas fa-truck-moving',
+        submenu: [
 
-      ]
-    },
+        ]
+      },
     ];
     menu[1].submenu.unshift({ titulo: 'Papeleta', url: '/solicitudes_transportista' });
     menu[1].submenu.unshift({ titulo: 'Operadores', url: '/operadores' });

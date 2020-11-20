@@ -448,8 +448,7 @@ app.put('/eliminarManiobra/Solicitud/Descarga/:id&:solicitud', mdAutenticacion.v
               mensaje: 'Error al actualizar el estatus de la maniobra' + id,
               errors: err
             });
-          }
-          else {
+          } else {
             Maniobra.updateOne({ "_id": id }, { $unset: { "solicitud": solicitud } }, (err, maniobraBorrada) => {
               if (err) {
                 return res.status(500).json({
@@ -614,6 +613,7 @@ app.put('/:id/corrige_contenedor', mdAutenticacion.verificaToken, (req, res) => 
 
   var id = req.params.id;
   var body = req.body;
+  console.log("corrige contenedor");
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
@@ -646,6 +646,9 @@ app.put('/:id/corrige_contenedor', mdAutenticacion.verificaToken, (req, res) => 
     });
   });
 });
+
+
+
 
 
 // export
