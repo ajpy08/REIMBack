@@ -155,6 +155,7 @@ function obtenerMenu(ROLE) {
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
       menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
+      menu[0].submenu.unshift({ titulo: 'Entradas', url: '/entradas' });
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
       menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Productos Servicios', url: '/clave-productos-servicios' });

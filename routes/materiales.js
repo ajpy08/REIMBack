@@ -124,8 +124,8 @@ app.put('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
         material.descripcion = body.descripcion;
         material.unidadMedida = body.unidadMedida;
-        material.costo = body.costo,
-            material.activo = body.activo;
+        material.costo = body.costo;
+        material.activo = body.activo;
         material.usuarioMod = req.usuario._id;
         material.fMod = new Date();
 

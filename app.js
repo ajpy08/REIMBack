@@ -69,7 +69,9 @@ var NOTASRoutes = require('./routes/notas-de-credito');
 // var jobsRoutes = require('./routes/jobs');
 var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
 var materialesRoutes = require('./routes/materiales');
+var detallesRoutes = require('./routes/detallesMaterial');
 var unidadesRoutes = require('./routes/unidades');
+var entradasRoutes = require('./routes/entradas');
 
 // Rutas
 app.use('/login', loginRoutes);
@@ -114,7 +116,9 @@ app.use('/reportes', reportesRoutes);
 // app.use('/jobs', jobsRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
 app.use('/materiales', materialesRoutes);
+app.use('/detalles', detallesRoutes);
 app.use('/unidades', unidadesRoutes);
+app.use('/entradas', entradasRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
@@ -344,6 +348,21 @@ io.on('connection', function (socket) {
   socket.on('deletematerial', function (data) {
     io.emit('delete-material', { data: data });
     // console.log('Eliminaste un material!!! =( ');
+  });
+  /* #endregion */
+
+  /* #region  SOCKET ENTRADAS */
+  socket.on('newentrada', function (data) {
+    io.emit('new-entrada', { data: data });
+    // console.log('Agregaste una entrada!!! =D ');
+  });
+  socket.on('updateentrada', function (data) {
+    io.emit('update-entrada', { data: data });
+    // console.log('Actualizaste una entrada!!! =) ');
+  });
+  socket.on('deleteentrada', function (data) {
+    io.emit('delete-entrada', { data: data });
+    // console.log('Eliminaste una entrada!!! =( ');
   });
   /* #endregion */
 
