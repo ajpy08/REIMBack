@@ -68,6 +68,10 @@ var CFDIRoutes = require('./routes/cfdis');
 var NOTASRoutes = require('./routes/notas-de-credito');
 // var jobsRoutes = require('./routes/jobs');
 var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
+var materialesRoutes = require('./routes/materiales');
+var detallesRoutes = require('./routes/detallesMaterial');
+var unidadesRoutes = require('./routes/unidades');
+var entradasRoutes = require('./routes/entradas');
 
 var proveedorRoutes = require('./routes/proveedores');
 
@@ -114,6 +118,10 @@ app.use('/reportes', reportesRoutes);
 // app.use('/jobs', jobsRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
 app.use('/proveedores', proveedorRoutes);
+app.use('/materiales', materialesRoutes);
+app.use('/detalles', detallesRoutes);
+app.use('/unidades', unidadesRoutes);
+app.use('/entradas', entradasRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
@@ -330,6 +338,7 @@ io.on('connection', function(socket) {
   });
   /* #endregion */
 
+
   /* #region  SOCKET Proveedores */
   socket.on('newproveedor', function(data) {
     io.emit('new-proveedor', { data: data });
@@ -344,6 +353,41 @@ io.on('connection', function(socket) {
     // console.log('Eliminaste un buque!!! =( ');
   });
   /* #endregion */
+
+
+  /* #region  SOCKET MATERIALES */
+  socket.on('newmaterial', function (data) {
+    io.emit('new-material', { data: data });
+    // console.log('Agregaste un material!!! =D ');
+  });
+  socket.on('updatematerial', function (data) {
+    io.emit('update-material', { data: data });
+    // console.log('Actualizaste un material!!! =) ');
+  });
+  socket.on('deletematerial', function (data) {
+    io.emit('delete-material', { data: data });
+    // console.log('Eliminaste un material!!! =( ');
+  });
+  /* #endregion */
+
+  /* #region  SOCKET ENTRADAS */
+  socket.on('newentrada', function (data) {
+    io.emit('new-entrada', { data: data });
+    // console.log('Agregaste una entrada!!! =D ');
+  });
+  socket.on('updateentrada', function (data) {
+    io.emit('update-entrada', { data: data });
+    // console.log('Actualizaste una entrada!!! =) ');
+  });
+  socket.on('deleteentrada', function (data) {
+    io.emit('delete-entrada', { data: data });
+    // console.log('Eliminaste una entrada!!! =( ');
+  });
+  /* #endregion */
+
+});
+/* #endregion */
+
 
 });
 /* #endregion */
