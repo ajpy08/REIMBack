@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 var materialSchema = new Schema({
     descripcion: { type: String, required: [true, 'La descripción del material es necesario'] },
     unidadMedida: { type: Schema.Types.ObjectId, ref: 'Unidad', required: true },
-    costo: { type: Schema.Types.Number, required: [true, 'El costo es obligatorio']},
+    costo: { type: mongoose.Types.Decimal128, required: [true, 'El costo es obligatorio']},
     activo: {type: Boolean, default: true, required: [true, 'El campo activo es obligatorio']},
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
