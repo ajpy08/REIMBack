@@ -1,8 +1,8 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
-var DetalleMaterial = require('../models/detalleMaterial');
-var app = express();
+
 var Entrada = require('../models/entrada');
+var app = express();
 
 // ==========================================
 //  Obtener todos los Detalles

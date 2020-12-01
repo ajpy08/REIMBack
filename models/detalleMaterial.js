@@ -1,16 +1,11 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
-var Entrada = require('../models/entrada');
 var Schema = mongoose.Schema;
 
 var detalleMaterialSchema = new Schema({
     material: { type: Schema.Types.ObjectId, ref: 'Material', required: true },
-    cantidad: { type: Schema.Types.Number, required: [true, 'La cantidad es obligatoria'] },
-    costo: {
-        type: mongoose.Types.Decimal128,
-        get: getCosto,
-        required: [true, 'El costo es obligatorio']
-    },
+    cantidad: { type: Number, required: true },
+    costo: { type: mongoose.Types.Decimal128, required: true,  get: getCosto },
     entrada: { type: Schema.Types.ObjectId, ref: 'Entrada' },
     usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
     fAlta: { type: Date, default: Date.now },
@@ -20,10 +15,10 @@ var detalleMaterialSchema = new Schema({
 
 function getCosto(value) {
     if (typeof value !== 'undefined') {
-        return parseFloat(value.toString());
+      return parseFloat(value.toString());
     }
     return value;
-}
+  }
 
 detalleMaterialSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
