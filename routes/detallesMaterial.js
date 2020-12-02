@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 
 var Entrada = require('../models/entrada');
+var DetalleMaterial = require('../models/detalleMaterial');
 var app = express();
 
 // ==========================================
