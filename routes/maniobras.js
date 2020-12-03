@@ -1334,10 +1334,18 @@ app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => 
         tipoEvento: body.evento.tipoEvento,
         tipoLavado: body.evento.tipoLavado,
         observaciones: body.evento.observaciones,
-        fIni: body.evento.fIni,
-        hIni: body.evento.fIni,
-        fFin: body.evento.fIni,
-        hFin: body.evento.fIni
+        izquierdo: body.evento.izquerdo,
+        derecho: body.evento.derecho,
+        frente: body.evento.frente,
+        posterior: body.evento.posterior,
+        piso: body.evento.piso,
+        techo: body.evento.techo,
+        interior: body.evento.interior,
+        puerta: body.evento.puerta
+          // fIni: body.evento.fIni,
+          // hIni: body.evento.fIni,
+          // fFin: body.evento.fIni,
+          // hFin: body.evento.fIni
       }
     }
   }, (err, maniobra) => {
