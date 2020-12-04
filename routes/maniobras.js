@@ -1341,14 +1341,13 @@ app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => 
         piso: body.evento.piso,
         techo: body.evento.techo,
         interior: body.evento.interior,
-        puerta: body.evento.puerta
-          // fIni: body.evento.fIni,
-          // hIni: body.evento.fIni,
-          // fFin: body.evento.fIni,
-          // hFin: body.evento.fIni
+        puerta: body.evento.puerta,
+        fechas: body.evento.fechas,
+        materiales: body.evento.materiales
       }
     }
   }, (err, maniobra) => {
+    console.log(err);
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -1373,7 +1372,7 @@ app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => 
 });
 
 // ==========================================
-// Remover eventos de la maniobra
+// Editas eventos de la maniobra
 // ==========================================
 
 app.put('/maniobra/:id/editevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
@@ -1387,7 +1386,21 @@ app.put('/maniobra/:id/editevento/:idevento', mdAutenticacion.verificaToken, (re
     'eventos._id': mongoose.Types.ObjectId(idevento)
   }, {
     $set: {
-      'eventos.$': { tipoEvento: body.evento.tipoEvento }
+      'eventos.$': {
+        tipoEvento: body.evento.tipoEvento,
+        tipoLavado: body.evento.tipoLavado,
+        observaciones: body.evento.observaciones,
+        izquierdo: body.evento.izquerdo,
+        derecho: body.evento.derecho,
+        frente: body.evento.frente,
+        posterior: body.evento.posterior,
+        piso: body.evento.piso,
+        techo: body.evento.techo,
+        interior: body.evento.interior,
+        puerta: body.evento.puerta,
+        fechas: body.evento.fechas,
+        materiales: body.evento.materiales
+      }
     }
   }, (err, maniobra) => {
     if (err) {
@@ -1529,6 +1542,7 @@ app.get('/maniobra/:id/getEvento/:idevento', mdAutenticacion.verificaToken, (req
           errors: err
         });
       }
+      console.log(maniobra[0]);
       res.status(200).json({
         ok: true,
         evento: maniobra[0]

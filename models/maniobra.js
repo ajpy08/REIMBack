@@ -54,9 +54,11 @@ var maniobraSchema = new Schema({
       hFin: { type: String }
     }],
     materiales: [{
-      id: { type: Schema.Types.ObjectId, ref: 'materiales' },
-      cantidad: { type: String },
-      costo: { type: String }
+      idMaterial: { type: Schema.Types.ObjectId, ref: 'materiales' },
+      descripcion: { type: String },
+      cantidad: { type: Number },
+      costo: { type: mongoose.Types.Decimal128 },
+      precio: { type: mongoose.Types.Decimal128 }
     }]
   }],
   descargaAutorizada: { type: Boolean, default: false },
