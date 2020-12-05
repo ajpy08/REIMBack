@@ -1,8 +1,9 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
+
+var Entrada = require('../models/entrada');
 var DetalleMaterial = require('../models/detalleMaterial');
 var app = express();
-var Entrada = require('../models/entrada');
 
 // ==========================================
 //  Obtener todos los Detalles
@@ -74,13 +75,15 @@ app.get('/detalle/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 app.post('/detalle/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
-    var detalle = new detalle({
+    var detalle = new DetalleMaterial({
+        material: body.material,
         cantidad: body.cantidad,
         costo: body.costo,
+        entrada: body.entrada,
         usuarioAlta: req.usuario._id
     });
 
-    DetalleMaterial.save((err, detalleGuardado) => {
+    detalle.save((err, detalleGuardado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -118,13 +121,13 @@ app.put('/detalle/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe un detalle con ese ID' }
             });
         }
-        detalle.detalle = body.detalle;
+        detalle.material = body.material;
         detalle.cantidad = body.cantidad;
         detalle.costo = body.costo;
         detalle.usuarioMod = req.usuario._id;
         detalle.fMod = new Date();
 
-        DetalleMaterial.save((err, detalleGuardado) => {
+        detalle.save((err, detalleGuardado) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -147,49 +150,52 @@ app.put('/detalle/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/detalle/:id', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
 
-    Entrada.find({
-        $or: [
-            { 'entrada': id }
-        ]
-    })
-        .exec(
-            (err, entrada) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error al intentar validar la eliminacion del detalle',
-                        errors: err
-                    });
-                }
-                if (entrada && entrada.length > 0) {
-                    res.status(400).json({
-                        ok: false,
-                        mensaje: 'El detalle ya se encuentra en alguna Entrada, por lo tanto no puede eliminarse.',
-                        errors: { message: 'El detalle ya se encuentra en alguna Entrada, por lo tanto no puede eliminarse.' },
-                        resultadoError: entrada
-                    });
-                }
-                DetalleMaterial.findByIdAndRemove(id, (err, detalleBorrado) => {
-                    if (err) {
-                        return res.status(500).json({
-                            ok: false,
-                            mensaje: 'Error al borrar detalle',
-                            errors: err
-                        });
-                    }
-                    if (!detalleBorrado) {
-                        return res.status(400).json({
-                            ok: false,
-                            mensaje: 'No existe un detalle con ese id',
-                            errors: { message: 'No existe un detalle con ese id' }
-                        });
-                    }
-                    res.status(200).json({
-                        ok: true,
-                        detalle: detalleBorrado
-                    });
-                });
-
+    // Entrada.find({
+    //     $or: [
+    //         { 'entrada': id }
+    //     ]
+    // })
+    //     .exec(
+    //         (err, entrada) => {
+    //             if (err) {
+    //                 return res.status(500).json({
+    //                     ok: false,
+    //                     mensaje: 'Error al intentar validar la eliminacion del detalle',
+    //                     errors: err
+    //                 });
+    //             }
+    //             if (entrada && entrada.length > 0) {
+    //                 res.status(400).json({
+    //                     ok: false,
+    //                     mensaje: 'El detalle ya se encuentra en alguna Entrada, por lo tanto no puede eliminarse.',
+    //                     errors: { message: 'El detalle ya se encuentra en alguna Entrada, por lo tanto no puede eliminarse.' },
+    //                     resultadoError: entrada
+    //                 });
+    //             }
+    DetalleMaterial.findById(id, (err, detalleBorrado) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar detalle',
+                errors: err
             });
+        }
+        if (!detalleBorrado) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No existe un detalle con ese id',
+                errors: { message: 'No existe un detalle con ese id' }
+            });
+        }
+
+        detalleBorrado.remove();
+
+        res.status(200).json({
+            ok: true,
+            detalle: detalleBorrado
+        });
+    });
+
+    // });
 });
 module.exports = app;

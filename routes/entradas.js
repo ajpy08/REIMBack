@@ -1,6 +1,7 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Entrada = require('../models/entrada');
+var DetalleMaterial = require('../models/detalleMaterial');
 var app = express();
 
 // ==========================================
@@ -47,6 +48,16 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 app.get('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
     Entrada.findById(id)
+        // .populate('detalles._id', 'material cantidad costo')
+        .populate({
+            path: "detalles.detalle",
+            select: 'material cantidad costo entrada',
+
+            populate: {
+                path: "material",
+                select: 'descripcion'
+            }
+        })
         .exec((err, entrada) => {
             if (err) {
                 return res.status(500).json({
@@ -58,7 +69,7 @@ app.get('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
             if (!entrada) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'El entrada con el id ' + id + 'no existe',
+                    mensaje: 'El entrada con el id ' + id + ' no existe',
                     errors: { message: 'No existe un entrada con ese ID' }
                 });
             }
@@ -123,22 +134,86 @@ app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
         entrada.noFactura = body.noFactura;
         entrada.proveedor = body.proveedor;
         entrada.fFactura = body.fFactura;
-        entrada.detalles = body.detalles;
-        entrada.usuarioMod = req.usuario._id;
-        entrada.fMod = new Date();
-
-        entrada.save((err, materialGuardado) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al actualizar al entrada',
-                    errors: err
+        //entrada.detalles = body.detalles;
+        body.detalles.forEach(det => {
+            if (det._id === '') {
+                var detalle = new DetalleMaterial({
+                    material: det.material,
+                    cantidad: det.cantidad,
+                    costo: det.costo,
+                    entrada: entrada._id,
+                    usuarioAlta: req.usuario._id
                 });
+
+                detalle.save((err, detalleGuardado) => {
+                    if (err) {
+                        return res.status(400).json({
+                            ok: false,
+                            mensaje: 'Error al agregar detalle',
+                            errors: err
+                        });
+                    }
+                    Entrada.findByIdAndUpdate(id, { $push: { detalles: { detalle: detalleGuardado._id } } }, (err, entradaActualizada) => {
+                        if (err) {
+                            return res.status(400).json({
+                                ok: false,
+                                mensaje: 'Error al actualizar entrada',
+                                errors: err
+                            });
+                        }
+                        res.status(200).json({
+                            ok: true,
+                            entrada: entradaActualizada
+                        });
+                    });
+                    // entrada.usuarioMod = req.usuario._id;
+                    // entrada.fMod = new Date();
+                    // entrada.detalles.push(detalleGuardado._id);
+
+                    // entrada.save((err, materialGuardado) => {
+                    //     if (err) {
+                    //         return res.status(400).json({
+                    //             ok: false,
+                    //             mensaje: 'Error al actualizar al entrada',
+                    //             errors: err
+                    //         });
+                    //     }
+                    //     res.status(200).json({
+                    //         ok: true,
+                    //         entrada: materialGuardado
+                    //     });
+                    // });
+                });
+
+
+                // var detalle = new DetalleMaterial({
+                //     material: det.material,
+                //     cantidad: det.cantidad,
+                //     costo: det.costo,
+                //     entrada: entrada._id,
+                //     usuarioAlta: req.usuario._id
+                // });
+
+                // detalle.save((err, detalleGuardado) => {
+                // entrada.usuarioMod = req.usuario._id;
+                // entrada.fMod = new Date();
+                // entrada.detalles.push(detalleGuardado._id);
+
+                // entrada.save((err, materialGuardado) => {
+                //     if (err) {
+                //         return res.status(400).json({
+                //             ok: false,
+                //             mensaje: 'Error al actualizar al entrada',
+                //             errors: err
+                //         });
+                //     }
+                //     res.status(200).json({
+                //         ok: true,
+                //         entrada: materialGuardado
+                //     });
+                // });
+                // });
             }
-            res.status(200).json({
-                ok: true,
-                entrada: materialGuardado
-            });
         });
     });
 });
@@ -149,7 +224,7 @@ app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.delete('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
 
-    Entrada.findByIdAndRemove(id, (err, entradaBorrada) => {
+    Entrada.findById(id, (err, entradaBorrada) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -164,6 +239,7 @@ app.delete('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe una entrada con ese id' }
             });
         }
+        entradaBorrada.remove();
         res.status(200).json({
             ok: true,
             entrada: entradaBorrada
