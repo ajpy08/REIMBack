@@ -1304,6 +1304,8 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res, next) =>
 });
 
 
+
+//#region  EVENTOS
 // ==========================================
 // Agregar Cevento a la maniobra
 // ==========================================
@@ -1326,7 +1328,26 @@ app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => 
   // hFin: { type: String },
   console.log(body);
 
-  Maniobra.findOneAndUpdate({ _id: id }, { $push: { eventos: { tipoEvento: body.tipoEvento, observaciones: body.observaciones } } }, (err, maniobra) => {
+  Maniobra.findOneAndUpdate({ _id: id }, {
+    $push: {
+      eventos: {
+        tipoEvento: body.evento.tipoEvento,
+        tipoLavado: body.evento.tipoLavado,
+        observaciones: body.evento.observaciones,
+        izquierdo: body.evento.izquerdo,
+        derecho: body.evento.derecho,
+        frente: body.evento.frente,
+        posterior: body.evento.posterior,
+        piso: body.evento.piso,
+        techo: body.evento.techo,
+        interior: body.evento.interior,
+        puerta: body.evento.puerta,
+        fechas: body.evento.fechas,
+        materiales: body.evento.materiales
+      }
+    }
+  }, (err, maniobra) => {
+    console.log(err);
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -1349,6 +1370,62 @@ app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => 
 
   });
 });
+
+// ==========================================
+// Editas eventos de la maniobra
+// ==========================================
+
+app.put('/maniobra/:id/editevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var idevento = req.params.idevento;
+  var body = req.body;
+  console.log(id);
+  console.log(idevento);
+  Maniobra.findOneAndUpdate({
+    _id: id,
+    'eventos._id': mongoose.Types.ObjectId(idevento)
+  }, {
+    $set: {
+      'eventos.$': {
+        tipoEvento: body.evento.tipoEvento,
+        tipoLavado: body.evento.tipoLavado,
+        observaciones: body.evento.observaciones,
+        izquierdo: body.evento.izquerdo,
+        derecho: body.evento.derecho,
+        frente: body.evento.frente,
+        posterior: body.evento.posterior,
+        piso: body.evento.piso,
+        techo: body.evento.techo,
+        interior: body.evento.interior,
+        puerta: body.evento.puerta,
+        fechas: body.evento.fechas,
+        materiales: body.evento.materiales
+      }
+    }
+  }, (err, maniobra) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar la maniobra',
+        errors: err
+      });
+    }
+    if (!maniobra) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'La maniobra con el id ' + id + ' no existe',
+        errors: { message: 'No existe una maniobra con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Evento Editada con éxito',
+      eventos: maniobra.eventos
+    });
+
+  });
+});
+
 
 // ==========================================
 // Remover eventos de la maniobra
@@ -1374,7 +1451,6 @@ app.put('/maniobra/:id/removeevento/:idevento', mdAutenticacion.verificaToken, (
         errors: { message: 'No existe una maniobra con ese ID' }
       });
     }
-    console.log(err);
     res.status(200).json({
       ok: true,
       mensaje: 'Evento Eliminado con éxito',
@@ -1416,7 +1492,7 @@ app.put('/maniobra/:id/removeevento/:idevento', mdAutenticacion.verificaToken, (
 // =======================================
 // Obtener eventosñ
 // =======================================
-app.get('/maniobra/:id/getEventos', (req, res) => {
+app.get('/maniobra/:id/getEventos', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
 
   Maniobra.findById(id)
@@ -1434,6 +1510,51 @@ app.get('/maniobra/:id/getEventos', (req, res) => {
       });
     });
 });
+
+
+// =======================================
+// Obtener evento
+// =======================================
+app.get('/maniobra/:id/getEvento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+
+  var id = req.params.id;
+  var idevento = req.params.idevento;
+
+  Maniobra.aggregate([{
+        $unwind: "$eventos"
+      },
+      {
+        $match: {
+          "eventos._id": new mongoose.Types.ObjectId(idevento)
+        }
+      },
+      {
+        "$replaceRoot": {
+          "newRoot": "$eventos"
+        }
+      }
+    ])
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error cargando eventos',
+          errors: err
+        });
+      }
+      console.log(maniobra[0]);
+      res.status(200).json({
+        ok: true,
+        evento: maniobra[0]
+
+      });
+    });
+});
+
+
+
+//#endregion
+
 // ==============================================================================
 // Actualizar Maniobra asignando su solicitud sin mdAutenticacion.verificaToken
 // ==============================================================================
