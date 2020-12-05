@@ -71,6 +71,57 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 // ==========================================
+//  Obtener Stock de Material por ID
+// ==========================================
+app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var material = req.params.id;
+
+    var filtro = '{';
+    if (material != 'undefined' && material != '')
+        filtro += '\"material\":' + '\"' + material + '\",';
+
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+    DetalleMaterial.find(json)
+        .populate('material', 'descripcion costo')
+        .sort({ fAlta: -1 })
+        .exec(
+            (err, detalles) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando detalles',
+                        errors: err
+                    });
+                }
+
+                let stock = 0;
+                let material;
+                if (detalles.length > 0) {
+                    detalles.forEach(det => {
+                        stock += det.cantidad;
+                        material = det.material;
+                    });
+
+                    res.status(200).json({
+                        ok: true,
+                        material: detalles[0].material,
+                        stock: stock
+                    });
+                } else {
+                    res.status(200).json({
+                        ok: true,
+                        material: undefined,
+                        stock: stock
+                    });
+                }
+
+            });
+});
+
+// ==========================================
 // Crear un nuevo material
 // ==========================================
 app.post('/material/', mdAutenticacion.verificaToken, (req, res) => {
@@ -79,8 +130,10 @@ app.post('/material/', mdAutenticacion.verificaToken, (req, res) => {
         descripcion: body.descripcion,
         unidadMedida: body.unidadMedida,
         costo: body.costo,
+        precio: body.precio,
         activo: body.activo,
-        licencia: body.licencia,
+        tipo: body.tipo,
+        minimo: body.minimo,
         usuarioAlta: req.usuario._id
     });
 
@@ -125,7 +178,10 @@ app.put('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
         material.descripcion = body.descripcion;
         material.unidadMedida = body.unidadMedida;
         material.costo = body.costo;
+        material.precio = body.precio;
         material.activo = body.activo;
+        material.tipo = body.tipo;
+        material.minimo = body.minimo;
         material.usuarioMod = req.usuario._id;
         material.fMod = new Date();
 

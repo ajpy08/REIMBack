@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var Schema = mongoose.Schema;
-var Entrada = require('../models/entrada');
+// var Entrada = require('../models/entrada');
 
 var detalleMaterialSchema = new Schema({
   material: { type: Schema.Types.ObjectId, ref: 'Material', required: true },
@@ -14,20 +14,18 @@ var detalleMaterialSchema = new Schema({
   fMod: { type: Date }
 }, { collection: 'detallesMaterial' });
 
-detalleMaterialSchema.pre('save', function (next) {
-  var doc = this;
+// detalleMaterialSchema.pre('save', function (next) {
+//   var doc = this;
 
-  // Entrada.updateOne({ "_id": new mongoose.Types.ObjectId(doc.entrada) }, {
-  // $set: { "detalles.$": doc._id }
-  Entrada.findOneAndUpdate({ _id: doc.entrada }, { $push: { detalles: { detalle: doc._id } } }, (err, entradaActualizada) => {
-  }, (err, cont) => {
-    if (err) {
-      next();
-    }
-  });
+//   Entrada.findOneAndUpdate({ _id: doc.entrada }, { $push: { detalles: { detalle: doc._id } } }, (err, entradaActualizada) => {
+//   }, (err, cont) => {
+//     if (err) {
+//       next();
+//     }
+//   });
 
-  next();
-});
+//   next();
+// });
 
 function getCosto(value) {
   if (typeof value !== 'undefined') {
