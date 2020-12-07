@@ -25,48 +25,48 @@ var entradaSchema = new Schema({
 entradaSchema.index({ noFactura: 1, proveedor: 1 }, { unique: true });
 entradaSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
-entradaSchema.pre('save', function (next) {
-  var doc = this;
+// entradaSchema.pre('save', function (next) {
+//   var doc = this;
 
-  doc.detalles.forEach(function (element, index) {
-    if (element.material && element.cantidad && element.costo > 0) {
-      try {
-        var detalle;
-        detalle = new DetalleMaterial({
-          material: element.material,
-          cantidad: element.cantidad,
-          costo: element.costo,
-          entrada: doc._id,
-          usuarioAlta: doc.usuarioAlta
-        });
-      } catch (err) {
-        next(err);
-      }
+//   doc.detalles.forEach(function (element, index) {
+//     if (element.material && element.cantidad && element.costo > 0) {
+//       try {
+//         var detalle;
+//         detalle = new DetalleMaterial({
+//           material: element.material,
+//           cantidad: element.cantidad,
+//           costo: element.costo,
+//           entrada: doc._id,
+//           usuarioAlta: doc.usuarioAlta
+//         });
+//       } catch (err) {
+//         next(err);
+//       }
 
-      doc.detalles[index].detalle = detalle._id;
-      doc.detalles[index].material = undefined;
-      doc.detalles[index].cantidad = undefined;
-      doc.detalles[index].costo = undefined;
+//       doc.detalles[index].detalle = detalle._id;
+//       doc.detalles[index].material = undefined;
+//       doc.detalles[index].cantidad = undefined;
+//       doc.detalles[index].costo = undefined;
 
-      detalle.save((err) => {
-        if (err) {
-          // console.log(err);
-          return next(err);
-        }
-      });
-    }
-  });
-  next();
-});
+//       detalle.save((err) => {
+//         if (err) {
+//           // console.log(err);
+//           return next(err);
+//         }
+//       });
+//     }
+//   });
+//   next();
+// });
 
-entradaSchema.pre('remove', function (next) {
-  try {
-    DetalleMaterial.remove({ 'entrada': this._id }).exec();
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
+// entradaSchema.pre('remove', function (next) {
+//   try {
+//     DetalleMaterial.remove({ 'entrada': this._id }).exec();
+//     next();
+//   } catch (err) {
+//     next(err);
+//   }
+// });
 
 function getCosto(value) {
   if (typeof value !== 'undefined') {

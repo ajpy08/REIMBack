@@ -48,16 +48,16 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 app.get('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
     Entrada.findById(id)
-        // .populate('detalles._id', 'material cantidad costo')
-        .populate({
-            path: "detalles.detalle",
-            select: 'material cantidad costo entrada',
+        .populate('detalles.material', 'descripcion')
+        // .populate({
+        //     path: "detalles.detalle",
+        //     select: 'material cantidad costo entrada',
 
-            populate: {
-                path: "material",
-                select: 'descripcion'
-            }
-        })
+        //     populate: {
+        //         path: "material",
+        //         select: 'descripcion'
+        //     }
+        // })
         .exec((err, entrada) => {
             if (err) {
                 return res.status(500).json({
@@ -134,87 +134,55 @@ app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
         entrada.noFactura = body.noFactura;
         entrada.proveedor = body.proveedor;
         entrada.fFactura = body.fFactura;
-        //entrada.detalles = body.detalles;
-        body.detalles.forEach(det => {
-            if (det._id === '') {
-                var detalle = new DetalleMaterial({
-                    material: det.material,
-                    cantidad: det.cantidad,
-                    costo: det.costo,
-                    entrada: entrada._id,
-                    usuarioAlta: req.usuario._id
+        entrada.detalles = body.detalles;
+        entrada.fMod = new Date();
+        entrada.save((err, entradaGuardada) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar entrada',
+                    errors: err
                 });
-
-                detalle.save((err, detalleGuardado) => {
-                    if (err) {
-                        return res.status(400).json({
-                            ok: false,
-                            mensaje: 'Error al agregar detalle',
-                            errors: err
-                        });
-                    }
-                    Entrada.findByIdAndUpdate(id, { $push: { detalles: { detalle: detalleGuardado._id } } }, (err, entradaActualizada) => {
-                        if (err) {
-                            return res.status(400).json({
-                                ok: false,
-                                mensaje: 'Error al actualizar entrada',
-                                errors: err
-                            });
-                        }
-                        res.status(200).json({
-                            ok: true,
-                            entrada: entradaActualizada
-                        });
-                    });
-                    // entrada.usuarioMod = req.usuario._id;
-                    // entrada.fMod = new Date();
-                    // entrada.detalles.push(detalleGuardado._id);
-
-                    // entrada.save((err, materialGuardado) => {
-                    //     if (err) {
-                    //         return res.status(400).json({
-                    //             ok: false,
-                    //             mensaje: 'Error al actualizar al entrada',
-                    //             errors: err
-                    //         });
-                    //     }
-                    //     res.status(200).json({
-                    //         ok: true,
-                    //         entrada: materialGuardado
-                    //     });
-                    // });
-                });
-
-
-                // var detalle = new DetalleMaterial({
-                //     material: det.material,
-                //     cantidad: det.cantidad,
-                //     costo: det.costo,
-                //     entrada: entrada._id,
-                //     usuarioAlta: req.usuario._id
-                // });
-
-                // detalle.save((err, detalleGuardado) => {
-                // entrada.usuarioMod = req.usuario._id;
-                // entrada.fMod = new Date();
-                // entrada.detalles.push(detalleGuardado._id);
-
-                // entrada.save((err, materialGuardado) => {
-                //     if (err) {
-                //         return res.status(400).json({
-                //             ok: false,
-                //             mensaje: 'Error al actualizar al entrada',
-                //             errors: err
-                //         });
-                //     }
-                //     res.status(200).json({
-                //         ok: true,
-                //         entrada: materialGuardado
-                //     });
-                // });
-                // });
             }
+            res.status(200).json({
+                ok: true,
+                entrada: entradaGuardada
+            });
         });
+        // body.detalles.forEach(det => {
+        //     if (det._id === '') {
+        //         var detalle = new DetalleMaterial({
+        //             material: det.material,
+        //             cantidad: det.cantidad,
+        //             costo: det.costo,
+        //             entrada: entrada._id,
+        //             usuarioAlta: req.usuario._id
+        //         });
+
+        //         detalle.save((err, detalleGuardado) => {
+        //             if (err) {
+        //                 return res.status(400).json({
+        //                     ok: false,
+        //                     mensaje: 'Error al agregar detalle',
+        //                     errors: err
+        //                 });
+        //             }
+        //             Entrada.findByIdAndUpdate(id, { $push: { detalles: { detalle: detalleGuardado._id } } }, (err, entradaActualizada) => {
+        //                 if (err) {
+        //                     return res.status(400).json({
+        //                         ok: false,
+        //                         mensaje: 'Error al actualizar entrada',
+        //                         errors: err
+        //                     });
+        //                 }
+        //                 res.status(200).json({
+        //                     ok: true,
+        //                     entrada: entradaActualizada
+        //                 });
+        //             });
+        //         });
+        //     }
+        // });
     });
 });
 
