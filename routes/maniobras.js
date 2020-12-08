@@ -1722,34 +1722,6 @@ app.delete('/maniobra/mantenimientos/:id', mdAutenticacion.verificaToken, (req, 
   //   });
 });
 
-// =======================================
-// Obtener evento
-// =======================================
-app.get('/maniobra/Eventos/evento/:id', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  Mantenimiento.findById(id)
-    .populate('usuario', 'nombre img email')
-    .exec((err, mantenimiento) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar el mantenimiento',
-          errors: err
-        });
-      }
-      if (!mantenimiento) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'El mantenimiento con el id ' + id + ' no existe',
-          errors: { message: 'No existe un mantenimiento con ese ID' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        mantenimiento: mantenimiento
-      });
-    });
-});
 
 
 // =======================================

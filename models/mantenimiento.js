@@ -13,7 +13,7 @@ var SchemaFechas = new Schema({
 }, { _id: false });
 
 var SchemaMateriales = new Schema({
-  idMaterial: { type: Schema.Types.ObjectId, ref: 'materiales' },
+  Material: { type: Schema.Types.ObjectId, ref: 'materiales' },
   descripcion: { type: String },
   cantidad: { type: Number },
   costo: { type: mongoose.Types.Decimal128 },
@@ -45,7 +45,7 @@ var mantenimientoSchema = new Schema({
 
 mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
-mantenimientoSchema.virtual('dañosCompleto')
+mantenimientoSchema.virtual('observacionesCompleto')
   .get(function() {
     return `${this.observacionesGenerales}\n Izq: ${this.izquierdo}\n Der: ${this.derecho}\n Pos: ${this.posterior}\n Int: ${this.interior}`;
   });
