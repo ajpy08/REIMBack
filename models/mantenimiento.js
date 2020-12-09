@@ -41,7 +41,7 @@ var mantenimientoSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date }
-}, { collection: 'mantenimientos' });
+}, { collection: 'mantenimientos', toJSON: { virtuals: true } });
 
 mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
