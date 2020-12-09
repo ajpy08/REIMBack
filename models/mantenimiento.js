@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
+const { stringify } = require('uuid');
 var Schema = mongoose.Schema;
 
 
@@ -16,8 +17,8 @@ var SchemaMateriales = new Schema({
   Material: { type: Schema.Types.ObjectId, ref: 'materiales' },
   descripcion: { type: String },
   cantidad: { type: Number },
-  costo: { type: mongoose.Types.Decimal128 },
-  precio: { type: mongoose.Types.Decimal128 },
+  costo: { type: mongoose.Types.Decimal128, get: getDecimal },
+  precio: { type: mongoose.Types.Decimal128, get: getDecimal },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now }
 }, { _id: false });
@@ -32,12 +33,13 @@ var mantenimientoSchema = new Schema({
   derecho: { type: String },
   frente: { type: String },
   posterior: { type: String },
-  interior: { type: String },
   piso: { type: String },
   techo: { type: String },
+  interior: { type: String },
   puerta: { type: String },
   fechas: [SchemaFechas],
   materiales: [SchemaMateriales],
+  finalizado: { type: Boolean, default: false },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
@@ -48,7 +50,24 @@ mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' }
 
 mantenimientoSchema.virtual('observacionesCompleto')
   .get(function() {
-    return `${this.observacionesGenerales}\n Izq: ${this.izquierdo}\n Der: ${this.derecho}\n Pos: ${this.posterior}\n Int: ${this.interior}`;
+    var completo = '';
+    if (this.observacionesGenerales != '' && this.observacionesGenerales != undefined) completo += 'Generales: ' + this.observacionesGenerales + ';';
+    if (this.izquierdo != '' && this.izquierdo != undefined) completo += 'Izquierdo: ' + this.izquierdo + ';';
+    if (this.derecho != '' && this.derecho != undefined) completo += 'Derecho: ' + this.derecho + ';';
+    if (this.frente != '' && this.frente != undefined) completo += 'Frente: ' + this.frente + ';';
+    if (this.posterior != '' && this.posterior != undefined) completo += 'Posterior: ' + this.posterior + ';';
+    if (this.piso != '' && this.piso != undefined) completo += 'Piso: ' + this.piso + ';';
+    if (this.techo != '' && this.techo != undefined) completo += 'Techo: ' + this.techo + ';';
+    if (this.interior != '' && this.interior != undefined) completo += 'Interior: ' + this.interior + ';';
+    if (this.puerta != '' && this.puerta != undefined) completo += 'Puerta: ' + this.puerta + ';';
+    return completo;
+    //return `${this.observacionesGenerales}\n Izq: ${this.izquierdo}\n Der: ${this.derecho}\n Pos: ${this.posterior}\n Int: ${this.interior}`;
   });
 
+function getDecimal(value) {
+  if (typeof value !== 'undefined') {
+    return parseFloat(value.toString());
+  }
+  return value;
+}
 module.exports = mongoose.model('Mantenimiento', mantenimientoSchema);

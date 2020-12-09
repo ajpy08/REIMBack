@@ -56,7 +56,6 @@ app.get('/xmaniobra/:id', (req, res) => {
           errors: err
         });
       }
-      console.log(mantenimientos);
       res.status(200).json({
         ok: true,
         mantenimientos: mantenimientos,
@@ -78,6 +77,7 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
     maniobra: body.maniobra,
     tipoMantenimiento: body.tipoMantenimiento,
     tipoLavado: body.tipoLavado,
+    cambioGrado: body.cambioGrado,
     observacionesGenerales: body.observacionesGenerales,
     izquierdo: body.izquierdo,
     derecho: body.derecho,
@@ -89,6 +89,7 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
     puerta: body.puerta,
     fechas: body.fechas,
     materiales: body.materiales,
+    finalizado: body.finalizado,
     usuarioAlta: req.usuario._id
   });
 
@@ -136,6 +137,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento,
       mantenimiento.tipoLavado = body.tipoLavado,
+      mantenimiento.cambioGrado = body.cambioGrado,
       mantenimiento.observacionesGenerales = body.observacionesGenerales,
       mantenimiento.izquierdo = body.izquierdo,
       mantenimiento.derecho = body.derecho,
@@ -147,6 +149,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       mantenimiento.puerta = body.puerta,
       mantenimiento.fechas = body.fechas,
       mantenimiento.materiales = body.materiales,
+      mantenimiento.finalizado = body.finalizado,
       mantenimiento.usuarioMod = req.usuario._id,
       mantenimiento.fMod = new Date();
 
