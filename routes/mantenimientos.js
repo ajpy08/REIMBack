@@ -72,7 +72,7 @@ app.get('/xmaniobra/:id', (req, res) => {
 
 app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
 
-  var body = req.body;
+  var body = req.body.mantenimiento;
   // console.log(body);
   var mantenimiento = new Mantenimiento({
     maniobra: body.maniobra,
@@ -115,7 +115,7 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  var body = req.body;
+  var body = req.body.mantenimiento;
 
   Mantenimiento.findById(id, (err, mantenimiento) => {
     if (err) {
@@ -136,19 +136,19 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento,
       mantenimiento.tipoLavado = body.tipoLavado,
-      mantenimiento.observacionesGenerales = body.observaciones,
-      mantenimiento.izquierdo = body.izquerdo,
+      mantenimiento.observacionesGenerales = body.observacionesGenerales,
+      mantenimiento.izquierdo = body.izquierdo,
       mantenimiento.derecho = body.derecho,
-      mantenimiento.mantenimiento.frente = body.frente,
+      mantenimiento.frente = body.frente,
       mantenimiento.posterior = body.posterior,
       mantenimiento.piso = body.piso,
       mantenimiento.techo = body.techo,
       mantenimiento.interior = body.interior,
       mantenimiento.puerta = body.puerta,
       mantenimiento.fechas = body.fechas,
-      mantenimiento.materiales = body.materiales
-    mantenimiento.usuarioMod = req.usuario._id;
-    mantenimiento.fMod = new Date();
+      mantenimiento.materiales = body.materiales,
+      mantenimiento.usuarioMod = req.usuario._id,
+      mantenimiento.fMod = new Date();
 
     mantenimiento.save((err, mantenimientoGuardado) => {
       if (err) {

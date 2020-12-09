@@ -26,6 +26,7 @@ var mantenimientoSchema = new Schema({
   maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
   tipoMantenimiento: { type: String },
   tipoLavado: { type: String },
+  cambioGrado: { type: Boolean },
   observacionesGenerales: { type: String },
   izquierdo: { type: String },
   derecho: { type: String },
@@ -41,7 +42,7 @@ var mantenimientoSchema = new Schema({
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fMod: { type: Date }
-}, { collection: 'mantenimientos', toJSON: { virtuals: true } });
+}, { collection: 'mantenimientos', toJSON: { getters: true, virtuals: true } });
 
 mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
