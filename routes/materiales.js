@@ -1,8 +1,8 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Material = require('../models/material');
+var Entrada = require('../models/entrada');
 var app = express();
-var DetalleMaterial = require('../models/detalleMaterial');
 
 // ==========================================
 //  Obtener todos los Materiales
@@ -78,45 +78,126 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     var filtro = '{';
     if (material != 'undefined' && material != '')
-        filtro += '\"material\":' + '\"' + material + '\",';
+        filtro += '\"detalles.material\":' + '\"' + material + '\",';
 
     if (filtro != '{')
         filtro = filtro.slice(0, -1);
     filtro = filtro + '}';
     var json = JSON.parse(filtro);
-    DetalleMaterial.find(json)
-        .populate('material', 'descripcion costo')
+    Entrada.find(json)
+        .populate('detalles.material', 'descripcion costo precio tipo minimo')
         .sort({ fAlta: -1 })
         .exec(
-            (err, detalles) => {
+            (err, entradas) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando detalles',
+                        mensaje: 'Error cargando entradas',
                         errors: err
                     });
                 }
 
                 let stock = 0;
                 let material;
-                if (detalles.length > 0) {
-                    detalles.forEach(det => {
-                        stock += det.cantidad;
-                        material = det.material;
-                    });
+                let ok = false;
+                if (entradas.length > 0) {
+                    entradas.forEach(e => {
+                        e.detalles.forEach(d => {
+                            if (d.material._id == req.params.id) {
+                                ok = true;
+                                stock += d.cantidad;
+                                material = d.material;
+                            }
+                        });
 
-                    res.status(200).json({
-                        ok: true,
-                        material: detalles[0].material,
-                        stock: stock
-                    });
-                } else {
-                    res.status(200).json({
-                        ok: true,
-                        material: undefined,
-                        stock: stock
                     });
                 }
+
+                res.status(200).json({
+                    ok,
+                    material: material,
+                    stock: stock
+                });
+
+            });
+});
+
+// ==========================================================================
+//  Obtener todos los Materiales donde el precio sea menor o igual al costo
+// ==========================================================================
+
+app.get('/costo-precio', mdAutenticacion.verificaToken, (req, res) => {
+    Material.find({$expr:{$gte:["$costo", "$precio"]}})
+        // .populate('usuarioAlta', 'nombre email')
+        // .populate('usuarioMod', 'nombre email')
+        // .populate('unidadMedida', 'descripcion abreviacion')
+        .sort({ fAlta: -1 })
+        .exec(
+            (err, materiales) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando materiales',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    materiales: materiales,
+                    totalRegistros: materiales.length
+                });
+            });
+});
+
+
+// ==========================================
+//  Obtener Validacion Costo VS Precio P.
+// ==========================================
+app.get('/material/valida/costo/precio/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var material = req.params.id;
+
+    var filtro = '{';
+    if (material != 'undefined' && material != '')
+        filtro += '\"detalles.material\":' + '\"' + material + '\",';
+
+    if (filtro != '{')
+        filtro = filtro.slice(0, -1);
+    filtro = filtro + '}';
+    var json = JSON.parse(filtro);
+    Entrada.find(json)
+        .populate('detalles.material', 'descripcion costo precio tipo minimo')
+        .sort({ fAlta: -1 })
+        .exec(
+            (err, entradas) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando entradas',
+                        errors: err
+                    });
+                }
+
+                let stock = 0;
+                let material;
+                let ok = false;
+                if (entradas.length > 0) {
+                    entradas.forEach(e => {
+                        e.detalles.forEach(d => {
+                            if (d.material._id == req.params.id) {
+                                ok = true;
+                                stock += d.cantidad;
+                                material = d.material;
+                            }
+                        });
+
+                    });
+                }
+
+                res.status(200).json({
+                    ok,
+                    material: material,
+                    stock: stock
+                });
 
             });
 });

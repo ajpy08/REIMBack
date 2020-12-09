@@ -69,7 +69,6 @@ var NOTASRoutes = require('./routes/notas-de-credito');
 // var jobsRoutes = require('./routes/jobs');
 var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
 var materialesRoutes = require('./routes/materiales');
-var detallesRoutes = require('./routes/detallesMaterial');
 var unidadesRoutes = require('./routes/unidades');
 var entradasRoutes = require('./routes/entradas');
 
@@ -119,7 +118,6 @@ app.use('/reportes', reportesRoutes);
 app.use('/pdfFacturacion', pdfFacturacionRoutes);
 app.use('/proveedores', proveedorRoutes);
 app.use('/materiales', materialesRoutes);
-app.use('/detalles', detallesRoutes);
 app.use('/unidades', unidadesRoutes);
 app.use('/entradas', entradasRoutes);
 app.use('/', appRoutes);
