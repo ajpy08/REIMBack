@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var app = express();
 var Maniobra = require('../models/maniobra');
 var Solicitud = require('../models/solicitud');
+var Mantenimiento = require('../models/mantenimiento');
 var variasBucket = require('../public/variasBucket');
 const sentMail = require('../routes/sendAlert');
 var fileUpload = require('express-fileupload');
@@ -1305,301 +1306,452 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res, next) =>
 
 
 
-//#region  EVENTOS
-// ==========================================
-// Agregar Cevento a la maniobra
-// ==========================================
+// //#region  EVENTOS
+// // ==========================================
+// // Agregar evento a la maniobra
+// // ==========================================
 
-app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  var body = req.body;
+// app.put('/maniobra/:id/addevento', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+//   var body = req.body;
 
-  // var tipo = req.query.tipo;
-  // var peso = req.query.peso;
-  // var patio = req.query.patio != undefined ? req.query.patio : undefined;
-  // var destinatario = req.query.destinatario;
+//   // var tipo = req.query.tipo;
+//   // var peso = req.query.peso;
+//   // var patio = req.query.patio != undefined ? req.query.patio : undefined;
+//   // var destinatario = req.query.destinatario;
 
-  // tipoEvento: { type: String },
-  // tipoLavado: { type: String },
-  // Observaciones: { type: String },
-  // fIni: { type: Date },
-  // hIni: { type: String },
-  // fFin: { type: Date },
-  // hFin: { type: String },
-  console.log(body);
+//   // tipoEvento: { type: String },
+//   // tipoLavado: { type: String },
+//   // Observaciones: { type: String },
+//   // fIni: { type: Date },
+//   // hIni: { type: String },
+//   // fFin: { type: Date },
+//   // hFin: { type: String },
+//   console.log(body);
 
-  Maniobra.findOneAndUpdate({ _id: id }, {
-    $push: {
-      eventos: {
-        tipoEvento: body.evento.tipoEvento,
-        tipoLavado: body.evento.tipoLavado,
-        observaciones: body.evento.observaciones,
-        izquierdo: body.evento.izquerdo,
-        derecho: body.evento.derecho,
-        frente: body.evento.frente,
-        posterior: body.evento.posterior,
-        piso: body.evento.piso,
-        techo: body.evento.techo,
-        interior: body.evento.interior,
-        puerta: body.evento.puerta,
-        fechas: body.evento.fechas,
-        materiales: body.evento.materiales
-      }
-    }
-  }, (err, maniobra) => {
-    console.log(err);
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
-      });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Evento agregado con éxito',
-      eventos: maniobra.eventos
-    });
+//   Maniobra.findOneAndUpdate({ _id: id }, {
+//     $push: {
+//       eventos: {
+//         tipoEvento: body.evento.tipoEvento,
+//         tipoLavado: body.evento.tipoLavado,
+//         observaciones: body.evento.observaciones,
+//         izquierdo: body.evento.izquerdo,
+//         derecho: body.evento.derecho,
+//         frente: body.evento.frente,
+//         posterior: body.evento.posterior,
+//         piso: body.evento.piso,
+//         techo: body.evento.techo,
+//         interior: body.evento.interior,
+//         puerta: body.evento.puerta,
+//         fechas: body.evento.fechas,
+//         materiales: body.evento.materiales
+//       }
+//     }
+//   }, (err, maniobra) => {
+//     console.log(err);
+//     if (err) {
+//       return res.status(500).json({
+//         ok: false,
+//         mensaje: 'Error al buscar la maniobra',
+//         errors: err
+//       });
+//     }
+//     if (!maniobra) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'La maniobra con el id ' + id + ' no existe',
+//         errors: { message: 'No existe una maniobra con ese ID' }
+//       });
+//     }
+//     res.status(200).json({
+//       ok: true,
+//       mensaje: 'Evento agregado con éxito',
+//       eventos: maniobra.eventos
+//     });
 
-  });
-});
+//   });
+// });
 
-// ==========================================
-// Editas eventos de la maniobra
-// ==========================================
+// // ==========================================
+// // Editas eventos de la maniobra
+// // ==========================================
 
-app.put('/maniobra/:id/editevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  var idevento = req.params.idevento;
-  var body = req.body;
-  console.log(id);
-  console.log(idevento);
-  Maniobra.findOneAndUpdate({
-    _id: id,
-    'eventos._id': mongoose.Types.ObjectId(idevento)
-  }, {
-    $set: {
-      'eventos.$': {
-        tipoEvento: body.evento.tipoEvento,
-        tipoLavado: body.evento.tipoLavado,
-        observaciones: body.evento.observaciones,
-        izquierdo: body.evento.izquerdo,
-        derecho: body.evento.derecho,
-        frente: body.evento.frente,
-        posterior: body.evento.posterior,
-        piso: body.evento.piso,
-        techo: body.evento.techo,
-        interior: body.evento.interior,
-        puerta: body.evento.puerta,
-        fechas: body.evento.fechas,
-        materiales: body.evento.materiales
-      }
-    }
-  }, (err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
-      });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Evento Editada con éxito',
-      eventos: maniobra.eventos
-    });
+// app.put('/maniobra/:id/editevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+//   var idevento = req.params.idevento;
+//   var body = req.body;
+//   console.log(id);
+//   console.log(idevento);
+//   Maniobra.findOneAndUpdate({
+//     _id: id,
+//     'eventos._id': mongoose.Types.ObjectId(idevento)
+//   }, {
+//     $set: {
+//       'eventos.$': {
+//         tipoEvento: body.evento.tipoEvento,
+//         tipoLavado: body.evento.tipoLavado,
+//         observaciones: body.evento.observaciones,
+//         izquierdo: body.evento.izquerdo,
+//         derecho: body.evento.derecho,
+//         frente: body.evento.frente,
+//         posterior: body.evento.posterior,
+//         piso: body.evento.piso,
+//         techo: body.evento.techo,
+//         interior: body.evento.interior,
+//         puerta: body.evento.puerta,
+//         fechas: body.evento.fechas,
+//         materiales: body.evento.materiales
+//       }
+//     }
+//   }, (err, maniobra) => {
+//     if (err) {
+//       return res.status(500).json({
+//         ok: false,
+//         mensaje: 'Error al buscar la maniobra',
+//         errors: err
+//       });
+//     }
+//     if (!maniobra) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'La maniobra con el id ' + id + ' no existe',
+//         errors: { message: 'No existe una maniobra con ese ID' }
+//       });
+//     }
+//     res.status(200).json({
+//       ok: true,
+//       mensaje: 'Evento Editada con éxito',
+//       eventos: maniobra.eventos
+//     });
 
-  });
-});
-
-
-// ==========================================
-// Remover eventos de la maniobra
-// ==========================================
-
-app.put('/maniobra/:id/removeevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  var idevento = req.params.idevento;
-  var body = req.body;
-
-  Maniobra.findOneAndUpdate({ _id: id }, { $pull: { eventos: { _id: idevento } } }, (err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
-      });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      mensaje: 'Evento Eliminado con éxito',
-      eventos: maniobra.eventos
-    });
-
-  });
-  // Maniobra.findOne({ 'viaje': id, 'contenedor': contenedor })
-  //   .exec((err, conte) => {
-  //     if (err) {
-  //       return res.status(500).json({
-  //         ok: false,
-  //         mensaje: 'Error al buscar viaje - Contenedor',
-  //         errors: err
-  //       });
-  //     }
-  //     if (!conte) {
-  //       return res.status(400).json({
-  //         ok: false,
-  //         mensaje: 'El contenedor ' + contenedor + ' no existe',
-  //         errors: { message: 'No existe un contendor con ese Numero' }
-  //       });
-  //     } else if ((conte.peso != 'VACIO' && conte.estatus != "APROBACION") || (conte.peso == 'VACIO' && conte.estatus != "TRANSITO")) {
-  //       return res.status(400).json({
-  //         ok: false,
-  //         mensaje: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus,
-  //         errors: { message: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus }
-  //       });
-  //     }
-  //     conte.remove();
-  //     res.status(200).json({
-  //       ok: true,
-  //       contenedor: conte.contenedor
-  //     });
-  //   });
-});
+//   });
+// });
 
 
-// =======================================
-// Obtener eventosñ
-// =======================================
-app.get('/maniobra/:id/getEventos', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
+// // ==========================================
+// // Remover eventos de la maniobra
+// // ==========================================
 
-  Maniobra.findById(id)
-    .exec((err, maniobra) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando eventos',
-          errors: err
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        eventos: maniobra.eventos
-      });
-    });
-});
+// app.put('/maniobra/:id/removeevento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+//   var idevento = req.params.idevento;
+//   var body = req.body;
+
+//   Maniobra.findOneAndUpdate({ _id: id }, { $pull: { eventos: { _id: idevento } } }, (err, maniobra) => {
+//     if (err) {
+//       return res.status(500).json({
+//         ok: false,
+//         mensaje: 'Error al buscar la maniobra',
+//         errors: err
+//       });
+//     }
+//     if (!maniobra) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'La maniobra con el id ' + id + ' no existe',
+//         errors: { message: 'No existe una maniobra con ese ID' }
+//       });
+//     }
+//     res.status(200).json({
+//       ok: true,
+//       mensaje: 'Evento Eliminado con éxito',
+//       eventos: maniobra.eventos
+//     });
+
+//   });
+//   // Maniobra.findOne({ 'viaje': id, 'contenedor': contenedor })
+//   //   .exec((err, conte) => {
+//   //     if (err) {
+//   //       return res.status(500).json({
+//   //         ok: false,
+//   //         mensaje: 'Error al buscar viaje - Contenedor',
+//   //         errors: err
+//   //       });
+//   //     }
+//   //     if (!conte) {
+//   //       return res.status(400).json({
+//   //         ok: false,
+//   //         mensaje: 'El contenedor ' + contenedor + ' no existe',
+//   //         errors: { message: 'No existe un contendor con ese Numero' }
+//   //       });
+//   //     } else if ((conte.peso != 'VACIO' && conte.estatus != "APROBACION") || (conte.peso == 'VACIO' && conte.estatus != "TRANSITO")) {
+//   //       return res.status(400).json({
+//   //         ok: false,
+//   //         mensaje: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus,
+//   //         errors: { message: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus }
+//   //       });
+//   //     }
+//   //     conte.remove();
+//   //     res.status(200).json({
+//   //       ok: true,
+//   //       contenedor: conte.contenedor
+//   //     });
+//   //   });
+// });
 
 
-// =======================================
-// Obtener evento
-// =======================================
-app.get('/maniobra/:id/getEvento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+// // =======================================
+// // Obtener eventosñ
+// // =======================================
+// app.get('/maniobra/:id/getEventos', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
 
-  var id = req.params.id;
-  var idevento = req.params.idevento;
+//   Maniobra.findById(id)
+//     .exec((err, maniobra) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando eventos',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         eventos: maniobra.eventos
+//       });
+//     });
+// });
 
-  Maniobra.aggregate([{
-        $unwind: "$eventos"
-      },
-      {
-        $match: {
-          "eventos._id": new mongoose.Types.ObjectId(idevento)
-        }
-      },
-      {
-        "$replaceRoot": {
-          "newRoot": "$eventos"
-        }
-      }
-    ])
-    .exec((err, maniobra) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando eventos',
-          errors: err
-        });
-      }
-      console.log(maniobra[0]);
-      res.status(200).json({
-        ok: true,
-        evento: maniobra[0]
 
-      });
-    });
-});
+// // =======================================
+// // Obtener evento
+// // =======================================
+// app.get('/maniobra/:id/getEvento/:idevento', mdAutenticacion.verificaToken, (req, res) => {
+
+//   var id = req.params.id;
+//   var idevento = req.params.idevento;
+
+//   Maniobra.aggregate([{
+//         $unwind: "$eventos"
+//       },
+//       {
+//         $match: {
+//           "eventos._id": new mongoose.Types.ObjectId(idevento)
+//         }
+//       },
+//       {
+//         "$replaceRoot": {
+//           "newRoot": "$eventos"
+//         }
+//       }
+//     ])
+//     .exec((err, maniobra) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error cargando eventos',
+//           errors: err
+//         });
+//       }
+//       console.log(maniobra[0]);
+//       res.status(200).json({
+//         ok: true,
+//         evento: maniobra[0]
+
+//       });
+//     });
+// });
+
+
+
+// //#endregion
+
+// //#region Mantenimientos.
+
+// // ==========================================
+// // Agregar mantenimiento a la maniobra
+// // ==========================================
+
+// app.post('/maniobra/:id/mantenimientos', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+//   var body = req.body;
+
+//   var body = req.body;
+//   var mantenimiento = new Mantenimiento({
+//     maniobra: id,
+//     tipoMantenimiento: body.evento.tipoMantenimiento,
+//     tipoLavado: body.evento.tipoLavado,
+//     observacionesGenerales: body.evento.observacionesGenerales,
+//     izquierdo: body.evento.izquerdo,
+//     derecho: body.evento.derecho,
+//     frente: body.evento.frente,
+//     posterior: body.evento.posterior,
+//     piso: body.evento.piso,
+//     techo: body.evento.techo,
+//     interior: body.evento.interior,
+//     puerta: body.evento.puerta,
+//     fechas: body.evento.fechas,
+//     materiales: body.evento.materiales,
+//     usuarioAlta: req.usuario._id
+//   });
+
+//   mantenimiento.save((err, mantenimientoGuardado) => {
+//     if (err) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'Error al agregar el mantenimiento',
+//         errors: err
+//       });
+//     }
+//     res.status(201).json({
+//       ok: true,
+//       mantenimiento: mantenimientoGuardado
+//     });
+//   });
+
+
+// });
+
+
+// // ==========================================
+// // Editar mantenimientos de la maniobra
+// // ==========================================
+// app.put('/maniobra/mantenimientos/:id', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+//   var body = req.body;
+
+//   Mantenimiento.findById(id, (err, mantenimiento) => {
+//     if (err) {
+//       return res.status(500).json({
+//         ok: false,
+//         mensaje: 'Error al buscar el mantenimiento',
+//         errors: err
+//       });
+//     }
+//     if (!mantenimiento) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'El mantenimiento con el id ' + id + ' no existe',
+//         errors: { message: 'No existe mantenimiento con ese ID' }
+//       });
+//     }
+
+
+//     mantenimiento.tipoMantenimiento = body.evento.tipoMantenimiento,
+//       mantenimiento.tipoLavado = body.evento.tipoLavado,
+//       mantenimiento.observacionesGenerales = body.evento.observaciones,
+//       mantenimiento.izquierdo = body.evento.izquerdo,
+//       mantenimiento.derecho = body.evento.derecho,
+//       mantenimiento.mantenimiento.frente = body.evento.frente,
+//       mantenimiento.posterior = body.evento.posterior,
+//       mantenimiento.piso = body.evento.piso,
+//       mantenimiento.techo = body.evento.techo,
+//       mantenimiento.interior = body.evento.interior,
+//       mantenimiento.puerta = body.evento.puerta,
+//       mantenimiento.fechas = body.evento.fechas,
+//       mantenimiento.materiales = body.evento.materiales
+//     mantenimiento.usuarioMod = req.usuario._id;
+//     mantenimiento.fMod = new Date();
+
+//     mantenimiento.save((err, mantenimientoGuardado) => {
+//       if (err) {
+//         return res.status(400).json({
+//           ok: false,
+//           mensaje: 'Error al actualizar el mantenimiento',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         mantenimiento: mantenimientoGuardado
+//       });
+//     });
+//   });
+
+// });
+
+
+// // ==========================================
+// // Remover eventos de la maniobra
+// // ==========================================
+
+// app.delete('/maniobra/mantenimientos/:id', mdAutenticacion.verificaToken, (req, res) => {
+
+//   var id = req.params.id;
+//   var body = req.body;
+
+//   Mantenimiento.findByIdAndRemove(id, (err, mantenimientoBorrado) => {
+//     if (err) {
+//       return res.status(500).json({
+//         ok: false,
+//         mensaje: 'Error al borrar el mantenimiento',
+//         errors: err
+//       });
+//     }
+//     if (!buqueBorrado) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'No existe mantenimiento con ese id',
+//         errors: { message: 'No existe mantenimiento con ese id' }
+//       });
+//     }
+//     res.status(200).json({
+//       ok: true,
+//       mantenimiento: mantenimientoBorrado
+//     });
+//   });
+
+
+//   // Maniobra.findOne({ 'viaje': id, 'contenedor': contenedor })
+//   //   .exec((err, conte) => {
+//   //     if (err) {
+//   //       return res.status(500).json({
+//   //         ok: false,
+//   //         mensaje: 'Error al buscar viaje - Contenedor',
+//   //         errors: err
+//   //       });
+//   //     }
+//   //     if (!conte) {
+//   //       return res.status(400).json({
+//   //         ok: false,
+//   //         mensaje: 'El contenedor ' + contenedor + ' no existe',
+//   //         errors: { message: 'No existe un contendor con ese Numero' }
+//   //       });
+//   //     } else if ((conte.peso != 'VACIO' && conte.estatus != "APROBACION") || (conte.peso == 'VACIO' && conte.estatus != "TRANSITO")) {
+//   //       return res.status(400).json({
+//   //         ok: false,
+//   //         mensaje: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus,
+//   //         errors: { message: 'El contenedor ' + contenedor + ' no se puede eliminar porque ya tiene movimiento de ' + conte.estatus }
+//   //       });
+//   //     }
+//   //     conte.remove();
+//   //     res.status(200).json({
+//   //       ok: true,
+//   //       contenedor: conte.contenedor
+//   //     });
+//   //   });
+// });
+
+
+
+// // =======================================
+// // Obtener eventosñ
+// // =======================================
+// app.get('/maniobra/:id/eventos/', mdAutenticacion.verificaToken, (req, res) => {
+//   var id = req.params.id;
+
+//   Mantenimiento.find({ maniobra: id })
+//     .populate('usuario', 'nombre email')
+//     .exec((err, mantenimiento) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error los mantenimientos',
+//           errors: err
+//         });
+//       }
+//       res.status(200).json({
+//         ok: true,
+//         mantenimiento: mantenimiento,
+//         total: mantenimiento.length
+//       });
+
+//     });
+// });
 
 
 
 //#endregion
 
-// ==============================================================================
-// Actualizar Maniobra asignando su solicitud sin mdAutenticacion.verificaToken
-// ==============================================================================
 
-// SOLO SE ACTIVARA CUANDO SE NECESITE NO BORRAR ES PARA CUANDO LAS MANIOBRAS
-// PIERDAN SU CAMPO SOLICITUD
-
-// app.put('/actualiza/maniobras/', (req, res) => {
-//   Solicitud.find()
-//     .sort({ fAlta: -1 })
-//     .exec(
-//       (err, solicitudes) => {
-//         if (err) {
-//           return res.status(500).json({
-//             ok: false,
-//             mensaje: 'Error cargando solicitudes',
-//             errors: err
-//           });
-//         }
-//         solicitudes.forEach(s => {
-//           s.contenedores.forEach(c => {
-//             if (c.maniobra) {
-//               Maniobra.updateMany({ '_id': c.maniobra }, {
-//                 $set: {
-//                   'solicitud': s._id
-//                 }
-//               }, (err) => {
-//                 if (err) {
-//                   return res.status(400).json({
-//                     ok: false,
-//                     mensaje: 'Error al actualizar la maniobra con el id ' + c.maniobra,
-//                     errors: { message: 'Error al actualizar la maniobra con el id ' + c.maniobra }
-//                   });
-//                 }
-//               });
-//             }
-//           });
-//         });
-
-//         res.status(200).json({
-//           ok: true,
-//           solicitudes: solicitudes,
-//           total: solicitudes.length
-//         });
-
-//       });
-// });
 module.exports = app;

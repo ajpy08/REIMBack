@@ -71,6 +71,7 @@ var pdfFacturacionRoutes = require('./routes/pdfFacturacion');
 var materialesRoutes = require('./routes/materiales');
 var unidadesRoutes = require('./routes/unidades');
 var entradasRoutes = require('./routes/entradas');
+var mantenimientosRoutes = require('./routes/mantenimientos');
 
 var proveedorRoutes = require('./routes/proveedores');
 
@@ -120,6 +121,7 @@ app.use('/proveedores', proveedorRoutes);
 app.use('/materiales', materialesRoutes);
 app.use('/unidades', unidadesRoutes);
 app.use('/entradas', entradasRoutes);
+app.use('/mantenimientos', mantenimientosRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
