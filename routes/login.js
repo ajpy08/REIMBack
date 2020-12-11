@@ -128,7 +128,12 @@ function obtenerMenu(ROLE) {
           //     icono: 'fas fa-ellipsis-v',
           //     submenu2: []
           // }]
-      }
+      },
+      {
+        titulo: 'Almacen',
+        icono: 'fas fa-warehouse',
+        submenu: []
+      },
     ];
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
@@ -155,13 +160,11 @@ function obtenerMenu(ROLE) {
 
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
-      menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
-      menu[0].submenu.unshift({ titulo: 'Entradas', url: '/entradas' });
+      menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });      
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
       menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Productos Servicios', url: '/clave-productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Unidades', url: '/clave-unidades' });
-      menu[1].submenu.unshift({ titulo: 'Materiales', url: '/materiales' });
     }
 
 
@@ -186,6 +189,11 @@ function obtenerMenu(ROLE) {
     menu[5].submenu.unshift({ titulo: 'Facturación Maniobras', url: '/facturacion-maniobras' });
     menu[5].submenu.unshift({ titulo: 'Complemento de Pago', url: '/complementos' });
     menu[5].submenu.unshift({ titulo: 'CFDIS', url: '/cfdis' });
+
+    menu[6].submenu.unshift({ titulo: 'Entradas', url: '/entradas' });
+    menu[6].submenu.unshift({ titulo: 'Materiales', url: '/materiales' });
+    menu[6].submenu.unshift({ titulo: 'Inventario de Materiales', url: '/inventario-material' });
+    menu[6].submenu.unshift({ titulo: 'Faltante de Materiales', url: '/faltante-material' });
 
     return menu;
 
