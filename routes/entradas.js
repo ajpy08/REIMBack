@@ -23,6 +23,7 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
         .populate('usuarioAlta', 'nombre email')
         .populate('usuarioMod', 'nombre email')
         .populate('proveedor', 'razonSocial')
+        .populate('detalles.material', 'descripcion')
         .sort({ fAlta: -1 })
         .exec(
             (err, entradas) => {

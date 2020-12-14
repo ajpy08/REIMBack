@@ -75,8 +75,13 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
     var material = req.params.id;
+    // var activo = true;
 
     var filtro = '{';
+
+    // if (activo != 'undefined' && activo != '')
+    // filtro += '\"activo\":' + '\"' + activo + '\",';
+
     if (material != 'undefined' && material != '')
         filtro += '\"detalles.material\":' + '\"' + material + '\",';
 
@@ -85,7 +90,7 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
     filtro = filtro + '}';
     var json = JSON.parse(filtro);
     Entrada.find(json)
-        .populate('detalles.material', 'descripcion costo precio tipo minimo')
+        // .populate('detalles.material', 'descripcion costo precio tipo minimo')
         .sort({ fAlta: -1 })
         .exec(
             (err, entradas) => {
