@@ -886,67 +886,71 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
   var id = req.params.id;
   var body = req.body;
 
-  if (!body.lavado && body.reparaciones.length == 0 &&
-    body.hDescarga !== '' && body.hDescarga !== undefined &&
-    body.hSalida !== '' && body.hSalida !== undefined &&
-    (body.grado === '' || body.grado === undefined)) {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR',
-      errors: { message: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR' }
-    });
-  }
 
-  Maniobra.findById(id, (err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar maniobra',
-        errors: err
-      });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
-      });
-    }
-    maniobra.lavado = body.lavado;
-    if (maniobra.lavado) maniobra.lavadoObservacion = body.lavadoObservacion;
-
-    maniobra.reparaciones = body.reparaciones;
-    if (maniobra.reparaciones.length > 0)
-      maniobra.reparacionesObservacion = body.reparacionesObservacion;
-
-    maniobra.historial = body.historial;
-    maniobra.sello = body.sello;
-    maniobra.grado = body.grado;
-    // if (maniobra.descargaAutorizada == true) {
-    maniobra.hDescarga = body.hDescarga;
-    maniobra.hSalida = body.hSalida;
-
-    if (maniobra.hDescarga !== '' && maniobra.hDescarga !== undefined && maniobra.hSalida !== '' && maniobra.hSalida !== undefined) {
-      maniobra.estatus = "LAVADO_REPARACION";
-      if (!body.lavado && body.reparaciones.length == 0)
-        maniobra.estatus = "DISPONIBLE";
-    }
-    // }
-
-    maniobra.save((err, maniobraGuardado) => {
+  Mantenimiento.find({ maniobra: id, finalizado: false })
+    .exec((err, mantenimientos) => {
       if (err) {
-        return res.status(400).json({
+        return res.status(500).json({
           ok: false,
-          mensaje: 'Error al actualizar la maniobra',
+          mensaje: 'Ha habido un error al consultar los Mantenimientos.',
           errors: err
         });
+      } else {
+        if ((mantenimientos.length <= 0) && (body.grado === '' || body.grado === undefined)) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'Si no hay lavados o reparaciones pendientes, DEBE ASIGNAR EL GRADO DEL CONTENEDOR',
+            errors: { message: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR' }
+          });
+        } else {
+
+          Maniobra.findById(id, (err, maniobra) => {
+            if (err) {
+              return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar maniobra',
+                errors: err
+              });
+            }
+            if (!maniobra) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'La maniobra con el id ' + id + ' no existe',
+                errors: { message: 'No existe una maniobra con ese ID' }
+              });
+            }
+            maniobra.historial = body.historial;
+            maniobra.sello = body.sello;
+            maniobra.grado = body.grado;
+            // if (maniobra.descargaAutorizada == true) {
+            maniobra.hDescarga = body.hDescarga;
+            maniobra.hSalida = body.hSalida;
+
+            if (body.hDescarga !== '' && body.hDescarga !== undefined && body.hSalida !== '' && body.hSalida !== undefined)
+              if (mantenimientos.length > 0)
+                maniobra.estatus = "LAVADO_REPARACION";
+              else
+                maniobra.estatus = "DISPONIBLE";
+
+              // }
+
+            maniobra.save((err, maniobraGuardado) => {
+              if (err) {
+                return res.status(400).json({
+                  ok: false,
+                  mensaje: 'Error al actualizar la maniobra',
+                  errors: err
+                });
+              }
+              res.status(200).json({
+                ok: true,
+                maniobra: maniobraGuardado
+              });
+            });
+          });
+        }
       }
-      res.status(200).json({
-        ok: true,
-        maniobra: maniobraGuardado
-      });
     });
-  });
 });
 
 // =======================================
