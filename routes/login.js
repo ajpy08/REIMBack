@@ -135,6 +135,7 @@ function obtenerMenu(ROLE) {
         submenu: []
       },
     ];
+    menu[0].submenu.unshift({ titulo: 'Mantenimientos', url: '/mantenimientos' });
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
@@ -160,7 +161,7 @@ function obtenerMenu(ROLE) {
 
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
-      menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });      
+      menu[0].submenu.unshift({ titulo: 'Status de Usuarios', url: '/status' });
       menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
       menu[1].submenu.unshift({ titulo: 'FAC Productos o Servicios', url: '/productos-servicios' });
       menu[1].submenu.unshift({ titulo: 'FAC Clave Productos Servicios', url: '/clave-productos-servicios' });
@@ -223,6 +224,7 @@ function obtenerMenu(ROLE) {
         submenu: []
       }
     ];
+    menu[0].submenu.unshift({ titulo: 'Mantenimientos', url: '/mantenimientos' });
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Liberaciones Booking', url: '/aprobacion_tbk' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
@@ -355,6 +357,7 @@ function obtenerMenu(ROLE) {
         { titulo: 'Dashboard', url: '/dashboard' }
       ]
     }, ];
+    menu[0].submenu.unshift({ titulo: 'Mantenimientos', url: '/mantenimientos' });
     menu[0].submenu.unshift({ titulo: 'Vigencia de Contenedor', url: '/vigencias' });
     menu[0].submenu.unshift({ titulo: 'Lavado / Reparación', url: '/contenedoresLR' });
     menu[0].submenu.unshift({ titulo: 'Inventario', url: '/inventario' });
