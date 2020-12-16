@@ -10,11 +10,14 @@ var app = express();
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
     var noFactura = req.query.noFactura || '';
     var proveedor = req.query.proveedor || '';
+    var material = req.query.material || '';
     var filtro = '{';
     if (noFactura != 'undefined' && noFactura != '')
         filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
     if (proveedor != 'undefined' && proveedor != '')
         filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
+    if (material != 'undefined' && material != '')
+        filtro += '\"detalles.material\":' + '\"' + material + '\",';
     if (filtro != '{')
         filtro = filtro.slice(0, -1);
     filtro = filtro + '}';

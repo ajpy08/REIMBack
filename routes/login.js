@@ -194,7 +194,7 @@ function obtenerMenu(ROLE) {
     menu[6].submenu.unshift({ titulo: 'Materiales', url: '/materiales' });
     menu[6].submenu.unshift({ titulo: 'Inventario de Materiales', url: '/inventario-material' });
     menu[6].submenu.unshift({ titulo: 'Faltante de Materiales', url: '/faltante-material' });
-    menu[6].submenu.unshift({ titulo: 'Reporte de Movimientos', url: '/reporte-movimientos/:id' });
+    menu[6].submenu.unshift({ titulo: 'Reporte de Movimientos', url: '/reporte-movimientos' });
 
     return menu;
 
