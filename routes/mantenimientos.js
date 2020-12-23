@@ -65,6 +65,35 @@ app.get('/xmaniobra/:id', (req, res) => {
     });
 });
 
+// =======================================
+// Obtener mantenimientos x TIPO
+// =======================================
+app.get('/xtipo/:tipo', mdAutenticacion.verificaToken, (req, res) => {
+  //app.get('/xtipo/:tipo', (req, res) => {
+  var tipo = req.params.tipo;
+
+  Mantenimiento.find({ tipoMantenimiento: tipo })
+    .populate('usuario', 'nombre email')
+    .populate('maniobra', 'contenedor tipo peso')
+    .exec((err, mantenimientos) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error los mantenimientos',
+          errors: err
+        });
+      }
+      console.log(mantenimientos);
+      res.status(200).json({
+        ok: true,
+        mantenimientos: mantenimientos,
+        total: mantenimientos.length
+
+      });
+
+    });
+});
+
 // ==========================================
 // Agregar mantenimiento a la maniobra
 // ==========================================
