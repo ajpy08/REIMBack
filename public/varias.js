@@ -91,3 +91,33 @@ exports.creaArchivoTXT = function creaArchivoTXT(ruta, contenido) {
     });
   });
 }
+// getGaps(BinaryArray, [])
+exports.getGaps = function getGaps(BinaryArray, gaps) {
+  console.log('BinaryArray ' + BinaryArray);
+
+  // finding the first one via its index
+  const firstOne = BinaryArray.indexOf("1");
+  console.log("firstOne " + firstOne);
+  if (firstOne > -1) {
+    // new array created taking a slice of original array 
+    // from the index of the firstOne + 1 index
+    let NewBinaryArray = BinaryArray.slice(firstOne + 1);
+    console.log("NewBinaryArray " + NewBinaryArray);
+    // finding second one via its index in new array slice
+    const secondOne = NewBinaryArray.indexOf("1");
+    console.log("secondOne " + secondOne);
+    // accounting for no zeros
+    if (secondOne > 0) {
+      // adding 2 to our gaps array
+      gaps.push(secondOne);
+      console.log("gaps " + gaps);
+    }
+
+    // Pass array minus second one and gaps array
+    return getGaps(NewBinaryArray.slice(secondOne + 1), gaps);
+  }
+
+  // if gaps array length is empty return 0
+  // otherwise return largest value in array
+  return (gaps.length > 0) ? Math.max.apply(Math, gaps) : 0;
+}
