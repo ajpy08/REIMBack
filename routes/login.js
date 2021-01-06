@@ -155,8 +155,6 @@ function obtenerMenu(ROLE) {
     menu[1].submenu.unshift({ titulo: 'Transportistas', url: '/transportistas' });
     menu[1].submenu.unshift({ titulo: 'Agencias', url: '/agencias' });
     menu[1].submenu.unshift({ titulo: 'Navieras', url: '/navieras' });
-    menu[1].submenu.unshift({ titulo: 'Proveedores', url: '/proveedores' });
-
 
     //Solo Admin puede entrar a los siguiente
     if (ROLE === 'ADMIN_ROLE') {
@@ -190,11 +188,12 @@ function obtenerMenu(ROLE) {
     menu[5].submenu.unshift({ titulo: 'Complemento de Pago', url: '/complementos' });
     menu[5].submenu.unshift({ titulo: 'CFDIS', url: '/cfdis' });
 
-    menu[6].submenu.unshift({ titulo: 'Entradas', url: '/entradas' });
-    menu[6].submenu.unshift({ titulo: 'Materiales', url: '/materiales' });
-    menu[6].submenu.unshift({ titulo: 'Inventario de Materiales', url: '/inventario-material' });
-    menu[6].submenu.unshift({ titulo: 'Faltante de Materiales', url: '/faltante-material' });
     menu[6].submenu.unshift({ titulo: 'Reporte de Movimientos', url: '/reporte-movimientos' });
+    menu[6].submenu.unshift({ titulo: 'Faltante de Materiales', url: '/faltante-material' });
+    menu[6].submenu.unshift({ titulo: 'Inventario de Materiales', url: '/inventario-material' });
+    menu[6].submenu.unshift({ titulo: 'Entradas Material', url: '/entradas' });
+    menu[6].submenu.unshift({ titulo: 'Catálogo de Materiales', url: '/materiales' });
+    menu[6].submenu.unshift({ titulo: 'Catálogo de Proveedores', url: '/proveedores' });
 
     return menu;
 
