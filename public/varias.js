@@ -121,3 +121,10 @@ exports.getGaps = function getGaps(BinaryArray, gaps) {
   // otherwise return largest value in array
   return (gaps.length > 0) ? Math.max.apply(Math, gaps) : 0;
 }
+
+exports.asyncForEach = async() => {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index]);
+    // await callback(array[index], index, array);
+  }
+}
