@@ -1,6 +1,22 @@
 var AWS = require('aws-sdk');
 var entorno = require('../config/config').config();
 
+exports.ListaArchivosBucket = (ruta) => {
+  return new Promise((resolve, reject) => {
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+    var params = {
+      Bucket: entorno.BUCKET,
+      Delimiter: '/',
+      Prefix: ruta
+    };
+
+    s3.listObjects(params, (err, data) => {
+      if(err)throw err;
+      resolve(data.Contents);
+     });
+  });
+};
+
 exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, nombreArchivo) {
   return new Promise((resolve, reject) => {
     var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
@@ -13,13 +29,13 @@ exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, n
       };
     } else {
       params = {
-       Bucket: entorno.BUCKET,
-       Body: archivo.data,
-       Key: rutaDestino + nombreArchivo,
-       ContentType: archivo.mimetype
-     };
+        Bucket: entorno.BUCKET,
+        Body: archivo.data,
+        Key: rutaDestino + nombreArchivo,
+        ContentType: archivo.mimetype
+      };
     }
-    s3.upload(params, function(err, data) {
+    s3.upload(params, function (err, data) {
       if (err) {
         console.log("Error", err);
       }
@@ -31,6 +47,37 @@ exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, n
   });
 };
 
+exports.CopiarArchivoBucket = (rutaTmp, nameTmp, rutaDestino) => {
+  if (nameTmp != null && nameTmp != undefined && nameTmp != '') {
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+    var params = {
+      Bucket: entorno.BUCKET,
+      CopySource: entorno.BUCKET + '/' + rutaTmp + nameTmp,
+      Key: rutaDestino + nameTmp
+    };
+    s3.copyObject(params, function (err, data) {
+      if (err) {
+        console.log(err, err.stack); // an error occurred
+      } else {
+        //Si se mueve, borro el original
+        var paramsDelete = {
+          Bucket: entorno.BUCKET,
+          Key: rutaTmp + nameTmp
+        };
+        // s3.deleteObject(paramsDelete, function (err, data) {
+        //   if (err) {
+        //     console.log("Error", err);
+        //   }
+        //   if (data) {
+        //     console.log("Elemento eliminado:", rutaTmp + nameTmp);
+        //   }
+        // });
+      }
+    });
+  }
+  return (true);
+};
+
 exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaDestino) {
   if (nameTmp != null && nameTmp != undefined && nameTmp != '') {
     var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
@@ -39,7 +86,7 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
       CopySource: entorno.BUCKET + '/' + rutaTmp + nameTmp,
       Key: rutaDestino + nameTmp
     };
-    s3.copyObject(params, function(err, data) {
+    s3.copyObject(params, function (err, data) {
       if (err) {
         console.log(err, err.stack); // an error occurred
       } else {
@@ -49,7 +96,7 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
           Bucket: entorno.BUCKET,
           Key: rutaTmp + nameTmp
         };
-        s3.deleteObject(paramsDelete, function(err, data) {
+        s3.deleteObject(paramsDelete, function (err, data) {
           if (err) {
             console.log("Error", err);
           }
@@ -70,7 +117,7 @@ exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
       Bucket: entorno.BUCKET,
       Key: ruta + name
     };
-    s3.deleteObject(paramsDelete, function(err, data) {
+    s3.deleteObject(paramsDelete, function (err, data) {
       if (err) {
         console.log("Error", err);
       }
@@ -89,7 +136,7 @@ exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
         Bucket: entorno.BUCKET,
         Key: key
       };
-      s3.deleteObject(paramsDelete, function(err, data) {
+      s3.deleteObject(paramsDelete, function (err, data) {
         if (err) {
           console.log("Error", err);
         }
