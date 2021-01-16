@@ -65,6 +65,30 @@ app.get('/maniobra/lavado_reparacion', (req, res, netx) => {
   }
 });
 
+app.get('/documento/imagen', (req, res, netx) => {
+  var img = req.query.ruta;
+
+  if (!img) {
+    res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
+  } else {
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+    var params = {
+      Bucket: entorno.BUCKET,
+      Key: img
+    };
+
+    s3.getObject(params, (err, data) => {
+      if (err) {
+        console.error('ERROR EN CALLBACK ' + img);
+        res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
+      } else {
+        res.setHeader('Content-disposition', 'atachment; filename=' + img);
+        res.setHeader('Content-length', data.ContentLength);
+        res.send(data.Body);
+      }
+    });
+  }
+});
 
 //DESCARGAR TODO LA CARPETA DE IMAGENES COMPRIMIDA //
 app.get('/maniobra/:id/zipLR/:LR', (req, res, netx) => {
@@ -81,7 +105,7 @@ app.get('/maniobra/:id/zipLR/:LR', (req, res, netx) => {
     }
   }
   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
-  
+
 
 
   var bucket = entorno.BUCKET;
@@ -91,7 +115,7 @@ app.get('/maniobra/:id/zipLR/:LR', (req, res, netx) => {
     Prefix: folder,
   }
 
-  s3.listObjectsV2(params, function (err, data) {
+  s3.listObjectsV2(params, function(err, data) {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -107,10 +131,10 @@ app.get('/maniobra/:id/zipLR/:LR', (req, res, netx) => {
       });
       // const output = fs.createWriteStream(join(res + `${idManiobra}.zip`));
 
-       s3Zip.archive({ s3: s3 , bucket: bucket , debug: true }, folder, files ).pipe(res, `${idManiobra}.zip`);
-      
+      s3Zip.archive({ s3: s3, bucket: bucket, debug: true }, folder, files).pipe(res, `${idManiobra}.zip`);
 
-      
+
+
       //  output.on('close', () => {
       //    console.log('Cerrado');
       //    res.download(res.path, 'algo.zip');
@@ -153,7 +177,7 @@ app.get('/maniobra/:Id/listaImagenes/:LR/', (req, res, netx) => {
     Prefix: pathFotos,
   };
 
-  s3.listObjects(params, function (err, data) {
+  s3.listObjects(params, function(err, data) {
     if (err) {
       // console.log(err, err.stack);
       return res.status(400).json({

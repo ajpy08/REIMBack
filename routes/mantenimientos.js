@@ -5,6 +5,19 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Mantenimiento = require('../models/mantenimiento');
+var variasBucket = require('../public/variasBucket');
+
+
+var entorno = require('../config/config').config();
+//var AWS = require('aws-sdk');
+var AWS = require('aws-sdk/global');
+
+var fileUpload = require('express-fileupload');
+var uuid = require('uuid/v1');
+var s3Zip = require('s3-zip');
+
+
+app.use(fileUpload());
 
 
 
@@ -71,7 +84,6 @@ app.get('/xmaniobra/:id', (req, res) => {
 app.get('/xtipo/:tipo', mdAutenticacion.verificaToken, (req, res) => {
   //app.get('/xtipo/:tipo', (req, res) => {
   var tipo = req.params.tipo;
-
   Mantenimiento.find({ tipoMantenimiento: tipo })
     .populate('usuario', 'nombre email')
     .populate('maniobra', 'contenedor tipo peso')
@@ -83,7 +95,7 @@ app.get('/xtipo/:tipo', mdAutenticacion.verificaToken, (req, res) => {
           errors: err
         });
       }
-      console.log(mantenimientos);
+      //console.log(mantenimientos);
       res.status(200).json({
         ok: true,
         mantenimientos: mantenimientos,
@@ -227,5 +239,233 @@ app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
   });
 });
 
+// ==========================================
+// Subir fotos ANTES o DESPUES
+// ==========================================
+app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
+
+  var id = req.params.id;
+  var AD = req.params.AD;
+  console.log(req.files);
+  if (!req.files) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'No selecciono nada',
+      errors: { message: 'Debe de seleccionar una imagen' }
+    });
+  }
+  console.log(id);
+  console.log(AD);
+  // Obtener nombre del archivo
+  var archivo = req.files.file;
+  var nombreCortado = archivo.name.split('.');
+  var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+  var nombreArchivo = `${uuid()}.${extensionArchivo}`;
+  var path = 'mantenimientos/' + id + '/';
+
+  if (AD === "ANTES")
+    path = path + 'fotos_antes/';
+  else
+  if (AD === "DESPUES")
+    path = path + 'fotos_despues/';
+
+  variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
+    .then((value) => {
+      if (value) {
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Archivo guardado!',
+        });
+      }
+    });
+});
+
+// RECUPERAR LISTA DE  Fotos antes y despues
+app.get('/mantenimiento/:id/fotos/:AD/', (req, res, netx) => {
+  var idMantenimiento = req.params.id;
+  var antes_despues = req.params.AD;
+  var pathFotos = "";
+
+  if (antes_despues === 'ANTES') {
+    pathFotos = `mantenimientos/${idMantenimiento}/fotos_antes/`;
+  } else {
+    if (antes_despues === 'DESPUES') {
+      pathFotos = `mantenimientos/${idMantenimiento}/fotos_despues/`;
+    }
+  }
+
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+  var params = {
+    Bucket: entorno.BUCKET,
+    Prefix: pathFotos,
+  };
+  s3.listObjects(params, function(err, data) {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se encontraron fotos',
+        errors: { message: 'No existen fotos para mantenimiento con ID: ' + idMantenimiento }
+      });
+    } else {
+      // console.log(data.Contents); // successful response
+      res.status(200).json({
+        ok: true,
+        // fotos: JSON.parse(JSON.stringify(array)),
+        fotos: data.Contents,
+        total: data.Contents.length
+      });
+    }
+  });
+});
+
+// Recupera Foto por medio de la ruta completa..
+app.get('/mantenimiento/getfoto', (req, res, netx) => {
+  var img = req.query.ruta;
+
+  if (!img) {
+    res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
+  } else {
+    var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+    var params = {
+      Bucket: entorno.BUCKET,
+      Key: img
+    };
+
+    s3.getObject(params, (err, data) => {
+      if (err) {
+        console.error('ERROR EN CALLBACK ' + img);
+        res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
+      } else {
+        res.setHeader('Content-disposition', 'atachment; filename=' + img);
+        res.setHeader('Content-length', data.ContentLength);
+        res.send(data.Body);
+      }
+    });
+  }
+});
+
+// ============================================
+//   Borrar Foto de Mantenimiento desde Bucket 
+// ============================================
+app.get('/mantenimiento/:id/eliminafoto/:AD/:name', (req, res, netx) => {
+  var id = req.params.id;
+  var a_d = req.params.AD;
+  var nameimg = req.params.name;
+
+  var pathfoto;
+  if (a_d === 'ANTES') {
+    pathfoto = `mantenimientos/${id}/fotos_antes/${nameimg}`;
+  } else {
+    if (a_d === 'DESPUES') {
+      pathfoto = `mantenimientos/${id}/fotos_despues/${nameimg}`;
+    }
+  }
+  console.log(pathfoto);
+  variasBucket.BorrarArchivoBucketKey(pathfoto)
+    .then((value) => {
+      if (value) {
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Foto Eliminada!',
+        });
+      }
+    });
+});
+
+
+//DESCARGAR TODO LA CARPETA DE IMAGENES EN UN ZIP //
+// app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
+//   var idMantenimiento = req.params.id;
+//   var antes_despues = req.params.AD;
+//   var folder = "";
+//   folder = `mantenimientos/${idMantenimiento}/`;
+
+//   if (antes_despues === 'ANTES') {
+//     folder = `mantenimientos/${idMantenimiento}/fotos_antes/`;
+
+//   } else {
+//     if (antes_despues === 'DESPUES') {
+//       folder = `mantenimientos/${idMantenimiento}/fotos_despues/`;
+//     }
+//   }
+
+//   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+//   var bucket = entorno.BUCKET;
+//   var params = {
+//     Bucket: entorno.BUCKET,
+//     Prefix: folder,
+//   }
+
+//   s3.listObjectsV2(params, function(err, data) {
+//     if (err) {
+//       return res.status(400).json({
+//         ok: false,
+//         mensaje: 'No se encontraron fotos',
+//         errors: { message: 'No existen fotos para el Mantenimiento con ID ' + idMantenimiento }
+//       });
+//     } else {
+//       const files = [];
+//       data.Contents.forEach(d => {
+//         const img = d.Key.substr(d.Key.lastIndexOf('/') + 1, d.Key.length - 1);
+//         files.push(img);
+//       });
+//       // const output = fs.createWriteStream(join(res + `${idMantenimiento}.zip`));
+//       s3Zip.archive({ s3: s3, bucket: bucket, preserveFolderStructure: true }, folder, files).pipe(res, `${idMantenimiento}.zip`);
+//       //s3Zip.archive({ s3: s3, bucket: bucket, debug: true, preserveFolderStructure: true }, folder, files).pipe(res, `${idMantenimiento}.zip`);
+//       //  output.on('close', () => {
+//       //    console.log('Cerrado');
+//       //    res.download(res.path, 'algo.zip');
+//       //    return;
+//       //  });
+//       //  return;
+//       //res.send(s3Zip.archive({ region: region, bucket: bucket, debug: true, preserveFolderStructure: true  }, folder, files).pipe(output));
+//       // res.setHeader('Content-disposition', 'atachment; filename=algo.zip'); 
+//       // res.setHeader('Content-length',data.Contents);
+//       // res.status(200).json({
+//       //   ok:true,
+//       //   archive: output
+//       // });
+//     }
+//   })
+// })
+
+app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
+  var idMantenimiento = req.params.id;
+  var antes_despues = req.params.AD;
+  var folder = "";
+  folder = `mantenimientos/${idMantenimiento}/`;
+  const files = [];
+
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+  var bucket = entorno.BUCKET;
+  var params = {
+    Bucket: entorno.BUCKET,
+    Prefix: folder
+  }
+  s3.listObjectsV2(params, function(err, data) {
+    if (err) {
+
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Hubo un error al consultar las fotos del ANTES',
+        errors: { message: 'Hubo un error al consultar las fotos del ANTES ' + idMantenimiento }
+      });
+    } else {
+      data.Contents.forEach(d => {
+        const img = d.Key.substr(folder.length);
+        if (img.substr(0, 11) === "fotos_antes" && antes_despues !== "DESPUES") files.push(img);
+        if (img.substr(0, 13) === "fotos_despues" && antes_despues !== "ANTES") files.push(img);
+      });
+    }
+    if (files.length > 0) s3Zip.archive({ s3: s3, bucket: bucket, preserveFolderStructure: true }, folder, files).pipe(res, `${idMantenimiento}.zip`);
+    else {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se encontraron fotos.',
+        errors: { message: 'No se encontraron fotos del mantenimiento: ' + idMantenimiento }
+      });
+    }
+  });
+});
 
 module.exports = app;
