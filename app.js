@@ -396,6 +396,9 @@ io.on('connection', function(socket) {
   socket.on('deletemerma', function(data) {
     io.emit('delete-merma', { data: data });
   });
+  socket.on('aprobarmerma', function(data) {
+    io.emit('aprobar-merma', { data: data });
+  });
   /* #endregion */
 
 });

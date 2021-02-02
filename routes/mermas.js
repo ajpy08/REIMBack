@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Merma = require('../models/merma');
 var app = express();
+var mongoose = require('mongoose');
 
 // ==========================================
 //  Obtener todas las Mermas
@@ -170,5 +171,40 @@ app.delete('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
             merma: mermaBorrada
         });
     });
+});
+
+// ==========================================
+// Aprobar Merma 
+// ==========================================
+app.put('/aprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
+    const idMerma = req.params.id;
+    const fAprobacion = new Date();
+    const comentario = req.body.comentarioAprobacion;
+    if (req.usuario.role === 'ADMIN_ROLE' || req.usuario.role === 'PATIOADMIN_ROLE') {
+        Merma.updateOne({ "_id": new mongoose.Types.ObjectId(idMerma) }, {
+            $set: {
+                "usuarioAprobacion": new mongoose.Types.ObjectId(req.usuario._id),
+                "fAprobacion": fAprobacion,
+                "comentarioAprobacion": comentario
+            }
+        }, (err, mermaActualizada) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al autorizar merma',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                mermaActualizada
+            });
+        });
+    } else {
+        return res.status(400).json({
+            ok: false,
+            mensaje: 'No tienes privilegios para Aprobar Mermas'
+        });
+    }
 });
 module.exports = app;
