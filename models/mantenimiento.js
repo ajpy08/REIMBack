@@ -14,14 +14,14 @@ var SchemaFechas = new Schema({
 }, { _id: false });
 
 var SchemaMateriales = new Schema({
-  Material: { type: Schema.Types.ObjectId, ref: 'materiales' },
+  material: { type: Schema.Types.ObjectId, ref: 'Material' },
   descripcion: { type: String },
   cantidad: { type: Number },
   costo: { type: mongoose.Types.Decimal128, get: getDecimal },
   precio: { type: mongoose.Types.Decimal128, get: getDecimal },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now }
-}, { _id: false });
+});
 
 var mantenimientoSchema = new Schema({
   maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
