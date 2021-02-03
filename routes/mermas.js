@@ -207,4 +207,37 @@ app.put('/aprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
         });
     }
 });
+
+// ==========================================
+// Desaprobar merma
+// ==========================================
+
+app.put('/desaprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+
+    if (req.usuario.role === 'ADMIN_ROLE' || req.usuario.role === 'PATIOADMIN_ROLE') {
+        Merma.updateOne({ "_id": id }, { $unset: { "usuarioAprobacion": undefined, "fAprobacion": undefined, "comentarioAprobacion": undefined } }, (err, mermaDesaprobada) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al desaprobar merma',
+                    errors: err
+                });
+            }
+
+            if (!mermaDesaprobada) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existe una maniobra con ese id',
+                    errors: { message: 'No existe una maniobra con ese id' }
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                merma: mermaDesaprobada
+            });
+        });
+    }
+});
 module.exports = app;

@@ -399,6 +399,10 @@ io.on('connection', function(socket) {
   socket.on('aprobarmerma', function(data) {
     io.emit('aprobar-merma', { data: data });
   });
+
+  socket.on('desaprobarmerma', function(data) {
+    io.emit('desaprobar-merma', { data: data });
+  });
   /* #endregion */
 
 });
