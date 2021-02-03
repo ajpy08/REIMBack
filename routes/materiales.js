@@ -2,6 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Material = require('../models/material');
 var Entrada = require('../models/entrada');
+var Merma = require('../models/merma');
 var app = express();
 
 // ==========================================
@@ -75,13 +76,8 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
     var material = req.params.id;
-    // var activo = true;
 
     var filtro = '{';
-
-    // if (activo != 'undefined' && activo != '')
-    // filtro += '\"activo\":' + '\"' + activo + '\",';
-
     if (material != 'undefined' && material != '')
         filtro += '\"detalles.material\":' + '\"' + material + '\",';
 
@@ -93,37 +89,79 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
         // .populate('detalles.material', 'descripcion costo precio tipo minimo')
         .sort({ fAlta: -1 })
         .exec(
-            (err, entradas) => {
+            (err, entrada) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando entradas',
+                        mensaje: 'Error cargando entrada',
                         errors: err
                     });
                 }
 
-                let stock = 0;
-                let material;
-                let ok = false;
-                if (entradas.length > 0) {
-                    entradas.forEach(e => {
-                        e.detalles.forEach(d => {
-                            if (d.material._id == req.params.id) {
-                                ok = true;
-                                stock += d.cantidad;
-                                material = d.material;
-                            }
-                        });
-
-                    });
+                let filtro = '{';
+                if (material != 'undefined' && material != '') {
+                    filtro += '\"materiales.material\":' + '\"' + material + '\",';
+                    filtro += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
                 }
 
-                res.status(200).json({
-                    ok,
-                    material: material,
-                    stock: stock
-                });
+                if (filtro != '{')
+                    filtro = filtro.slice(0, -1);
+                filtro = filtro + '}';
+                const json = JSON.parse(filtro);
 
+
+                Merma.find(json)
+                    // .populate('materiales.material', 'descripcion')
+                    .exec((err, mermas) => {
+                        if (err) {
+                            return res.status(500).json({
+                                ok: false,
+                                mensaje: 'Error al buscar mermas',
+                                errors: err
+                            });
+                        }
+                        if (!mermas) {
+                            return res.status(400).json({
+                                ok: false,
+                                mensaje: 'El mermas con el id ' + material + ' no existe',
+                                errors: { message: 'No existe una mermas con ese ID' }
+                            });
+                        }
+
+                        let stock = 0;
+                        let material;
+                        let ok = false;
+                        if (entrada.length > 0) {
+                            entrada.forEach(e => {
+                                e.detalles.forEach(d => {
+                                    if (d.material._id == req.params.id) {
+                                        ok = true;
+                                        stock += d.cantidad;
+                                        material = d.material;
+                                    }
+                                });
+
+                            });
+                        }
+
+                        if (mermas.length > 0) {
+                            mermas.forEach(m => {
+                                m.materiales.forEach(m => {
+                                    if (m.material._id == req.params.id) {
+                                        ok = true;
+                                        stock -= m.cantidad;
+                                    }
+                                });
+
+                            });
+                        }
+
+                        res.status(200).json({
+                            ok,
+                            material: material,
+                            stock: stock
+                        });
+                    });
             });
 });
 
@@ -132,7 +170,7 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================================================
 
 app.get('/costo-precio', mdAutenticacion.verificaToken, (req, res) => {
-    Material.find({$expr:{$gte:["$costo", "$precio"]}})
+    Material.find({ $expr: { $gte: ["$costo", "$precio"] } })
         // .populate('usuarioAlta', 'nombre email')
         // .populate('usuarioMod', 'nombre email')
         // .populate('unidadMedida', 'descripcion abreviacion')
