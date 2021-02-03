@@ -227,7 +227,8 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
 
-
+    // console.log(mantenimiento.materiales);
+    // console.log("nadan");
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento,
       mantenimiento.tipoLavado = body.tipoLavado,
       mantenimiento.cambioGrado = body.cambioGrado,
@@ -245,7 +246,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       mantenimiento.finalizado = body.finalizado,
       mantenimiento.usuarioMod = req.usuario._id,
       mantenimiento.fMod = new Date();
-
+    // console.log(mantenimiento.materiales);
     mantenimiento.save((err, mantenimientoGuardado) => {
       if (err) {
         return res.status(400).json({
@@ -260,6 +261,16 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     });
   });
+
+});
+
+
+app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.material;
+  console.log(body);
+  //REvisar primero si se puede agregar por el stock
+  //REchazarlo o darlo de alta en el array
 
 });
 
