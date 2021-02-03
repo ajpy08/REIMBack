@@ -168,6 +168,7 @@ app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
         entrada.proveedor = body.proveedor;
         entrada.fFactura = body.fFactura;
         entrada.detalles = body.detalles;
+        entrada.usuarioMod = req.usuario._id;
         entrada.fMod = new Date();
         entrada.save((err, entradaGuardada) => {
             if (err) {

@@ -72,6 +72,7 @@ var materialesRoutes = require('./routes/materiales');
 var unidadesRoutes = require('./routes/unidades');
 var entradasRoutes = require('./routes/entradas');
 var mantenimientosRoutes = require('./routes/mantenimientos');
+var mermasRoutes = require('./routes/mermas');
 
 var proveedorRoutes = require('./routes/proveedores');
 
@@ -122,6 +123,7 @@ app.use('/materiales', materialesRoutes);
 app.use('/unidades', unidadesRoutes);
 app.use('/entradas', entradasRoutes);
 app.use('/mantenimientos', mantenimientosRoutes);
+app.use('/mermas', mermasRoutes);
 app.use('/', appRoutes);
 
 // Conexión a la base de datos Mongoose
@@ -339,7 +341,6 @@ io.on('connection', function(socket) {
   });
   /* #endregion */
 
-
   /* #region  SOCKET Proveedores */
   socket.on('newproveedor', function(data) {
     io.emit('new-proveedor', { data: data });
@@ -354,7 +355,6 @@ io.on('connection', function(socket) {
     // console.log('Eliminaste un buque!!! =( ');
   });
   /* #endregion */
-
 
   /* #region  SOCKET MATERIALES */
   socket.on('newmaterial', function(data) {
@@ -383,6 +383,25 @@ io.on('connection', function(socket) {
   socket.on('deleteentrada', function(data) {
     io.emit('delete-entrada', { data: data });
     // console.log('Eliminaste una entrada!!! =( ');
+  });
+  /* #endregion */
+
+  /* #region  SOCKET MERMAS */
+  socket.on('newmerma', function(data) {
+    io.emit('new-merma', { data: data });
+  });
+  socket.on('updatemerma', function(data) {
+    io.emit('update-merma', { data: data });
+  });
+  socket.on('deletemerma', function(data) {
+    io.emit('delete-merma', { data: data });
+  });
+  socket.on('aprobarmerma', function(data) {
+    io.emit('aprobar-merma', { data: data });
+  });
+
+  socket.on('desaprobarmerma', function(data) {
+    io.emit('desaprobar-merma', { data: data });
   });
   /* #endregion */
 
