@@ -40,6 +40,7 @@ var mantenimientoSchema = new Schema({
   fechas: [SchemaFechas],
   materiales: [SchemaMateriales],
   finalizado: { type: Boolean, default: false },
+  migrado: { type: Boolean, default: false },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
