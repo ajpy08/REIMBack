@@ -1,29 +1,15 @@
-var express = require('express');
-var mdAutenticacion = require('../middlewares/autenticacion');
-var Merma = require('../models/merma');
-var app = express();
-var mongoose = require('mongoose');
+const express = require('express');
+const mdAutenticacion = require('../middlewares/autenticacion');
+const Merma = require('../models/merma');
+const app = express();
+const mongoose = require('mongoose');
 
 // ==========================================
 //  Obtener todas las Mermas
 // ==========================================
 
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
-    // var noFactura = req.query.noFactura || '';
-    // var proveedor = req.query.proveedor || '';
-    // var material = req.query.material || '';
-    var filtro = '{';
-    // if (noFactura != 'undefined' && noFactura != '')
-    //     filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
-    // if (proveedor != 'undefined' && proveedor != '')
-    //     filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
-    // if (material != 'undefined' && material != '')
-    //     filtro += '\"materiales.material\":' + '\"' + material + '\",';
-    // if (filtro != '{')
-    //     filtro = filtro.slice(0, -1);
-    filtro = filtro + '}';
-    var json = JSON.parse(filtro);
-    Merma.find(json)
+    Merma.find()
         .populate('usuarioAprobacion', 'nombre email')
         .populate('usuarioAlta', 'nombre email')
         .populate('usuarioMod', 'nombre email')
@@ -50,7 +36,7 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 //  Obtener Merma por ID
 // ==========================================
 app.get('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    var id = req.params.id;
+    const id = req.params.id;
     Merma.findById(id)
         .populate('materiales.material', 'descripcion')
         .exec((err, merma) => {
@@ -79,8 +65,8 @@ app.get('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 // Crear una nueva merma
 // ==========================================
 app.post('/merma/', mdAutenticacion.verificaToken, (req, res) => {
-    var body = req.body;
-    var merma = new Merma({
+    const body = req.body;
+    const merma = new Merma({
         motivo: body.motivo,
         materiales: body.materiales,
         usuarioAlta: req.usuario._id
@@ -107,8 +93,8 @@ app.post('/merma/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 
 app.put('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    var id = req.params.id;
-    var body = req.body;
+    const id = req.params.id;
+    const body = req.body;
     Merma.findById(id, (err, merma) => {
         if (err) {
             return res.status(500).json({
@@ -124,23 +110,32 @@ app.put('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe una merma con ese ID' }
             });
         }
-        merma.motivo = body.motivo;
-        merma.materiales = body.materiales;
-        merma.usuarioMod = req.usuario._id;
-        merma.fMod = new Date();
-        merma.save((err, mermaGuardada) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al actualizar merma',
-                    errors: err
+
+        if (!merma.fAprobacion) {
+            merma.motivo = body.motivo;
+            merma.materiales = body.materiales;
+            merma.usuarioMod = req.usuario._id;
+            merma.fMod = new Date();
+            merma.save((err, mermaGuardada) => {
+                if (err) {
+                    return res.status(400).json({
+                        ok: false,
+                        mensaje: 'Error al actualizar merma',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    merma: mermaGuardada
                 });
-            }
-            res.status(200).json({
-                ok: true,
-                merma: mermaGuardada
             });
-        });
+        }else {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No puedes actualizar esta merma por que ya esta aprobada.',
+                errors: { message: 'No puedes actualizar esta merma por que ya esta aprobada.' }
+            });
+        }
     });
 });
 
@@ -148,7 +143,7 @@ app.put('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 //  Borrar un Merma por el id
 // ============================================
 app.delete('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    var id = req.params.id;
+    const id = req.params.id;
 
     Merma.findById(id, (err, mermaBorrada) => {
         if (err) {
@@ -165,11 +160,22 @@ app.delete('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
                 errors: { message: 'No existe una merma con ese id' }
             });
         }
-        mermaBorrada.remove();
+
+        if (!mermaBorrada.fAprobacion) {
+            mermaBorrada.remove();
         res.status(200).json({
             ok: true,
             merma: mermaBorrada
         });
+        } else {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No puedes eliminar esta merma por que ya esta aprobada.',
+                errors: { message: 'No puedes eliminar esta merma por que ya esta aprobada.' }
+            });
+        }
+
+        
     });
 });
 
@@ -213,7 +219,7 @@ app.put('/aprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 
 app.put('/desaprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    var id = req.params.id;
+    const id = req.params.id;
 
     if (req.usuario.role === 'ADMIN_ROLE' || req.usuario.role === 'PATIOADMIN_ROLE') {
         Merma.updateOne({ "_id": id }, { $unset: { "usuarioAprobacion": undefined, "fAprobacion": undefined, "comentarioAprobacion": undefined } }, (err, mermaDesaprobada) => {
