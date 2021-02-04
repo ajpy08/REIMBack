@@ -3,6 +3,7 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 var Material = require('../models/material');
 var Entrada = require('../models/entrada');
 var Merma = require('../models/merma');
+var Mantenimiento = require('../models/mantenimiento');
 var app = express();
 
 // ==========================================
@@ -75,77 +76,79 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 //  Obtener Stock de Material por ID
 // ==========================================
 app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
-    var material = req.params.id;
+    const material = req.params.id;
+    let stock = 0;
+    let nombreMaterial;
+    let ok = false;
 
-    var filtro = '{';
+    let filtro = '{';
     if (material != 'undefined' && material != '')
         filtro += '\"detalles.material\":' + '\"' + material + '\",';
 
     if (filtro != '{')
         filtro = filtro.slice(0, -1);
     filtro = filtro + '}';
-    var json = JSON.parse(filtro);
+    const json = JSON.parse(filtro);
+
+    // Busco Material en Entradas
     Entrada.find(json)
-        // .populate('detalles.material', 'descripcion costo precio tipo minimo')
+        .populate('detalles.material', 'descripcion costo precio tipo minimo')
         .sort({ fAlta: -1 })
         .exec(
-            (err, entrada) => {
+            (err, entradas) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando entrada',
+                        mensaje: 'Error cargando entradas',
                         errors: err
                     });
                 }
 
-                let filtro = '{';
-                if (material != 'undefined' && material != '') {
-                    filtro += '\"materiales.material\":' + '\"' + material + '\",';
-                    filtro += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
+                if (entradas.length > 0) {
+                    entradas.forEach(e => {
+                        e.detalles.forEach(d => {
+                            if (d.material._id == req.params.id) {
+                                ok = true;
+                                stock += d.cantidad;
+                                nombreMaterial = d.material.descripcion;
+                            }
+                        });
+
+                    });
                 }
 
-                if (filtro != '{')
-                    filtro = filtro.slice(0, -1);
-                filtro = filtro + '}';
-                const json = JSON.parse(filtro);
+                // Busco Material en Mantenimientos
+                let filtroMantenimientos = '{';
+                if (material != 'undefined' && material != '') {
+                    filtroMantenimientos += '\"materiales.material\":' + '\"' + material + '\",';
+                }
+
+                if (filtroMantenimientos != '{')
+                    filtroMantenimientos = filtroMantenimientos.slice(0, -1);
+                filtroMantenimientos = filtroMantenimientos + '}';
+                const jsonMantenimientos = JSON.parse(filtroMantenimientos);
 
 
-                Merma.find(json)
+                Mantenimiento.find(jsonMantenimientos)
                     // .populate('materiales.material', 'descripcion')
-                    .exec((err, mermas) => {
+                    .exec((err, mantenimientos) => {
                         if (err) {
                             return res.status(500).json({
                                 ok: false,
-                                mensaje: 'Error al buscar mermas',
+                                mensaje: 'Error al buscar mantenimientos',
                                 errors: err
                             });
                         }
-                        if (!mermas) {
+                        if (!mantenimientos) {
                             return res.status(400).json({
                                 ok: false,
-                                mensaje: 'El mermas con el id ' + material + ' no existe',
-                                errors: { message: 'No existe una mermas con ese ID' }
+                                mensaje: 'El material con el id ' + material + ' no existe',
+                                errors: { message: 'No existe un material con ese ID' }
                             });
                         }
 
-                        let stock = 0;
-                        let material;
-                        let ok = false;
-                        if (entrada.length > 0) {
-                            entrada.forEach(e => {
-                                e.detalles.forEach(d => {
-                                    if (d.material._id == req.params.id) {
-                                        ok = true;
-                                        stock += d.cantidad;
-                                        material = d.material;
-                                    }
-                                });
-
-                            });
-                        }
-
-                        if (mermas.length > 0) {
-                            mermas.forEach(m => {
+                        // if (mantenimientos.length > 0) {
+                            mantenimientos.forEach(m => {
                                 m.materiales.forEach(m => {
                                     if (m.material._id == req.params.id) {
                                         ok = true;
@@ -154,13 +157,56 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, (req, res) => {
                                 });
 
                             });
+                        // }
+
+                        // Busco Material en Mermas
+                        let filtroMermas = '{';
+                        if (material != 'undefined' && material != '') {
+                            filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
+                            filtroMermas += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
                         }
 
-                        res.status(200).json({
-                            ok,
-                            material: material,
-                            stock: stock
-                        });
+                        if (filtroMermas != '{')
+                            filtroMermas = filtroMermas.slice(0, -1);
+                        filtroMermas = filtroMermas + '}';
+                        const jsonMermas = JSON.parse(filtroMermas);
+
+                        Merma.find(jsonMermas)
+                            // .populate('materiales.material', 'descripcion')
+                            .exec((err, mermas) => {
+                                if (err) {
+                                    return res.status(500).json({
+                                        ok: false,
+                                        mensaje: 'Error al buscar mermas',
+                                        errors: err
+                                    });
+                                }
+                                if (!mermas) {
+                                    return res.status(400).json({
+                                        ok: false,
+                                        mensaje: 'El material con el id ' + material + ' no existe',
+                                        errors: { message: 'No existe un material con ese ID' }
+                                    });
+                                }
+
+                                // if (mermas.length > 0) {
+                                    mermas.forEach(m => {
+                                        m.materiales.forEach(m => {
+                                            if (m.material._id == req.params.id) {
+                                                ok = true;
+                                                stock -= m.cantidad;
+                                            }
+                                        });
+
+                                    });
+                                // }
+
+                                res.status(200).json({
+                                    ok,
+                                    material: nombreMaterial,
+                                    stock: stock
+                                });
+                            });
                     });
             });
 });
