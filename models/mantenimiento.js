@@ -20,7 +20,9 @@ var SchemaMateriales = new Schema({
   costo: { type: mongoose.Types.Decimal128, get: getDecimal },
   precio: { type: mongoose.Types.Decimal128, get: getDecimal },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
-  fAlta: { type: Date, default: Date.now }
+  fAlta: { type: Date, default: Date.now },
+  usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  fMod: { type: Date }
 });
 
 var mantenimientoSchema = new Schema({
