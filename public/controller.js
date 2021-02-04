@@ -120,6 +120,8 @@ module.exports = {
 
         const mantenimientos = Mantenimiento.find(json)
             // .populate('materiales.material', 'descripcion')
+            .populate('usuario', 'nombre email')
+            .populate('maniobra', 'contenedor tipo peso')
             .exec(
                 // (err, mantenimientos) => {
                 //     if (err) {

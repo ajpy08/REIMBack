@@ -223,7 +223,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
                 ok = true;
-                stock += m.cantidad;
+                stock -= m.cantidad;
                 // nombreMaterial = m.material.descripcion;
             }
         });
@@ -234,7 +234,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
                 ok = true;
-                stock += m.cantidad;
+                stock -= m.cantidad;
                 // nombreMaterial = m.material.descripcion;
             }
         });
