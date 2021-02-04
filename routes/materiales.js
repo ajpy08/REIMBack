@@ -1,10 +1,8 @@
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Material = require('../models/material');
-var Entrada = require('../models/entrada');
-var Merma = require('../models/merma');
-var Mantenimiento = require('../models/mantenimiento');
 var app = express();
+const controller = require('../public/controller')
 
 // ==========================================
 //  Obtener todos los Materiales
@@ -75,8 +73,7 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 //  Obtener Stock de Material por ID
 // ==========================================
-app.get('/material/stock/:id', mdAutenticacion.verificaToken, async (req, res) => {
-    const material = req.params.id;
+app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, res) => {
     let stock = 0;
     let nombreMaterial;
     let ok = false;
@@ -210,51 +207,55 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, async (req, res) =
     //         });
     /* #endregion */
 
-    const entradas = await consultaEntradas(material);
-    console.log(entradas);
+    const entradas = await controller.consultaEntradas(req, res);
+    // console.log(entradas);
     // entradas.then(entradas => {
     //     if (entradas) {
-    //         entradas.forEach(e => {
-    //             e.detalles.forEach(d => {
-    //                 if (d.material._id == req.params.id) {
-    //                     ok = true;
-    //                     stock += d.cantidad;
-    //                     nombreMaterial = d.material.descripcion;
-    //                 }
-    //             });
-
-    //         });
+    entradas.forEach(e => {
+        e.detalles.forEach(d => {
+            if (d.material._id == req.params.material) {
+                ok = true;
+                stock += d.cantidad;
+                nombreMaterial = d.material.descripcion;
+            }
+        });
+    });
     //     }
     // });
 
-    // const mermas = await consultaMerma(material).then(mermas => {
+    const mermas = await controller.consultaMermas(req, res);
+    // console.log(mermas);
+    // mermas.then(mermas => {
     //     if (mermas) {
-    //         mermas.forEach(m => {
-    //             m.materiales.forEach(m => {
-    //                 if (m.material._id == req.params.id) {
-    //                     ok = true;
-    //                     stock -= m.cantidad;
-    //                 }
-    //             });
-    //         });
+    mermas.forEach(e => {
+        e.materiales.forEach(m => {
+            if (m.material._id == req.params.material) {
+                ok = true;
+                stock += m.cantidad;
+                nombreMaterial = m.material.descripcion;
+            }
+        });
+    });
     //     }
     // });
 
+    const mantenimientos = await controller.consultaMantenimientos(req, res);
+    // console.log(mantenimientos);
+    // mantenimientos.then(mantenimientos => {
+    //     if (mantenimientos) {
+    mantenimientos.forEach(e => {
+        e.materiales.forEach(m => {
+            if (m.material._id == req.params.material) {
+                ok = true;
+                stock += m.cantidad;
+                nombreMaterial = m.material.descripcion;
+            }
+        });
+    });
+    //     }
+    // });
 
-
-    // const mantenimientos = await consultaMantenimientos(material);
-
-    // if (mantenimientos) {
-    //     mantenimientos.forEach(m => {
-    //         m.materiales.forEach(m => {
-    //             if (m.material._id == req.params.id) {
-    //                 ok = true;
-    //                 stock -= m.cantidad;
-    //             }
-    //         });
-
-    //     });
-    // }
+    
 
 
     res.status(200).json({
@@ -263,141 +264,6 @@ app.get('/material/stock/:id', mdAutenticacion.verificaToken, async (req, res) =
         stock: stock
     });
 });
-
-const consultaEntradas = (material) => {
-    let filtro = '{';
-    if (material != 'undefined' && material != '')
-        filtro += '\"detalles.material\":' + '\"' + material + '\",';
-
-    if (filtro != '{')
-        filtro = filtro.slice(0, -1);
-    filtro = filtro + '}';
-    const json = JSON.parse(filtro);
-
-    // Busco Material en Entradas
-    return Entrada.find(json)
-        .populate('detalles.material', 'descripcion costo precio tipo minimo')
-        .sort({ fAlta: -1 })
-        .exec()
-        // .then((entradas) => {
-        //     // FIRST CONSOLE.LOG
-        //     console.log(entradas);
-        //     return entradas;
-        // })
-    // async (err, entradas) => {
-    //     if (err) {
-    //         return res.status(500).json({
-    //             ok: false,
-    //             mensaje: 'Error cargando entradas',
-    //             errors: err
-    //         });
-    //     }
-
-    //     // if (entradas.length > 0) {
-    //     //     entradas.forEach(e => {
-    //     //         e.detalles.forEach(d => {
-    //     //             if (d.material._id == req.params.id) {
-    //     //                 ok = true;
-    //     //                 stock += d.cantidad;
-    //     //                 nombreMaterial = d.material.descripcion;
-    //     //             }
-    //     //         });
-
-    //     //     });
-    //     // }
-    // });
-}
-
-const consultaMerma = async (material) => {
-    // Busco Material en Mermas
-    let filtroMermas = '{';
-    if (material != 'undefined' && material != '') {
-        filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
-        filtroMermas += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
-    }
-
-    if (filtroMermas != '{')
-        filtroMermas = filtroMermas.slice(0, -1);
-    filtroMermas = filtroMermas + '}';
-    const jsonMermas = JSON.parse(filtroMermas);
-
-    Merma.find(jsonMermas)
-        // .populate('materiales.material', 'descripcion')
-        .exec((err, mermas) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar mermas',
-                    errors: err
-                });
-            }
-            if (!mermas) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'El material con el id ' + material + ' no existe',
-                    errors: { message: 'No existe un material con ese ID' }
-                });
-            }
-
-            // // if (mermas.length > 0) {
-            // mermas.forEach(m => {
-            //     m.materiales.forEach(m => {
-            //         if (m.material._id == material) {
-            //             ok = true;
-            //             stock -= m.cantidad;
-            //         }
-            //     });
-            // });
-            // // }
-            return mermas;
-        });
-}
-
-const consultaMantenimientos = async (material) => {
-    // Busco Material en Mantenimientos
-    let filtroMantenimientos = '{';
-    if (material != 'undefined' && material != '') {
-        filtroMantenimientos += '\"materiales.material\":' + '\"' + material + '\",';
-    }
-
-    if (filtroMantenimientos != '{')
-        filtroMantenimientos = filtroMantenimientos.slice(0, -1);
-    filtroMantenimientos = filtroMantenimientos + '}';
-    const jsonMantenimientos = JSON.parse(filtroMantenimientos);
-
-
-    Mantenimiento.find(jsonMantenimientos)
-        // .populate('materiales.material', 'descripcion')
-        .exec((err, mantenimientos) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar mantenimientos',
-                    errors: err
-                });
-            }
-            if (!mantenimientos) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'El material con el id ' + material + ' no existe',
-                    errors: { message: 'No existe un material con ese ID' }
-                });
-            }
-
-            // // if (mantenimientos.length > 0) {
-            // mantenimientos.forEach(m => {
-            //     m.materiales.forEach(m => {
-            //         if (m.material._id == material) {
-            //             ok = true;
-            //             stock -= m.cantidad;
-            //         }
-            //     });
-
-            // });
-            // // }
-            return mantenimientos;
-        });
-}
 
 // ==========================================================================
 //  Obtener todos los Materiales donde el precio sea menor o igual al costo
@@ -662,4 +528,4 @@ app.delete('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 
             });
 });
-module.exports = app, consultaEntradas, consultaMerma, consultaMantenimientos;
+module.exports = app;

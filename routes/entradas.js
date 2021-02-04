@@ -2,77 +2,66 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Entrada = require('../models/entrada');
 var app = express();
-var getGaps = require('../public/varias').getGaps;
+const javi = require('../public/controller');
 
 // ==========================================
 //  Obtener todos las Entradas
 // ==========================================
 
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
-    /* #region  Example */
-    // var N = req.body.N || '';
-    // // Tests if our value is an integer 
-    // // Tests if N is within range
-    // if (N === parseInt(N, 10) && N >= 1 && N <= 2147483647) {
 
-    //     console.log('===================================== ANALIZANDO ' + N + ' =====================================')
-
-    //     // Convert to binary
-    //     const BinaryArray = N.toString(2).split('');
-
-    //     // calling our recursive function with initial empty gaps
-    //     // return getGaps(BinaryArray, []);
-
-    //     res.status(200).json({
-    //         gaps: getGaps(BinaryArray, [])
-    //     });
-    // } else {
-    //     return res.status(500).json({
-    //         number: parseInt(N) ? N : 'Not Valid',
-    //         BinaryArray,
-    //         resp: 0
-    //     });
-    // }
-
-    // // default if it doesn't meet the requirements
-    // return 0;
-    /* #endregion */
-
-    var noFactura = req.query.noFactura || '';
-    var proveedor = req.query.proveedor || '';
-    var material = req.query.material || '';
-    var filtro = '{';
-    if (noFactura != 'undefined' && noFactura != '')
-        filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
-    if (proveedor != 'undefined' && proveedor != '')
-        filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
-    if (material != 'undefined' && material != '')
-        filtro += '\"detalles.material\":' + '\"' + material + '\",';
-    if (filtro != '{')
-        filtro = filtro.slice(0, -1);
-    filtro = filtro + '}';
-    var json = JSON.parse(filtro);
-    Entrada.find(json)
-        .populate('usuarioAlta', 'nombre email')
-        .populate('usuarioMod', 'nombre email')
-        .populate('proveedor', 'razonSocial')
-        .populate('detalles.material', 'descripcion')
-        .sort({ fAlta: -1 })
-        .exec(
-            (err, entradas) => {
-                if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando entradas',
-                        errors: err
-                    });
-                }
-                res.status(200).json({
-                    ok: true,
-                    entradas: entradas,
-                    totalRegistros: entradas.length
-                });
+    const resp = javi.consultaEntradas(req, res);
+    resp.then(entradas => {
+        if (entradas) {
+            res.status(200).json({
+                ok: true,
+                entradas,
+                totalRegistros: entradas.length
             });
+        } else {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error cargando entradas',
+                errors: err
+            });
+        }
+    })
+
+    // var noFactura = req.query.noFactura || '';
+    // var proveedor = req.query.proveedor || '';
+    // var material = req.query.material || '';
+    // var filtro = '{';
+    // if (noFactura != 'undefined' && noFactura != '')
+    //     filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
+    // if (proveedor != 'undefined' && proveedor != '')
+    //     filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
+    // if (material != 'undefined' && material != '')
+    //     filtro += '\"detalles.material\":' + '\"' + material + '\",';
+    // if (filtro != '{')
+    //     filtro = filtro.slice(0, -1);
+    // filtro = filtro + '}';
+    // var json = JSON.parse(filtro);
+    // Entrada.find(json)
+    //     .populate('usuarioAlta', 'nombre email')
+    //     .populate('usuarioMod', 'nombre email')
+    //     .populate('proveedor', 'razonSocial')
+    //     .populate('detalles.material', 'descripcion')
+    //     .sort({ fAlta: -1 })
+    //     .exec(
+    //         (err, entradas) => {
+    //             if (err) {
+    //                 return res.status(500).json({
+    //                     ok: false,
+    //                     mensaje: 'Error cargando entradas',
+    //                     errors: err
+    //                 });
+    //             }
+    //             res.status(200).json({
+    //                 ok: true,
+    //                 entradas: entradas,
+    //                 totalRegistros: entradas.length
+    //             });
+    //         });
 });
 
 // ==========================================
