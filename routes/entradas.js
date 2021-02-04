@@ -2,7 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Entrada = require('../models/entrada');
 var app = express();
-const controller = require('../public/controller');
+const controller = require('../controllers/entradasController');
 
 // ==========================================
 //  Obtener todos las Entradas

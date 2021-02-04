@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var app = express();
 var Mantenimiento = require('../models/mantenimiento');
 var variasBucket = require('../public/variasBucket');
-const controller = require('../public/controller');
+const controller = require('../controllers/entradasController');
 
 
 var entorno = require('../config/config').config();
