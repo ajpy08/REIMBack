@@ -208,9 +208,6 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
     /* #endregion */
 
     const entradas = await controller.consultaEntradas(req, res);
-    // console.log(entradas);
-    // entradas.then(entradas => {
-    //     if (entradas) {
     entradas.forEach(e => {
         e.detalles.forEach(d => {
             if (d.material._id == req.params.material) {
@@ -220,43 +217,28 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
             }
         });
     });
-    //     }
-    // });
 
     const mermas = await controller.consultaMermas(req, res);
-    // console.log(mermas);
-    // mermas.then(mermas => {
-    //     if (mermas) {
     mermas.forEach(e => {
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
                 ok = true;
                 stock += m.cantidad;
-                nombreMaterial = m.material.descripcion;
+                // nombreMaterial = m.material.descripcion;
             }
         });
     });
-    //     }
-    // });
 
     const mantenimientos = await controller.consultaMantenimientos(req, res);
-    // console.log(mantenimientos);
-    // mantenimientos.then(mantenimientos => {
-    //     if (mantenimientos) {
     mantenimientos.forEach(e => {
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
                 ok = true;
                 stock += m.cantidad;
-                nombreMaterial = m.material.descripcion;
+                // nombreMaterial = m.material.descripcion;
             }
         });
     });
-    //     }
-    // });
-
-    
-
 
     res.status(200).json({
         ok,

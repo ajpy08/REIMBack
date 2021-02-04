@@ -2,7 +2,7 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Entrada = require('../models/entrada');
 var app = express();
-const javi = require('../public/controller');
+const controller = require('../public/controller');
 
 // ==========================================
 //  Obtener todos las Entradas
@@ -10,8 +10,8 @@ const javi = require('../public/controller');
 
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 
-    const resp = javi.consultaEntradas(req, res);
-    resp.then(entradas => {
+    const entradas = controller.consultaEntradas(req, res);
+    entradas.then(entradas => {
         if (entradas) {
             res.status(200).json({
                 ok: true,
