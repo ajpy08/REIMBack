@@ -12,20 +12,18 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 
     const entradas = controller.consultaEntradas(req, res);
     entradas.then(entradas => {
-        if (entradas) {
             res.status(200).json({
                 ok: true,
                 entradas,
                 totalRegistros: entradas.length
             });
-        } else {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error cargando entradas',
-                errors: err
-            });
-        }
-    })
+    }).catch(error => {
+        return res.status(500).json({
+            ok: false,
+            mensaje: 'Error cargando entradas',
+            errors: error
+        });
+    });
 
     // var noFactura = req.query.noFactura || '';
     // var proveedor = req.query.proveedor || '';
