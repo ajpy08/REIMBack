@@ -67,6 +67,23 @@ mantenimientoSchema.virtual('observacionesCompleto')
     //return `${this.observacionesGenerales}\n Izq: ${this.izquierdo}\n Der: ${this.derecho}\n Pos: ${this.posterior}\n Int: ${this.interior}`;
   });
 
+mantenimientoSchema.virtual('costoMateriales')
+  .get(function() {
+    let costo = 0;
+    this.materiales.forEach(mat => {
+      costo += mat.costo * mat.cantidad;
+    });
+    return costo;
+  });
+mantenimientoSchema.virtual('precioMateriales')
+  .get(function() {
+    let precio = 0;
+    this.materiales.forEach(mat => {
+      precio += mat.precio * mat.cantidad;
+    });
+    return precio;
+  });
+
 function getDecimal(value) {
   if (typeof value !== 'undefined') {
     return parseFloat(value.toString());
