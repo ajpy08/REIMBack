@@ -35,32 +35,6 @@ var maniobraSchema = new Schema({
   reparacionesObservacion: { type: String },
   mostrarFotosRNaviera: { type: Boolean, default: false },
   mostrarFotosRAA: { type: Boolean, default: false },
-  eventos: [{
-    tipoEvento: { type: String },
-    tipoLavado: { type: String },
-    observaciones: { type: String },
-    izquierdo: { type: String },
-    derecho: { type: String },
-    frente: { type: String },
-    posterior: { type: String },
-    interior: { type: String },
-    piso: { type: String },
-    techo: { type: String },
-    puerta: { type: String },
-    fechas: [{
-      fIni: { type: Date },
-      hIni: { type: String },
-      fFin: { type: Date },
-      hFin: { type: String }
-    }],
-    materiales: [{
-      idMaterial: { type: Schema.Types.ObjectId, ref: 'materiales' },
-      descripcion: { type: String },
-      cantidad: { type: Number },
-      costo: { type: mongoose.Types.Decimal128 },
-      precio: { type: mongoose.Types.Decimal128 }
-    }]
-  }],
   descargaAutorizada: { type: Boolean, default: false },
   hDescarga: { type: String },
   hSalida: { type: String },
