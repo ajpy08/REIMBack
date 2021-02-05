@@ -24,42 +24,6 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
             errors: error
         });
     });
-
-    // var noFactura = req.query.noFactura || '';
-    // var proveedor = req.query.proveedor || '';
-    // var material = req.query.material || '';
-    // var filtro = '{';
-    // if (noFactura != 'undefined' && noFactura != '')
-    //     filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
-    // if (proveedor != 'undefined' && proveedor != '')
-    //     filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
-    // if (material != 'undefined' && material != '')
-    //     filtro += '\"detalles.material\":' + '\"' + material + '\",';
-    // if (filtro != '{')
-    //     filtro = filtro.slice(0, -1);
-    // filtro = filtro + '}';
-    // var json = JSON.parse(filtro);
-    // Entrada.find(json)
-    //     .populate('usuarioAlta', 'nombre email')
-    //     .populate('usuarioMod', 'nombre email')
-    //     .populate('proveedor', 'razonSocial')
-    //     .populate('detalles.material', 'descripcion')
-    //     .sort({ fAlta: -1 })
-    //     .exec(
-    //         (err, entradas) => {
-    //             if (err) {
-    //                 return res.status(500).json({
-    //                     ok: false,
-    //                     mensaje: 'Error cargando entradas',
-    //                     errors: err
-    //                 });
-    //             }
-    //             res.status(200).json({
-    //                 ok: true,
-    //                 entradas: entradas,
-    //                 totalRegistros: entradas.length
-    //             });
-    //         });
 });
 
 // ==========================================

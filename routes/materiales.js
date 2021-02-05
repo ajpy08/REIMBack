@@ -2,7 +2,9 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 var Material = require('../models/material');
 var app = express();
-const controller = require('../controllers/entradasController')
+const entradasController = require('../controllers/entradasController');
+const mermasController = require('../controllers/mermasController');
+const mantenimientosController = require('../controllers/mantenimientosController');
 
 // ==========================================
 //  Obtener todos los Materiales
@@ -207,7 +209,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
     //         });
     /* #endregion */
 
-    const entradas = await controller.consultaEntradas(req, res);
+    const entradas = await entradasController.consultaEntradas(req, res);
     entradas.forEach(e => {
         e.detalles.forEach(d => {
             if (d.material._id == req.params.material) {
@@ -218,7 +220,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
         });
     });
 
-    const mermas = await controller.consultaMermas(req, res);
+    const mermas = await mermasController.consultaMermas(req, res);
     mermas.forEach(e => {
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
@@ -229,7 +231,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, 
         });
     });
 
-    const mantenimientos = await controller.consultaMantenimientos(req, res);
+    const mantenimientos = await mantenimientosController.consultaMantenimientos(req, res);
     mantenimientos.forEach(e => {
         e.materiales.forEach(m => {
             if (m.material._id == req.params.material) {
