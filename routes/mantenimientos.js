@@ -5,8 +5,10 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var app = express();
 var Mantenimiento = require('../models/mantenimiento');
+var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 const mantenimientosController = require('../controllers/mantenimientosController');
+var Entrada = require('../models/entrada');
 
 
 var entorno = require('../config/config').config();
@@ -17,6 +19,7 @@ var fileUpload = require('express-fileupload');
 var uuid = require('uuid/v1');
 var s3Zip = require('s3-zip');
 
+var controllerMaterial = require('../controllers/material');
 
 app.use(fileUpload());
 
@@ -51,7 +54,6 @@ app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 app.get('', mdAutenticacion.verificaToken, (req, res) => {
-
   const mantenimientos = mantenimientosController.consultaMantenimientos(req, res);
   mantenimientos.then(mantenimientos => {
           res.status(200).json({
@@ -158,13 +160,39 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
         errors: err
       });
     }
-    res.status(201).json({
-      ok: true,
-      mantenimiento: mantenimientoGuardado
+    Maniobra.findById(mantenimiento.maniobra, (err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + ' no existe',
+          errors: { message: 'No existe una maniobra con ese ID' }
+        });
+      }
+      if (maniobra.status !== "LAVADO_REPARACION") {
+        maniobra.estatus = "LAVADO_REPARACION";
+        maniobra.save((err, maniobraGuardado) => {
+          if (err) {
+            return res.status(400).json({
+              ok: false,
+              mensaje: 'Error al actualizar la maniobra',
+              errors: err
+            });
+          }
+        });
+      }
+      res.status(201).json({
+        ok: true,
+        mantenimiento: mantenimientoGuardado
+      });
     });
   });
-
-
 });
 
 
@@ -230,12 +258,136 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
 
 app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  var body = req.body.material;
-  console.log(body);
   //REvisar primero si se puede agregar por el stock
   //REchazarlo o darlo de alta en el array
 
+  controllerMaterial.stock(req, res, (req, res, stock) => {
+    var id = req.params.id;
+    var body = req.body.material;
+    console.log("cantidad:" + body.cantidad);
+    console.log("stock:" + stock);
+
+    if (body.cantidad > stock) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se cuenta con suficiente stock para este material',
+        errors: { message: 'No se cuenta con suficiente stock para este material' }
+      });
+    } else {
+      Mantenimiento.findOneAndUpdate({ _id: id }, {
+        $push: {
+          materiales: {
+            material: body.material,
+            descripcion: body.descripcion,
+            cantidad: body.cantidad,
+            costo: body.costo,
+            precio: body.precio,
+            usuarioAlta: req.usuario._id
+          }
+        }
+      }, (err, mantenimiento) => {
+        console.log(err);
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al buscar el mantenimiento',
+            errors: err
+          });
+        }
+        if (!mantenimiento) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'El mantenimiento con el id ' + id + ' no existe',
+            errors: { message: 'No existe mantenimiento con ese ID' }
+          });
+        }
+        res.status(200).json({
+          ok: true,
+          mensaje: 'Material agregado con éxito',
+          materiales: mantenimiento.materiales
+        });
+
+      });
+    }
+  });
+});
+
+app.put('/mantenimiento/:id/editMaterial/:idMateria', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body.material;
+
+
+
+  Mantenimiento.findOneAndUpdate({
+    _id: id,
+    'materiales._id': mongoose.Types.ObjectId(body._id)
+  }, {
+    $set: {
+      'materiales.$': {
+        material: body.material,
+        descripcion: body.descripcion,
+        cantidad: body.cantidad,
+        costo: body.costo,
+        precio: body.precio,
+        usuarioMod: req.usuario._id,
+        fMod: new Date()
+      }
+    }
+  }, (err, mantenimiento) => {
+    console.log(err);
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar el mantenimiento',
+        errors: err
+      });
+    }
+    if (!mantenimiento) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El mantenimiento con el id ' + id + ' no existe',
+        errors: { message: 'No existe el mantenimiento con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Material Editado con éxito',
+      eventos: mantenimiento.materiales
+    });
+
+  });
+});
+
+
+// ==========================================
+// Remover eventos de la maniobra
+// ==========================================
+
+app.delete('/mantenimiento/:id/removeMaterial/:idMaterial', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var idmaterial = req.params.idMaterial;
+  Mantenimiento.findOneAndUpdate({ _id: id }, { $pull: { materiales: { _id: idmaterial } } }, (err, mantenimiento) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar el Material',
+        errors: err
+      });
+    }
+    if (!mantenimiento) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El Mantenimiento con el id ' + id + ' no existe',
+        errors: { message: 'No existe un Mantenimiento con ese ID' }
+      });
+    }
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Material Eliminado con éxito',
+      eventos: mantenimiento.materiales
+    });
+
+  });
 });
 
 // ==========================================
@@ -274,7 +426,7 @@ app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
 
   var id = req.params.id;
   var AD = req.params.AD;
-  console.log(req.files);
+
   if (!req.files) {
     return res.status(400).json({
       ok: false,
@@ -282,8 +434,6 @@ app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
       errors: { message: 'Debe de seleccionar una imagen' }
     });
   }
-  console.log(id);
-  console.log(AD);
   // Obtener nombre del archivo
   var archivo = req.files.file;
   var nombreCortado = archivo.name.split('.');
@@ -388,7 +538,7 @@ app.get('/mantenimiento/:id/eliminafoto/:AD/:name', (req, res, netx) => {
       pathfoto = `mantenimientos/${id}/fotos_despues/${nameimg}`;
     }
   }
-  console.log(pathfoto);
+
   variasBucket.BorrarArchivoBucketKey(pathfoto)
     .then((value) => {
       if (value) {
@@ -498,7 +648,7 @@ app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
 
 // Migrar fotos de maniobras a mantenimientos (BUCKET)
 // ==========================================
-app.get('/migracion/fotos',  mdAutenticacion.verificaToken, (req, res, next) => {
+app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
 
   // Mantenimiento.find({maniobra: '5fcbc717461c4f05583690cd'})
   Mantenimiento.find()
@@ -512,7 +662,7 @@ app.get('/migracion/fotos',  mdAutenticacion.verificaToken, (req, res, next) => 
         });
       }
 
-      mantenimientos.forEach(async (man) => {
+      mantenimientos.forEach(async(man) => {
         var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
         var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
         var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
