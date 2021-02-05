@@ -30,7 +30,7 @@ app.use(fileUpload());
 app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   Mantenimiento.findById(id)
-    .populate('usuario', 'nombre img email')
+    .populate('usuarioAlta', 'nombre img email')
     .exec((err, mantenimiento) => {
       if (err) {
         return res.status(500).json({
@@ -48,6 +48,7 @@ app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       }
       res.status(200).json({
         ok: true,
+        mensaje: 'Mantenimiento consultado con éxito',
         mantenimiento: mantenimiento
       });
     });
@@ -109,8 +110,8 @@ app.get('', mdAutenticacion.verificaToken, (req, res) => {
 // =======================================
 // Obtener mantenimientos
 // =======================================
-//app.get('/xmaniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
-app.get('/xmaniobra/:id', (req, res) => {
+app.get('/xmaniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
+  //app.get('/xmaniobra/:id', (req, res) => {
   var id = req.params.id;
 
   Mantenimiento.find({ maniobra: id })
@@ -183,8 +184,6 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
     interior: body.interior,
     puerta: body.puerta,
     fechas: body.fechas,
-    materiales: body.materiales,
-    finalizado: body.finalizado,
     usuarioAlta: req.usuario._id
   });
 
@@ -257,23 +256,21 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     // console.log(mantenimiento.materiales);
     // console.log("nadan");
-    mantenimiento.tipoMantenimiento = body.tipoMantenimiento,
-      mantenimiento.tipoLavado = body.tipoLavado,
-      mantenimiento.cambioGrado = body.cambioGrado,
-      mantenimiento.observacionesGenerales = body.observacionesGenerales,
-      mantenimiento.izquierdo = body.izquierdo,
-      mantenimiento.derecho = body.derecho,
-      mantenimiento.frente = body.frente,
-      mantenimiento.posterior = body.posterior,
-      mantenimiento.piso = body.piso,
-      mantenimiento.techo = body.techo,
-      mantenimiento.interior = body.interior,
-      mantenimiento.puerta = body.puerta,
-      mantenimiento.fechas = body.fechas,
-      mantenimiento.materiales = body.materiales,
-      mantenimiento.finalizado = body.finalizado,
-      mantenimiento.usuarioMod = req.usuario._id,
-      mantenimiento.fMod = new Date();
+    mantenimiento.tipoMantenimiento = body.tipoMantenimiento;
+    mantenimiento.tipoLavado = body.tipoLavado;
+    mantenimiento.cambioGrado = body.cambioGrado;
+    mantenimiento.observacionesGenerales = body.observacionesGenerales;
+    mantenimiento.izquierdo = body.izquierdo;
+    mantenimiento.derecho = body.derecho;
+    mantenimiento.frente = body.frente;
+    mantenimiento.posterior = body.posterior;
+    mantenimiento.piso = body.piso;
+    mantenimiento.techo = body.techo;
+    mantenimiento.interior = body.interior;
+    mantenimiento.puerta = body.puerta;
+    mantenimiento.fechas = body.fechas;
+    mantenimiento.usuarioMod = req.usuario._id;
+    mantenimiento.fMod = new Date();
     // console.log(mantenimiento.materiales);
     mantenimiento.save((err, mantenimientoGuardado) => {
       if (err) {
@@ -290,6 +287,97 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
   });
 
+});
+
+app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.id;
+  var body = req.body;
+
+
+
+  Mantenimiento.findById(id, (err, mant) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al buscar el Mantenimiento',
+        errors: err
+      });
+    }
+    if (!mant) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El Mantenimientos con el id ' + id + ' no existe',
+        errors: { message: 'No existe un Mantenimiento con ese ID' }
+      });
+    }
+
+    // si voy a finalizar debo determinar si hay algun otro mantenimiento abierto, para saber si el estado de la maniobra lo mando a disponible
+    Mantenimiento.find({
+      maniobra: mant.maniobra,
+      _id: { $ne: mant._id }
+    }).exec((err, mantenimientos) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'No se pudo determinar si hay algun Mantimiento Pendiente de Finalizar',
+          errors: err
+        });
+      }
+
+
+      mant.finalizado = body.finalizado;
+      mant.save((err, mantGuardado) => {
+        if (err) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'Error intentar cambiar el estado de Finalizado del Mantenimiento',
+            errors: err
+          });
+        }
+        Maniobra.findById(mant.maniobra, (err, maniobra) => {
+
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              mensaje: 'Error al buscar la maniobra asociada',
+              errors: err
+            });
+          }
+          if (!maniobra) {
+            return res.status(400).json({
+              ok: false,
+              mensaje: 'La maniobra asociada con el id ' + id + ' no existe',
+              errors: { message: 'No existe una maniobra asociada con ese ID' }
+            });
+          }
+          let losdemasFinalizados = true;
+          mantenimientos.forEach(m => {
+            losdemasFinalizados = m.finalizado && losdemasFinalizados;
+          });
+          if (mant.finalizado === true && losdemasFinalizados === true) maniobra.estatus = "DISPONIBLE";
+          else maniobra.estatus = "LAVADO_REPARACION";
+          maniobra.save((err, maniobraGuardado) => {
+            if (err) {
+              return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al actualizar la maniobra',
+                errors: err
+              });
+            }
+            if (maniobraGuardado) {
+              console.log(maniobraGuardado.estatus);
+              return res.status(200).json({
+                ok: false,
+                mensaje: 'El estatus del Mantenimiento ha sido actualizado con exito y el contenedor paso al estatus :' + maniobraGuardado.estatus,
+                errors: { message: 'El estatus del Mantenimiento ha sido actualizado con exito y el contenedor paso al estatus :' + maniobraGuardado.estatus }
+              });
+            }
+
+          });
+        });
+      });
+    });
+  });
 });
 
 
