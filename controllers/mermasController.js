@@ -1,9 +1,9 @@
 const Merma = require('../models/merma');
+const mongoose = require('mongoose');
 
 module.exports = {
-    consultaMermas: (req, res) => {
+    consultaMermas: (req) => {
         const material = req.params.material;
-        // Busco Material en Mermas
         let filtroMermas = '{';
         if (material != undefined && material != '') {
             filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
@@ -22,10 +22,50 @@ module.exports = {
             .populate('materiales.material', 'descripcion')
             .exec();
     },
-    consultaMermaById: (req, res) => {
+    consultaMermaById: (req) => {
         const id = req.params.id;
         return Merma.findById(id)
             .populate('materiales.material', 'descripcion')
             .exec();
     },
+    creaMerma: (req) => {
+        const body = req.body;
+        const merma = new Merma({
+            motivo: body.motivo,
+            materiales: body.materiales,
+            usuarioAlta: req.usuario._id
+        });
+
+        return merma.save();
+    },
+    actualizaMerma: (req) => {
+        const body = req.body;
+        let merma = req.body.merma;
+
+        merma.motivo = body.motivo;
+        merma.materiales = body.materiales;
+        merma.usuarioMod = req.usuario._id;
+        merma.fMod = new Date();
+        return merma.save();
+    },
+    eliminarMerma: (req) => {
+        let merma = req.body.merma;
+        return merma.remove();
+    },
+    aprobarMerma: (req) => {
+        const id = req.params.id;
+        const fAprobacion = new Date();
+        const comentario = req.body.comentarioAprobacion;
+        return Merma.updateOne({ "_id": new mongoose.Types.ObjectId(id) }, {
+            $set: {
+                "usuarioAprobacion": new mongoose.Types.ObjectId(req.usuario._id),
+                "fAprobacion": fAprobacion,
+                "comentarioAprobacion": comentario
+            }
+        });
+    },
+    desaprobarMerma: (req) => {
+        const id = req.params.id;
+        return Merma.updateOne({ "_id": id }, { $unset: { "usuarioAprobacion": undefined, "fAprobacion": undefined, "comentarioAprobacion": undefined } });
+    }
 }
