@@ -1,8 +1,6 @@
 const express = require('express');
 const mdAutenticacion = require('../middlewares/autenticacion');
-const Merma = require('../models/merma');
 const app = express();
-const mongoose = require('mongoose');
 const mermasController = require('../controllers/mermasController');
 
 // ==========================================
@@ -10,8 +8,8 @@ const mermasController = require('../controllers/mermasController');
 // ==========================================
 
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
-    const result = mermasController.consultaMermas(req, res);
-    result.then(mermas => {
+    const resultMermas = mermasController.consultaMermas(req, res);
+    resultMermas.then(mermas => {
         res.status(200).json({
             ok: true,
             mermas,
@@ -30,8 +28,8 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 //  Obtener Merma por ID
 // ==========================================
 app.get('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    const result = mermasController.consultaMermaById(req, res);
-    result.then(merma => {
+    const getMerma = mermasController.consultaMermaById(req, res);
+    getMerma.then(merma => {
         if (merma) {
             res.status(200).json({
                 ok: true,
@@ -57,25 +55,20 @@ app.get('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 // Crear una nueva merma
 // ==========================================
 app.post('/merma/', mdAutenticacion.verificaToken, (req, res) => {
-    const body = req.body;
-    const merma = new Merma({
-        motivo: body.motivo,
-        materiales: body.materiales,
-        usuarioAlta: req.usuario._id
-    });
-
-    merma.save((err, mermaGuardada) => {
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al crear merma',
-                errors: err
+    const resultMerma = mermasController.creaMerma(req, res);
+    resultMerma.then(merma => {
+        if (merma) {
+            res.status(200).json({
+                ok: true,
+                merma,
+                mensaje: 'Merma creada con éxito.',
             });
         }
-        res.status(201).json({
-            ok: true,
-            mensaje: 'Merma creada con éxito.',
-            merma: mermaGuardada
+    }).catch(error => {
+        return res.status(400).json({
+            ok: false,
+            mensaje: 'Error al crear merma',
+            errors: error
         });
     });
 });
@@ -85,47 +78,39 @@ app.post('/merma/', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 
 app.put('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    const id = req.params.id;
-    const body = req.body;
-    Merma.findById(id, (err, merma) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al buscar merma',
-                errors: err
-            });
-        }
-        if (!merma) {
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'La merma con el id ' + id + ' no existe',
-                errors: { message: 'No existe una merma con ese ID' }
-            });
-        }
-
-        if (!merma.fAprobacion) {
-            merma.motivo = body.motivo;
-            merma.materiales = body.materiales;
-            merma.usuarioMod = req.usuario._id;
-            merma.fMod = new Date();
-            merma.save((err, mermaGuardada) => {
-                if (err) {
+    const getMerma = mermasController.consultaMermaById(req, res);
+    getMerma.then(merma => {
+        if (merma) {
+            if (!merma.fAprobacion) {
+                req.body.merma = merma;
+                const resultMerma = mermasController.actualizaMerma(req, res);
+                resultMerma.then(merma => {
+                    if (merma) {
+                        res.status(200).json({
+                            ok: true,
+                            merma,
+                            mensaje: 'Merma actualizada con éxito.',
+                        });
+                    }
+                }).catch(error => {
                     return res.status(400).json({
                         ok: false,
                         mensaje: 'Error al actualizar merma',
-                        errors: err
+                        errors: error
                     });
-                }
-                res.status(200).json({
-                    ok: true,
-                    merma: mermaGuardada
                 });
-            });
+            } else {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No puedes actualizar esta merma por que ya esta aprobada.',
+                    errors: { message: 'No puedes actualizar esta merma por que ya esta aprobada.' }
+                });
+            }
         } else {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'No puedes actualizar esta merma por que ya esta aprobada.',
-                errors: { message: 'No puedes actualizar esta merma por que ya esta aprobada.' }
+                mensaje: `La merma con el id ${req.params.id} no existe`,
+                errors: { message: 'No existe una merma con ese ID' }
             });
         }
     });
@@ -135,14 +120,23 @@ app.put('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 //  Borrar un Merma por el id
 // ============================================
 app.delete('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    const result = mermasController.consultaMermaById(req, res);
-    result.then(merma => {
+    const getMerma = mermasController.consultaMermaById(req, res);
+    getMerma.then(merma => {
         if (merma) {
             if (!merma.fAprobacion) {
-                merma.remove();
-                res.status(200).json({
-                    ok: true,
-                    merma
+                req.body.merma = merma;
+                const resultElimina = mermasController.eliminarMerma(req, res);
+                resultElimina.then(merma => {
+                    res.status(200).json({
+                        ok: true,
+                        merma
+                    });
+                }).catch(() => {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al borrar la merma',
+                        errors: err
+                    });
                 });
             } else {
                 return res.status(400).json({
@@ -171,33 +165,25 @@ app.delete('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 // Aprobar Merma 
 // ==========================================
 app.put('/aprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    const idMerma = req.params.id;
-    const fAprobacion = new Date();
-    const comentario = req.body.comentarioAprobacion;
+
     if (req.usuario.role === 'ADMIN_ROLE' || req.usuario.role === 'PATIOADMIN_ROLE') {
-        Merma.updateOne({ "_id": new mongoose.Types.ObjectId(idMerma) }, {
-            $set: {
-                "usuarioAprobacion": new mongoose.Types.ObjectId(req.usuario._id),
-                "fAprobacion": fAprobacion,
-                "comentarioAprobacion": comentario
-            }
-        }, (err, mermaActualizada) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al autorizar merma',
-                    errors: err
-                });
-            }
+        const aprobarMerma = mermasController.aprobarMerma(req, res);
+        aprobarMerma.then(mermaAprobada => {
             res.status(200).json({
                 ok: true,
-                mermaActualizada
+                mermaAprobada
+            });
+        }).catch(error => {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al aprobar merma',
+                errors: error
             });
         });
     } else {
         return res.status(400).json({
             ok: false,
-            mensaje: 'No tienes privilegios para Aprobar Mermas'
+            mensaje: 'No tienes privilegios para aprobar Mermas'
         });
     }
 });
@@ -207,30 +193,24 @@ app.put('/aprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 
 app.put('/desaprobar/merma/:id', mdAutenticacion.verificaToken, (req, res) => {
-    const id = req.params.id;
-
     if (req.usuario.role === 'ADMIN_ROLE' || req.usuario.role === 'PATIOADMIN_ROLE') {
-        Merma.updateOne({ "_id": id }, { $unset: { "usuarioAprobacion": undefined, "fAprobacion": undefined, "comentarioAprobacion": undefined } }, (err, mermaDesaprobada) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al desaprobar merma',
-                    errors: err
-                });
-            }
-
-            if (!mermaDesaprobada) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'No existe una maniobra con ese id',
-                    errors: { message: 'No existe una maniobra con ese id' }
-                });
-            }
-
+        const desaprobarMerma = mermasController.desaprobarMerma(req, res);
+        desaprobarMerma.then(mermaDesaprobada => {
             res.status(200).json({
                 ok: true,
-                merma: mermaDesaprobada
+                mermaDesaprobada
             });
+        }).catch(error => {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error al desaprobar merma',
+                errors: error
+            });
+        });
+    } else {
+        return res.status(400).json({
+            ok: false,
+            mensaje: 'No tienes privilegios para Desaprobar Mermas'
         });
     }
 });
