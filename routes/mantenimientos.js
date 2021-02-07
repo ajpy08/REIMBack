@@ -28,58 +28,45 @@ app.use(fileUpload());
 // Obtener Mantenimiento
 // =======================================
 app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  Mantenimiento.findById(id)
-    .populate('usuarioAlta', 'nombre img email')
-    .exec((err, mantenimiento) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar el mantenimiento',
-          errors: err
-        });
-      }
-      if (!mantenimiento) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'El mantenimiento con el id ' + id + ' no existe',
-          errors: { message: 'No existe un mantenimiento con ese ID' }
-        });
-      }
-      res.status(200).json({
-        ok: true,
-        mensaje: 'Mantenimiento consultado con éxito',
-        mantenimiento: mantenimiento
-      });
+  const mantenimiento = mantenimientosController.getMantenimiento(req, res);
+  mantenimiento.then(mantenimiento => {
+    res.status(200).json({
+      ok: true,
+      mantenimiento
     });
+  }).catch(error => {
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al cargar el mantenimiento',
+      errors: error
+    });
+  });
 });
 
 app.get('', mdAutenticacion.verificaToken, (req, res) => {
   const mantenimientos = mantenimientosController.consultaMantenimientos(req, res);
   mantenimientos.then(mantenimientos => {
-          res.status(200).json({
-              ok: true,
-              mantenimientos,
-              totalRegistros: mantenimientos.length
-          });
+    res.status(200).json({
+      ok: true,
+      mantenimientos,
+      totalRegistros: mantenimientos.length
+    });
   }).catch(error => {
-      return res.status(500).json({
-          ok: false,
-          mensaje: 'Error cargando mantenimientos',
-          errors: error
-      });
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error cargando mantenimientos',
+      errors: error
+    });
   });
 });
 
 // =======================================
-// Obtener mantenimientos
+// Obtener mantenimientos por medio de la maniobra
 // =======================================
 app.get('/xmaniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
-  //app.get('/xmaniobra/:id', (req, res) => {
   var id = req.params.id;
-
   Mantenimiento.find({ maniobra: id })
-    .populate('usuario', 'nombre email')
+    .populate('usuarioAlta', 'nombre email')
     .exec((err, mantenimientos) => {
       if (err) {
         return res.status(500).json({
@@ -132,7 +119,6 @@ app.get('/xtipo/:tipo', mdAutenticacion.verificaToken, (req, res) => {
 app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
 
   var body = req.body.mantenimiento;
-  // console.log(body);
   var mantenimiento = new Mantenimiento({
     maniobra: body.maniobra,
     tipoMantenimiento: body.tipoMantenimiento,
@@ -256,9 +242,6 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
-
-
-
   Mantenimiento.findById(id, (err, mant) => {
     if (err) {
       return res.status(500).json({
@@ -284,6 +267,25 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
         return res.status(500).json({
           ok: false,
           mensaje: 'No se pudo determinar si hay algun Mantimiento Pendiente de Finalizar',
+          errors: err
+        });
+      }
+
+      if (body.finalizado === true && mant.fechas.length === 0) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'No se puede Finalizar un Mantenimiento si no se le ha ingresado Fechas',
+          errors: err
+        });
+      }
+      let FechasCorrectas = true;
+      mant.fechas.forEach(f => {
+        if (body.finalizado && (!f.fIni || f.hIni === '' || !f.fFin || f.hFin === '')) FechasCorrectas = false;
+      });
+      if (FechasCorrectas !== true) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'No se puede Finalizar un Mantenimiento si las Fechas no se han asignado completamente.',
           errors: err
         });
       }
@@ -769,7 +771,5 @@ app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
       });
     });
 });
-
-
 
 module.exports = app;
