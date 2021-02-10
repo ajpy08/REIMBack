@@ -1,6 +1,7 @@
 // Requires
 var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
+const passGmail = require('../config/config').passGmail;
 
 // Inicializar variables
 var app = express();
@@ -18,7 +19,7 @@ var mongoose = require('mongoose'),
     // pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
     // nodemailer = require('nodemailer');
     email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
+    pass = process.env.MAILER_PASSWORD || passGmail,
     nodemailer = require('nodemailer');
 
 
