@@ -122,8 +122,8 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
   var mantenimiento = new Mantenimiento({
     maniobra: body.maniobra,
     tipoMantenimiento: body.tipoMantenimiento,
-    tipoLavado: body.tipoLavado,
-    cambioGrado: body.cambioGrado,
+    tipoLavado: body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined,
+    cambioGrado: body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined,
     observacionesGenerales: body.observacionesGenerales,
     izquierdo: body.izquierdo,
     derecho: body.derecho,
@@ -187,7 +187,6 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
 app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body.mantenimiento;
-
   Mantenimiento.findById(id, (err, mantenimiento) => {
     if (err) {
       return res.status(500).json({
@@ -203,12 +202,17 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe mantenimiento con ese ID' }
       });
     }
-
-    // console.log(mantenimiento.materiales);
-    // console.log("nadan");
+    if (mantenimiento.finalizado) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El mantenimiento esta FINALIZADO, por lo tanto no se permite modificar',
+        errors: { message: 'El mantenimiento esta FINALIZADO, por lo tanto no se permite modificar' }
+      });
+    }
+    console.log("aqui");
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento;
-    mantenimiento.tipoLavado = body.tipoLavado;
-    mantenimiento.cambioGrado = body.cambioGrado;
+    mantenimiento.tipoLavado = body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined;
+    mantenimiento.cambioGrado = body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined;
     mantenimiento.observacionesGenerales = body.observacionesGenerales;
     mantenimiento.izquierdo = body.izquierdo;
     mantenimiento.derecho = body.derecho;
@@ -221,7 +225,6 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
     mantenimiento.fechas = body.fechas;
     mantenimiento.usuarioMod = req.usuario._id;
     mantenimiento.fMod = new Date();
-    // console.log(mantenimiento.materiales);
     mantenimiento.save((err, mantenimientoGuardado) => {
       if (err) {
         return res.status(400).json({
@@ -266,7 +269,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
       if (err) {
         return res.status(500).json({
           ok: false,
-          mensaje: 'No se pudo determinar si hay algun Mantimiento Pendiente de Finalizar',
+          mensaje: 'No se pudo determinar si hay algun Mantini  miento Pendiente de Finalizar',
           errors: err
         });
       }
@@ -274,7 +277,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
       if (body.finalizado === true && mant.fechas.length === 0) {
         return res.status(400).json({
           ok: false,
-          mensaje: 'No se puede Finalizar un Mantenimiento si no se le ha ingresado Fechas',
+          mensaje: 'No se permite Finalizar, debe asignar fechas y horarios.',
           errors: err
         });
       }
@@ -285,7 +288,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
       if (FechasCorrectas !== true) {
         return res.status(400).json({
           ok: false,
-          mensaje: 'No se puede Finalizar un Mantenimiento si las Fechas no se han asignado completamente.',
+          mensaje: 'No se permite Finalizar, las fechas y horarios no se han asignado completamente.',
           errors: err
         });
       }
@@ -331,11 +334,10 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
               });
             }
             if (maniobraGuardado) {
-              console.log(maniobraGuardado.estatus);
               return res.status(200).json({
-                ok: false,
-                mensaje: 'El estatus del Mantenimiento ha sido actualizado con exito y el contenedor paso al estatus :' + maniobraGuardado.estatus,
-                errors: { message: 'El estatus del Mantenimiento ha sido actualizado con exito y el contenedor paso al estatus :' + maniobraGuardado.estatus }
+                ok: true,
+                mensaje: 'El estatus Finalizado ha sido actualizado con éxito y el contenedor queda con el estatus :' + maniobraGuardado.estatus,
+                errors: { message: 'El estatus Finalizado ha sido actualizado con éxito y el contenedor queda con el estatus: ' + maniobraGuardado.estatus }
               });
             }
 
@@ -450,7 +452,7 @@ app.put('/mantenimiento/:id/editMaterial/:idMateria', mdAutenticacion.verificaTo
 
 
 // ==========================================
-// Remover eventos de la maniobra
+// Remover material del mantenimiento
 // ==========================================
 
 app.delete('/mantenimiento/:id/removeMaterial/:idMaterial', mdAutenticacion.verificaToken, (req, res) => {
@@ -481,12 +483,12 @@ app.delete('/mantenimiento/:id/removeMaterial/:idMaterial', mdAutenticacion.veri
 });
 
 // ==========================================
-// Remover eventos de la maniobra
+// Remover Mantenimiento
 // ==========================================
 
 app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
-  Mantenimiento.findByIdAndRemove(id, (err, mantenimientoBorrado) => {
+  Mantenimiento.findOne({ _id: id }).exec((err, mante) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -494,18 +496,51 @@ app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: err
       });
     }
-    if (!mantenimientoBorrado) {
+    if (!mante) {
       return res.status(400).json({
         ok: false,
         mensaje: 'No existe mantenimiento con ese id',
         errors: { message: 'No existe mantenimiento con ese id' }
       });
     }
-    res.status(200).json({
-      ok: true,
-      mantenimiento: mantenimientoBorrado
+    if (mante.finalizado) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede eliminar un mantenimiento finalizado',
+        errors: { message: 'No se puede eliminar un mantenimiento finalizado' }
+      });
+    }
+    if (mante.materiales && mante.materiales.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se puede eliminar un mantenimiento que tiene materiales cargados',
+        errors: { message: 'No se puede eliminar un mantenimiento que tiene materiales cargados' }
+      });
+    }
+
+    mante.remove((err, elim) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al borrar el mantenimiento',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        mantenimiento: elim
+      });
     });
+
+
   });
+
+
+
+
+
+
+
 });
 
 // ==========================================
@@ -534,8 +569,8 @@ app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
   if (AD === "ANTES")
     path = path + 'fotos_antes/';
   else
-  if (AD === "DESPUES")
-    path = path + 'fotos_despues/';
+    if (AD === "DESPUES")
+      path = path + 'fotos_despues/';
 
   variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
     .then((value) => {
@@ -567,7 +602,7 @@ app.get('/mantenimiento/:id/fotos/:AD/', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: pathFotos,
   };
-  s3.listObjects(params, function(err, data) {
+  s3.listObjects(params, function (err, data) {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -710,7 +745,7 @@ app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: folder
   }
-  s3.listObjectsV2(params, function(err, data) {
+  s3.listObjectsV2(params, function (err, data) {
     if (err) {
 
       return res.status(400).json({
@@ -752,7 +787,7 @@ app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
         });
       }
 
-      mantenimientos.forEach(async(man) => {
+      mantenimientos.forEach(async (man) => {
         var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
         var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
         var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
