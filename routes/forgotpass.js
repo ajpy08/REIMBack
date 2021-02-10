@@ -1,6 +1,7 @@
 // Requires
 var express = require('express');
 // var URL_SERVICIOS = require('../config/config').URL_SERVICIOS;
+const passGmail = require('../config/config').passGmail;
 
 // Inicializar variables
 var app = express();
@@ -15,7 +16,7 @@ var mongoose = require('mongoose'),
     _ = require('lodash'),
     hbs = require('nodemailer-express-handlebars'),
     email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
+    pass = process.env.MAILER_PASSWORD || passGmail,
     nodemailer = require('nodemailer');
 
 
