@@ -1,11 +1,12 @@
 
-var path = require('path'),
-    hbs = require('nodemailer-express-handlebars'),
-    // email = process.env.MAILER_EMAIL_ID || 'noreply@tlreim.com.mx',
-    // pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
-    email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
-    nodemailer = require('nodemailer');
+const path = require('path');
+const hbs = require('nodemailer-express-handlebars');
+const passGmail = require('../config/config').passGmail;
+// email = process.env.MAILER_EMAIL_ID || 'noreply@tlreim.com.mx',
+// pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
+const email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com';
+const pass = process.env.MAILER_PASSWORD || passGmail;
+const nodemailer = require('nodemailer');
 
 module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url, arch, archivos) => {
     let ok = true
@@ -42,12 +43,12 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url,
             attachments: [
                 {
                     filename: pdf,
-                    path:  path.resolve(__dirname, `../archivosTemp/${pdf}`),
+                    path: path.resolve(__dirname, `../archivosTemp/${pdf}`),
                     contentType: 'application/pdf'
                 },
                 {
                     filename: xml,
-                    path:  path.resolve(__dirname, `../archivosTemp/${xml}`),
+                    path: path.resolve(__dirname, `../archivosTemp/${xml}`),
                     ccontentType: 'application/xml'
                 }
             ],
