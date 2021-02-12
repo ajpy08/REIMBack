@@ -209,7 +209,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'El mantenimiento esta FINALIZADO, por lo tanto no se permite modificar' }
       });
     }
-    console.log("aqui");
+    
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento;
     mantenimiento.tipoLavado = body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined;
     mantenimiento.cambioGrado = body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined;

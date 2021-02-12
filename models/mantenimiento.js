@@ -83,7 +83,30 @@ mantenimientoSchema.virtual('precioMateriales')
     });
     return precio;
   });
-
+  mantenimientoSchema.virtual('fInicial')
+  .get(function() {
+    let fecha = null;
+    let fTemporal = new Date(2100,1,1);
+    this.fechas.forEach(fec => {
+      if (fec.fIni && fec.fIni <= fTemporal){
+        fecha = fec.fIni;
+        fTemporal = fec.fIni;
+      }
+    });
+    return fecha;
+  });
+  mantenimientoSchema.virtual('fFinal')
+  .get(function() {
+    let fecha2 = null;
+    let fTemporal2 = new Date(2000,1,1);
+    this.fechas.forEach(fec => {
+      if (fec.fFin && fec.fFin > fTemporal2){
+        fecha2 = fec.fFin;
+        fTemporal2 = fec.fFin;
+      }
+    });
+    return fecha2;
+  });
 function getDecimal(value) {
   if (typeof value !== 'undefined') {
     return parseFloat(value.toString());
