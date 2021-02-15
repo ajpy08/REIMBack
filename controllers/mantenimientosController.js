@@ -1,5 +1,5 @@
 const Mantenimiento = require('../models/mantenimiento');
-
+const moment = require('moment');
 module.exports = {
   getMantenimiento: (req, res) => {
     var id = req.params.id;
@@ -7,12 +7,15 @@ module.exports = {
       .populate('usuarioAlta', 'nombre img email')
       .exec();
   },
-  consultaMantenimientos: (req, res) => {
+  getMantenimientos: (req, res) => {
     const material = req.params.material;
 
     const tipoMantenimiento = req.query.tipoMantenimiento || '';
     const maniobra = req.query.maniobra || '';
     const finalizado = req.query.finalizado || '';
+
+    const fInicial = req.query.fInicial || '';
+    const fFinal = req.query.fFinal || '';
 
     let filtro = '{';
     if (material != undefined && material != '') {
@@ -28,27 +31,18 @@ module.exports = {
         if (finalizado === "FINALIZADOS") filtro += '\"finalizado\":' + '\"true\",';
         else filtro += '\"finalizado\":' + '\"false\",';
 
-
-        // if (reparacion === 'true') {
-        //   filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true},';
-        // }
-
-        // if (finillegada != '' && ffinllegada) {
-        //   fIni = moment(finillegada, 'DD-MM-YYYY', true).utc().startOf('day').format();
-        //   fFin = moment(ffinllegada, 'DD-MM-YYYY', true).utc().endOf('day').format();
-        //   filtro += '\"fLlegada\":{ \"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
-        // }
+    if (fInicial != '' && fFinal != '') {
+      fIni = moment(fInicial, 'DD-MM-YYYY', true).startOf('day').format();
+      fFin = moment(fFinal, 'DD-MM-YYYY', true).endOf('day').format();
+      filtro += '\"fechas.fIni\":{\"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
+    }
 
     if (filtro != '{')
       filtro = filtro.slice(0, -1);
     filtro = filtro + '}';
     const json = JSON.parse(filtro);
-
-
     // Busco Material en Mantenimientos
-
     return Mantenimiento.find(json)
-      // .populate('materiales.material', 'descripcion')
       .populate('usuarioAlta', 'nombre email')
       .populate('maniobra', 'contenedor tipo peso')
       .exec();

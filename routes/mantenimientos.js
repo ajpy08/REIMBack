@@ -44,14 +44,16 @@ app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 app.get('', mdAutenticacion.verificaToken, (req, res) => {
-  const mantenimientos = mantenimientosController.consultaMantenimientos(req, res);
+  const mantenimientos = mantenimientosController.getMantenimientos(req, res);
   mantenimientos.then(mantenimientos => {
+
     res.status(200).json({
       ok: true,
       mantenimientos,
       totalRegistros: mantenimientos.length
     });
   }).catch(error => {
+    console.log(error);
     return res.status(500).json({
       ok: false,
       mensaje: 'Error cargando mantenimientos',
@@ -209,7 +211,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'El mantenimiento esta FINALIZADO, por lo tanto no se permite modificar' }
       });
     }
-    
+
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento;
     mantenimiento.tipoLavado = body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined;
     mantenimiento.cambioGrado = body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined;
@@ -281,6 +283,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
           errors: err
         });
       }
+
       let FechasCorrectas = true;
       mant.fechas.forEach(f => {
         if (body.finalizado && (!f.fIni || f.hIni === '' || !f.fFin || f.hFin === '')) FechasCorrectas = false;
@@ -569,8 +572,8 @@ app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
   if (AD === "ANTES")
     path = path + 'fotos_antes/';
   else
-    if (AD === "DESPUES")
-      path = path + 'fotos_despues/';
+  if (AD === "DESPUES")
+    path = path + 'fotos_despues/';
 
   variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
     .then((value) => {
@@ -602,7 +605,7 @@ app.get('/mantenimiento/:id/fotos/:AD/', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: pathFotos,
   };
-  s3.listObjects(params, function (err, data) {
+  s3.listObjects(params, function(err, data) {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -745,7 +748,7 @@ app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: folder
   }
-  s3.listObjectsV2(params, function (err, data) {
+  s3.listObjectsV2(params, function(err, data) {
     if (err) {
 
       return res.status(400).json({
@@ -787,7 +790,7 @@ app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
         });
       }
 
-      mantenimientos.forEach(async (man) => {
+      mantenimientos.forEach(async(man) => {
         var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
         var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
         var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
