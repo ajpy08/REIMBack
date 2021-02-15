@@ -42,11 +42,9 @@ module.exports = {
         // Busco Material en Mantenimientos
 
         return Mantenimiento.find(json)
-            // .populate('materiales.material', 'descripcion')
-            // .populate('maniobra', 'contenedor tipo peso fLlegada ')
             .populate({
                 path: 'maniobra',
-                select: 'contenedor tipo peso fLlegada grado',
+                select: 'contenedor tipo peso fLlegada grado fAlta',
                 populate: {
                     path: 'viaje',
                     select: 'viaje',
@@ -59,24 +57,17 @@ module.exports = {
             })
             .populate({
                 path: 'maniobra',
-                select: 'contenedor tipo peso fLlegada grado',
+                select: 'contenedor tipo peso fLlegada grado fAlta',
                 populate: {
                     path: 'viaje',
                     select: 'viaje',
-                    
+
                     populate: {
                         path: 'naviera',
                         select: 'nombreComercial'
                     }
                 },
             })
-
-
-
-            // .populate('maniobra.viaje', 'viaje')
-            // .populate('maniobra.viaje.buque', 'nombre')
-            // .populate('maniobra.cliente', 'nombreComercial')
-            // .populate('naviera', 'nombreComercial')
             .exec();
     }
 }
