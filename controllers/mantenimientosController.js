@@ -44,13 +44,35 @@ module.exports = {
     filtro = filtro + '}';
     const json = JSON.parse(filtro);
 
+        // Busco Material en Mantenimientos
 
-    // Busco Material en Mantenimientos
+        return Mantenimiento.find(json)
+            .populate({
+                path: 'maniobra',
+                select: 'contenedor tipo peso fLlegada grado fAlta',
+                populate: {
+                    path: 'viaje',
+                    select: 'viaje',
 
-    return Mantenimiento.find(json)
-      // .populate('materiales.material', 'descripcion')
-      .populate('usuarioAlta', 'nombre email')
-      .populate('maniobra', 'contenedor tipo peso')
-      .exec();
-  }
+                    populate: {
+                        path: 'buque',
+                        select: 'nombre'
+                    }
+                }
+            })
+            .populate({
+                path: 'maniobra',
+                select: 'contenedor tipo peso fLlegada grado fAlta',
+                populate: {
+                    path: 'viaje',
+                    select: 'viaje',
+
+                    populate: {
+                        path: 'naviera',
+                        select: 'nombreComercial'
+                    }
+                },
+            })
+            .exec();
+    }
 }
