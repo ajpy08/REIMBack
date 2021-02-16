@@ -1,11 +1,12 @@
 
-var path = require('path'),
-    hbs = require('nodemailer-express-handlebars'),
-    // email = process.env.MAILER_EMAIL_ID || 'noreply@tlreim.com.mx',
-    // pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
-    email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com',
-    pass = process.env.MAILER_PASSWORD || 'fmat*0348',
-    nodemailer = require('nodemailer');
+const path = require('path');
+const hbs = require('nodemailer-express-handlebars');
+const passGmail = require('../config/config').passGmail;
+// email = process.env.MAILER_EMAIL_ID || 'noreply@tlreim.com.mx',
+// pass = process.env.MAILER_PASSWORD || 'tlreimjpuc#1',
+const email = process.env.MAILER_EMAIL_ID || 'patiocontenedoresreim@gmail.com';
+const pass = process.env.MAILER_PASSWORD || passGmail;
+const nodemailer = require('nodemailer');
 
 // module.exports = (formulario) => {
 module.exports = (datos, correoReceptor, asunto) => {
