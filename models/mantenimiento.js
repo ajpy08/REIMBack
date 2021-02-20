@@ -1,3 +1,4 @@
+const { text } = require('body-parser');
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 const { stringify } = require('uuid');
@@ -19,6 +20,7 @@ var SchemaMateriales = new Schema({
   cantidad: { type: Number },
   costo: { type: mongoose.Types.Decimal128, get: getDecimal },
   precio: { type: mongoose.Types.Decimal128, get: getDecimal },
+  unidadMedida: { type: String },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
   usuarioMod: { type: Schema.Types.ObjectId, ref: 'Usuario' },
@@ -26,6 +28,8 @@ var SchemaMateriales = new Schema({
 });
 
 var mantenimientoSchema = new Schema({
+  folio: { type: String, unique: [true, 'El folio ya se encuentra registrado'] },
+  fileFolio: { type: String },
   maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
   tipoMantenimiento: { type: String },
   tipoLavado: { type: String },
@@ -34,14 +38,15 @@ var mantenimientoSchema = new Schema({
   izquierdo: { type: String },
   derecho: { type: String },
   frente: { type: String },
-  posterior: { type: String },
+  puerta: { type: String },
   piso: { type: String },
   techo: { type: String },
   interior: { type: String },
-  puerta: { type: String },
+
   fechas: [SchemaFechas],
   materiales: [SchemaMateriales],
   finalizado: { type: Boolean, default: false },
+  fFinalizado: { type: Date },
   migrado: { type: Boolean, default: false },
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },
@@ -58,11 +63,11 @@ mantenimientoSchema.virtual('observacionesCompleto')
     if (this.izquierdo != '' && this.izquierdo != undefined) completo += 'Izquierdo: ' + this.izquierdo + ';';
     if (this.derecho != '' && this.derecho != undefined) completo += 'Derecho: ' + this.derecho + ';';
     if (this.frente != '' && this.frente != undefined) completo += 'Frente: ' + this.frente + ';';
-    if (this.posterior != '' && this.posterior != undefined) completo += 'Posterior: ' + this.posterior + ';';
+    if (this.puerta != '' && this.puerta != undefined) completo += 'Puerta: ' + this.puerta + ';';
     if (this.piso != '' && this.piso != undefined) completo += 'Piso: ' + this.piso + ';';
     if (this.techo != '' && this.techo != undefined) completo += 'Techo: ' + this.techo + ';';
     if (this.interior != '' && this.interior != undefined) completo += 'Interior: ' + this.interior + ';';
-    if (this.puerta != '' && this.puerta != undefined) completo += 'Puerta: ' + this.puerta + ';';
+
     return completo;
     //return `${this.observacionesGenerales}\n Izq: ${this.izquierdo}\n Der: ${this.derecho}\n Pos: ${this.posterior}\n Int: ${this.interior}`;
   });
@@ -83,30 +88,31 @@ mantenimientoSchema.virtual('precioMateriales')
     });
     return precio;
   });
-  mantenimientoSchema.virtual('fInicial')
+mantenimientoSchema.virtual('fInicial')
   .get(function() {
     let fecha = null;
-    let fTemporal = new Date(2100,1,1);
+    let fTemporal = new Date(2100, 1, 1);
     this.fechas.forEach(fec => {
-      if (fec.fIni && fec.fIni <= fTemporal){
+      if (fec.fIni && fec.fIni <= fTemporal) {
         fecha = fec.fIni;
         fTemporal = fec.fIni;
       }
     });
     return fecha;
   });
-  mantenimientoSchema.virtual('fFinal')
+mantenimientoSchema.virtual('fFinal')
   .get(function() {
     let fecha2 = null;
-    let fTemporal2 = new Date(2000,1,1);
+    let fTemporal2 = new Date(2000, 1, 1);
     this.fechas.forEach(fec => {
-      if (fec.fFin && fec.fFin > fTemporal2){
+      if (fec.fFin && fec.fFin > fTemporal2) {
         fecha2 = fec.fFin;
         fTemporal2 = fec.fFin;
       }
     });
     return fecha2;
   });
+
 function getDecimal(value) {
   if (typeof value !== 'undefined') {
     return parseFloat(value.toString());
