@@ -44,14 +44,16 @@ app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 app.get('', mdAutenticacion.verificaToken, (req, res) => {
-  const mantenimientos = mantenimientosController.consultaMantenimientos(req, res);
+  const mantenimientos = mantenimientosController.getMantenimientos(req, res);
   mantenimientos.then(mantenimientos => {
+
     res.status(200).json({
       ok: true,
       mantenimientos,
       totalRegistros: mantenimientos.length
     });
   }).catch(error => {
+    console.log(error);
     return res.status(500).json({
       ok: false,
       mensaje: 'Error cargando mantenimientos',
@@ -120,6 +122,7 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
 
   var body = req.body.mantenimiento;
   var mantenimiento = new Mantenimiento({
+    folio: body.folio,
     maniobra: body.maniobra,
     tipoMantenimiento: body.tipoMantenimiento,
     tipoLavado: body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined,
@@ -128,11 +131,10 @@ app.post('/mantenimiento', mdAutenticacion.verificaToken, (req, res) => {
     izquierdo: body.izquierdo,
     derecho: body.derecho,
     frente: body.frente,
-    posterior: body.posterior,
+    puerta: body.puerta,
     piso: body.piso,
     techo: body.techo,
     interior: body.interior,
-    puerta: body.puerta,
     fechas: body.fechas,
     usuarioAlta: req.usuario._id
   });
@@ -209,7 +211,7 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'El mantenimiento esta FINALIZADO, por lo tanto no se permite modificar' }
       });
     }
-    console.log("aqui");
+    mantenimiento.folio = body.folio;
     mantenimiento.tipoMantenimiento = body.tipoMantenimiento;
     mantenimiento.tipoLavado = body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined;
     mantenimiento.cambioGrado = body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined;
@@ -217,11 +219,10 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
     mantenimiento.izquierdo = body.izquierdo;
     mantenimiento.derecho = body.derecho;
     mantenimiento.frente = body.frente;
-    mantenimiento.posterior = body.posterior;
+    mantenimiento.puerta = body.puerta;
     mantenimiento.piso = body.piso;
     mantenimiento.techo = body.techo;
     mantenimiento.interior = body.interior;
-    mantenimiento.puerta = body.puerta;
     mantenimiento.fechas = body.fechas;
     mantenimiento.usuarioMod = req.usuario._id;
     mantenimiento.fMod = new Date();
@@ -281,6 +282,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
           errors: err
         });
       }
+
       let FechasCorrectas = true;
       mant.fechas.forEach(f => {
         if (body.finalizado && (!f.fIni || f.hIni === '' || !f.fFin || f.hFin === '')) FechasCorrectas = false;
@@ -295,6 +297,9 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
 
 
       mant.finalizado = body.finalizado;
+      if (mant.finalizado) mant.fFinalizado = new Date();
+      else mant.fFinalizado = undefined;
+
       mant.save((err, mantGuardado) => {
         if (err) {
           return res.status(400).json({
@@ -374,6 +379,7 @@ app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, r
             cantidad: body.cantidad,
             costo: body.costo,
             precio: body.precio,
+            unidadMedida: body.unidadMedida,
             usuarioAlta: req.usuario._id
           }
         }
@@ -421,6 +427,7 @@ app.put('/mantenimiento/:id/editMaterial/:idMateria', mdAutenticacion.verificaTo
         cantidad: body.cantidad,
         costo: body.costo,
         precio: body.precio,
+        unidadMedida: body.unidadMedida,
         usuarioMod: req.usuario._id,
         fMod: new Date()
       }
@@ -518,6 +525,9 @@ app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       });
     }
 
+    if (mante.fileFolio)
+      variasBucket.BorrarArchivoBucketKey('mantenimientos/' + mante._id + "/" + mante.fileFolio);
+
     mante.remove((err, elim) => {
       if (err) {
         return res.status(500).json({
@@ -543,6 +553,111 @@ app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
 });
 
+
+
+app.put('/mantenimiento/:id/adjunta_pdf_folio', mdAutenticacion.verificaToken, (req, res) => {
+  console.log("subir pdf");
+  if (!req.files) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'No anexo archivos.',
+      errors: { message: 'Debe de seleccionar un archivo' }
+    });
+  }
+  var id = req.params.id;
+  var archivo = req.files.file;
+  var nombreCortado = archivo.name.split('.');
+  var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+  var extensionesValidas = ['pdf', 'PDF'];
+  if (extensionesValidas.indexOf(extensionArchivo) < 0) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Extension no válida',
+      errors: { message: 'Las extensiones válidas son ' + extensionesValidas.join(', ') }
+    });
+  }
+
+  var nombreArchivo = `${uuid()}.${extensionArchivo}`;
+
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+  var params = {
+    Bucket: entorno.BUCKET,
+    Body: archivo.data,
+    Key: 'mantenimientos/' + id + "/" + nombreArchivo,
+    ContentType: archivo.mimetype
+  };
+
+  s3.upload(params, function(err, data) {
+    if (err) {
+      console.log("Error", err);
+      return res.status(500).json({
+        ok: false,
+        mensaje: 'Error al Subir archivo',
+        errors: err
+      });
+    }
+    if (data) {
+      console.log("Uploaded in:", data.Location);
+      Mantenimiento.findById(id, (err, mantenimiento) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            mensaje: 'Error al buscar el mantenimiento',
+            errors: err
+          });
+        }
+        if (!mantenimiento) {
+          return res.status(400).json({
+            ok: false,
+            mensaje: 'El mantenimiento con el id ' + id + ' no existe',
+            errors: { message: 'No existe mantenimiento con ese ID' }
+          });
+        }
+
+        mantenimiento.fileFolio = nombreArchivo;
+        mantenimiento.save((err, mantenimientoGuardado) => {
+          if (err) {
+            return res.status(400).json({
+              ok: false,
+              mensaje: 'Error al actualizar el mantenimiento',
+              errors: err
+            });
+          }
+          res.status(200).json({
+            ok: true,
+            mensaje: 'Archivo colocado con éxito',
+            nombreArchivo: nombreArchivo,
+            path: data.Location
+          });
+        });
+      });
+    }
+  });
+
+});
+
+app.get('/mantenimiento/:id/descarga_pdf_folio/:name', (req, res, netx) => {
+  const id = req.params.id;
+  const nombre = req.params.name;
+  var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
+
+  var params = {
+    Bucket: entorno.BUCKET,
+    Key: 'mantenimientos/' + id + "/" + nombre
+  };
+  s3.getObject(params, (err, data) => {
+    if (err) {
+      console.error('mantenimientos/' + id + "/" + nombre);
+      res.sendFile(path.resolve(__dirname, '../assets/no-img.jpg'));
+    } else {
+      res.setHeader('Content-disposition', 'atachment; filename=' + nombre);
+      res.setHeader('Content-length', data.ContentLength);
+      res.send(data.Body);
+    }
+  });
+
+});
+//descarga_pdf_folio
 // ==========================================
 
 // Subir fotos ANTES o DESPUES
@@ -569,8 +684,8 @@ app.put('/mantenimiento/:id/upfoto/:AD', (req, res) => {
   if (AD === "ANTES")
     path = path + 'fotos_antes/';
   else
-    if (AD === "DESPUES")
-      path = path + 'fotos_despues/';
+  if (AD === "DESPUES")
+    path = path + 'fotos_despues/';
 
   variasBucket.SubirArchivoBucket(archivo, path, nombreArchivo)
     .then((value) => {
@@ -602,7 +717,7 @@ app.get('/mantenimiento/:id/fotos/:AD/', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: pathFotos,
   };
-  s3.listObjects(params, function (err, data) {
+  s3.listObjects(params, function(err, data) {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -676,61 +791,6 @@ app.get('/mantenimiento/:id/eliminafoto/:AD/:name', (req, res, netx) => {
 });
 
 
-//DESCARGAR TODO LA CARPETA DE IMAGENES EN UN ZIP //
-// app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
-//   var idMantenimiento = req.params.id;
-//   var antes_despues = req.params.AD;
-//   var folder = "";
-//   folder = `mantenimientos/${idMantenimiento}/`;
-
-//   if (antes_despues === 'ANTES') {
-//     folder = `mantenimientos/${idMantenimiento}/fotos_antes/`;
-
-//   } else {
-//     if (antes_despues === 'DESPUES') {
-//       folder = `mantenimientos/${idMantenimiento}/fotos_despues/`;
-//     }
-//   }
-
-//   var s3 = new AWS.S3(entorno.CONFIG_BUCKET);
-//   var bucket = entorno.BUCKET;
-//   var params = {
-//     Bucket: entorno.BUCKET,
-//     Prefix: folder,
-//   }
-
-//   s3.listObjectsV2(params, function(err, data) {
-//     if (err) {
-//       return res.status(400).json({
-//         ok: false,
-//         mensaje: 'No se encontraron fotos',
-//         errors: { message: 'No existen fotos para el Mantenimiento con ID ' + idMantenimiento }
-//       });
-//     } else {
-//       const files = [];
-//       data.Contents.forEach(d => {
-//         const img = d.Key.substr(d.Key.lastIndexOf('/') + 1, d.Key.length - 1);
-//         files.push(img);
-//       });
-//       // const output = fs.createWriteStream(join(res + `${idMantenimiento}.zip`));
-//       s3Zip.archive({ s3: s3, bucket: bucket, preserveFolderStructure: true }, folder, files).pipe(res, `${idMantenimiento}.zip`);
-//       //s3Zip.archive({ s3: s3, bucket: bucket, debug: true, preserveFolderStructure: true }, folder, files).pipe(res, `${idMantenimiento}.zip`);
-//       //  output.on('close', () => {
-//       //    console.log('Cerrado');
-//       //    res.download(res.path, 'algo.zip');
-//       //    return;
-//       //  });
-//       //  return;
-//       //res.send(s3Zip.archive({ region: region, bucket: bucket, debug: true, preserveFolderStructure: true  }, folder, files).pipe(output));
-//       // res.setHeader('Content-disposition', 'atachment; filename=algo.zip'); 
-//       // res.setHeader('Content-length',data.Contents);
-//       // res.status(200).json({
-//       //   ok:true,
-//       //   archive: output
-//       // });
-//     }
-//   })
-// })
 
 app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
   var idMantenimiento = req.params.id;
@@ -745,7 +805,7 @@ app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
     Bucket: entorno.BUCKET,
     Prefix: folder
   }
-  s3.listObjectsV2(params, function (err, data) {
+  s3.listObjectsV2(params, function(err, data) {
     if (err) {
 
       return res.status(400).json({
@@ -787,7 +847,7 @@ app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
         });
       }
 
-      mantenimientos.forEach(async (man) => {
+      mantenimientos.forEach(async(man) => {
         var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
         var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
         var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
