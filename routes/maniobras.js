@@ -11,6 +11,7 @@ const sentMail = require('../routes/sendAlert');
 var fileUpload = require('express-fileupload');
 var uuid = require('uuid/v1');
 app.use(fileUpload());
+var varias = require('../public/varias');
 
 // =======================================
 // Obtener Maniobras G E N E R A L
@@ -395,26 +396,26 @@ app.get('/maniobra/:id/includes', mdAutenticacion.verificaToken, (req, res) => {
     })
 
 
-  .exec((err, maniobra) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        mensaje: 'Error al buscar la maniobra',
-        errors: err
+    .exec((err, maniobra) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar la maniobra',
+          errors: err
+        });
+      }
+      if (!maniobra) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'La maniobra con el id ' + id + 'no existe',
+          errors: { message: 'No existe maniobra con ese ID' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        maniobra: maniobra
       });
-    }
-    if (!maniobra) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'La maniobra con el id ' + id + 'no existe',
-        errors: { message: 'No existe maniobra con ese ID' }
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      maniobra: maniobra
     });
-  });
 });
 
 // =======================================
@@ -668,8 +669,8 @@ app.get('/LR', mdAutenticacion.verificaToken, (req, res) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-      json
-    )
+    json
+  )
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
@@ -931,7 +932,7 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
               else
                 maniobra.estatus = "DISPONIBLE";
 
-              // }
+            // }
 
             maniobra.save((err, maniobraGuardado) => {
               if (err) {
@@ -1149,7 +1150,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
             'estatus': 'CARGADO',
             'maniobraAsociada': maniobra._id
           }
-        }, function(err) {
+        }, function (err) {
           if (err) {
             console.log(err);
           }
@@ -1160,7 +1161,7 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
               'estatus': 'DISPONIBLE',
               'maniobraAsociada': null
             }
-          }, function(err) {
+          }, function (err) {
             if (err) {
               console.log(err);
             }
@@ -1273,8 +1274,8 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res) => {
   var json2 = JSON.parse(filtro2);
 
   Maniobra.find(
-      json
-    )
+    json
+  )
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial nombreComercial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
@@ -1306,13 +1307,6 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res) => {
       });
     });
 });
-
-
-
-
-
-
-
 
 // ==========================================
 // Migracion de Maniobras
@@ -1384,6 +1378,7 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
           mantenimiento.observacionesGenerales = observaciones.substring(0, observaciones.length - 2);
           mantenimiento.fechas = fechas;
           mantenimiento.finalizado = finalizado;
+          finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
           mantenimiento.migrado = true;
 
           mantenimientosReparacion.push(mantenimiento);
@@ -1431,6 +1426,7 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
           mantenimiento.observacionesGenerales = m.lavadoObservacion;
           mantenimiento.fechas = fechas;
           mantenimiento.finalizado = finalizado;
+          finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
           mantenimiento.migrado = true;
 
           mantenimientosLavado.push(mantenimiento);
@@ -1439,83 +1435,66 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
         /* #endregion */
       });
 
-
       if (mantenimientosLavado.length > 0) {
-        mantenimientosLavado.forEach((man) => {
-          let mantenimiento = new Mantenimiento({
-            maniobra: man.maniobra,
-            tipoMantenimiento: man.tipoMantenimiento,
-            tipoLavado: man.tipoLavado,
-            // cambioGrado: man.cambioGrado,
-            observacionesGenerales: man.observacionesGenerales,
-            // izquierdo: man.izquierdo,
-            // derecho: man.derecho,
-            // frente: man.frente,
-            // posterior: man.posterior,
-            // piso: man.piso,
-            // techo: man.techo,
-            // interior: man.interior,
-            // puerta: man.puerta,
-            fechas: man.fechas,
-            materiales: man.materiales,
-            finalizado: man.finalizado,
-            migrado: man.migrado,
-            // usuarioAlta: req.usuario._id
+        const start = async () => {
+          await varias.asyncForEach(mantenimientosLavado, async (man) => {
+            let mantenimiento = new Mantenimiento({
+              maniobra: man.maniobra,
+              tipoMantenimiento: man.tipoMantenimiento,
+              tipoLavado: man.tipoLavado,
+              // cambioGrado: man.cambioGrado,
+              observacionesGenerales: man.observacionesGenerales,
+              // izquierdo: man.izquierdo,
+              // derecho: man.derecho,
+              // frente: man.frente,
+              // posterior: man.posterior,
+              // piso: man.piso,
+              // techo: man.techo,
+              // interior: man.interior,
+              // puerta: man.puerta,
+              fechas: man.fechas,
+              materiales: man.materiales,
+              finalizado: man.finalizado,
+              fFinalizado: man.fFinalizado,
+              migrado: man.migrado,
+              // usuarioAlta: req.usuario._id
+            });
+            const manL = await mantenimiento.save();
           });
-          mantenimiento.save((err, mantenimientoGuardado) => {
-            if (err) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al agregar el mantenimiento',
-                errors: err
-              });
-            }
-            // res.status(201).json({
-            //   ok: true,
-            //   mantenimiento: mantenimientoGuardado
-            // });
-          });
+        };
+        start();
 
-        });
       }
 
       if (mantenimientosReparacion.length > 0) {
-        mantenimientosReparacion.forEach((man) => {
-          let mantenimiento = new Mantenimiento({
-            maniobra: man.maniobra,
-            tipoMantenimiento: man.tipoMantenimiento,
-            // tipoLavado: man.tipoLavado,
-            cambioGrado: man.cambioGrado,
-            observacionesGenerales: man.observacionesGenerales,
-            // izquierdo: man.izquierdo,
-            // derecho: man.derecho,
-            // frente: man.frente,
-            // posterior: man.posterior,
-            // piso: man.piso,
-            // techo: man.techo,
-            // interior: man.interior,
-            // puerta: man.puerta,
-            fechas: man.fechas,
-            materiales: man.materiales,
-            finalizado: man.finalizado,
-            migrado: man.migrado,
-            // usuarioAlta: req.usuario._id
+        const start = async () => {
+          await varias.asyncForEach(mantenimientosReparacion, async (man) => {
+            let mantenimiento = new Mantenimiento({
+              maniobra: man.maniobra,
+              tipoMantenimiento: man.tipoMantenimiento,
+              tipoLavado: man.tipoLavado,
+              // cambioGrado: man.cambioGrado,
+              observacionesGenerales: man.observacionesGenerales,
+              // izquierdo: man.izquierdo,
+              // derecho: man.derecho,
+              // frente: man.frente,
+              // posterior: man.posterior,
+              // piso: man.piso,
+              // techo: man.techo,
+              // interior: man.interior,
+              // puerta: man.puerta,
+              fechas: man.fechas,
+              materiales: man.materiales,
+              finalizado: man.finalizado,
+              fFinalizado: man.fFinalizado,
+              migrado: man.migrado,
+              // usuarioAlta: req.usuario._id
+            });
+            const manR = await mantenimiento.save();
           });
-          mantenimiento.save((err, mantenimientoGuardado) => {
-            if (err) {
-              return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al agregar el mantenimiento',
-                errors: err
-              });
-            }
-            // res.status(201).json({
-            //   ok: true,
-            //   mantenimiento: mantenimientoGuardado
-            // });
-          });
+        };
+        start();
 
-        });
       }
 
       res.status(200).json({
@@ -1525,12 +1504,6 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
         totalMantenimientosLavado: mantenimientosLavado.length,
         totalMantenimientosReparacion: mantenimientosReparacion.length
       });
-
-      // res.status(200).json({
-      //   ok: true,
-      //   maniobras,
-      //   total: maniobras.length
-      // });
     });
 });
 
