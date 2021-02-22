@@ -65,6 +65,7 @@ app.post('/proveedor/', mdAutenticacion.verificaToken, (req, res) => {
   var proveedor = new Proveedor({
     rfc: body.rfc,
     razonSocial: body.razonSocial,
+    alias: body.alias,
     activo: body.activo,
     usuarioAlta: req.usuario._id
   });
@@ -106,6 +107,7 @@ app.put('/proveedor/:id', mdAutenticacion.verificaToken, (req, res) => {
     }
     proveedor.rfc = body.rfc;
     proveedor.razonSocial = body.razonSocial;
+    proveedor.alias = body.alias;
     proveedor.activo = body.activo;
     proveedor.usuarioMod = req.usuario._id;
     proveedor.fMod = new Date();
