@@ -13,11 +13,16 @@ const mantenimientosController = require('../controllers/mantenimientosControlle
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
   var descripcion = req.query.descripcion || '';
   var activo = req.query.activo || '';
+  var tipo = req.query.tipo || '';
+
   var filtro = '{';
   if (descripcion != 'undefined' && descripcion != '')
     filtro += '\"descripcion\":' + '\"' + descripcion + '\",';
   if (activo != 'undefined' && activo != '')
     filtro += '\"activo\":' + '\"' + activo + '\",';
+  if (tipo != 'undefined' && tipo != '')
+    filtro += '\"tipo\":' + '\"' + tipo + '\",';
+
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
@@ -75,7 +80,7 @@ app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 //  Obtener Stock de Material por ID
 // ==========================================
-app.get('/material/stock/:material', mdAutenticacion.verificaToken, async(req, res) => {
+app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, res) => {
   let stock = 0;
   let nombreMaterial;
   let ok = false;
@@ -335,6 +340,7 @@ app.get('/material/valida/costo/precio/:id', mdAutenticacion.verificaToken, (req
 app.post('/material/', mdAutenticacion.verificaToken, (req, res) => {
   var body = req.body;
   var material = new Material({
+    codigo: body.codigo,
     descripcion: body.descripcion,
     unidadMedida: body.unidadMedida,
     costo: body.costo,
@@ -383,6 +389,7 @@ app.put('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
         errors: { message: 'No existe un material con ese ID' }
       });
     }
+    material.codigo = body.codigo;
     material.descripcion = body.descripcion;
     material.unidadMedida = body.unidadMedida;
     material.costo = body.costo;
@@ -464,52 +471,82 @@ app.put('/material/:id/habilita_deshabilita', mdAutenticacion.verificaToken, (re
 // ============================================
 //  Borrar un Material por el id
 // ============================================
-app.delete('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/material/:id', mdAutenticacion.verificaToken, async (req, res) => {
   var id = req.params.id;
 
-  DetalleMaterial.find({
-      $or: [
-        { 'material': id }
-      ]
-    })
-    .exec(
-      (err, detalleMaterial) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al intentar validar la eliminacion del material',
-            errors: err
-          });
-        }
-        if (detalleMaterial && detalleMaterial.length > 0) {
-          res.status(400).json({
-            ok: false,
-            mensaje: 'El material ya tiene detalles registrados, por lo tanto no puede eliminarse.',
-            errors: { message: 'El material ya tiene detalles registrados, por lo tanto no puede eliminarse.' },
-            resultadoError: detalleMaterial
-          });
-        }
-        Material.findByIdAndRemove(id, (err, materialBorrado) => {
-          if (err) {
-            return res.status(500).json({
-              ok: false,
-              mensaje: 'Error al borrar material',
-              errors: err
-            });
-          }
-          if (!materialBorrado) {
-            return res.status(400).json({
-              ok: false,
-              mensaje: 'No existe un material con ese id',
-              errors: { message: 'No existe un material con ese id' }
-            });
-          }
-          res.status(200).json({
-            ok: true,
-            material: materialBorrado
-          });
-        });
+  const entradas = await entradasController.consultaEntradas(req, res);
 
+  if (entradas && entradas.length > 0) {
+    res.status(400).json({
+      ok: false,
+      mensaje: 'El material ya se encuentra en entradas registradas, por lo tanto no puede eliminarse.',
+      errors: { message: 'El material ya se encuentra en entradas registradas, por lo tanto no puede eliminarse.' }
+    });
+  } else {
+    Material.findByIdAndRemove(id, (err, materialBorrado) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al borrar material',
+          errors: err
+        });
+      }
+      if (!materialBorrado) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'No existe un material con ese id',
+          errors: { message: 'No existe un material con ese id' }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        material: materialBorrado
       });
+    });
+  }
+
+  // DetalleMaterial.find({
+  //     $or: [
+  //       { 'material': id }
+  //     ]
+  //   })
+  //   .exec(
+  //     (err, detalleMaterial) => {
+  //       if (err) {
+  //         return res.status(500).json({
+  //           ok: false,
+  //           mensaje: 'Error al intentar validar la eliminacion del material',
+  //           errors: err
+  //         });
+  //       }
+  //       if (detalleMaterial && detalleMaterial.length > 0) {
+  //         res.status(400).json({
+  //           ok: false,
+  //           mensaje: 'El material ya tiene detalles registrados, por lo tanto no puede eliminarse.',
+  //           errors: { message: 'El material ya tiene detalles registrados, por lo tanto no puede eliminarse.' },
+  //           resultadoError: detalleMaterial
+  //         });
+  //       }
+  //       Material.findByIdAndRemove(id, (err, materialBorrado) => {
+  //         if (err) {
+  //           return res.status(500).json({
+  //             ok: false,
+  //             mensaje: 'Error al borrar material',
+  //             errors: err
+  //           });
+  //         }
+  //         if (!materialBorrado) {
+  //           return res.status(400).json({
+  //             ok: false,
+  //             mensaje: 'No existe un material con ese id',
+  //             errors: { message: 'No existe un material con ese id' }
+  //           });
+  //         }
+  //         res.status(200).json({
+  //           ok: true,
+  //           material: materialBorrado
+  //         });
+  //       });
+  //     });
 });
 module.exports = app;
