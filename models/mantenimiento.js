@@ -28,7 +28,8 @@ var SchemaMateriales = new Schema({
 });
 
 var mantenimientoSchema = new Schema({
-  folio: { type: String, unique: [true, 'El folio ya se encuentra registrado'] },
+  // folio: { type: String, unique: [true, 'El folio ya se encuentra registrado'] },
+  folio: { type: String },
   fileFolio: { type: String },
   maniobra: { type: Schema.Types.ObjectId, ref: 'Maniobra' },
   tipoMantenimiento: { type: String },
@@ -57,7 +58,7 @@ var mantenimientoSchema = new Schema({
 mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
 mantenimientoSchema.virtual('observacionesCompleto')
-  .get(function() {
+  .get(function () {
     var completo = '';
     if (this.observacionesGenerales != '' && this.observacionesGenerales != undefined) completo += 'Generales: ' + this.observacionesGenerales + ';';
     if (this.izquierdo != '' && this.izquierdo != undefined) completo += 'Izquierdo: ' + this.izquierdo + ';';
@@ -73,23 +74,27 @@ mantenimientoSchema.virtual('observacionesCompleto')
   });
 
 mantenimientoSchema.virtual('costoMateriales')
-  .get(function() {
+  .get(function () {
     let costo = 0;
-    this.materiales.forEach(mat => {
-      costo += mat.costo * mat.cantidad;
-    });
+    if (this.materiales) {
+      this.materiales.forEach(mat => {
+        costo += mat.costo * mat.cantidad;
+      });
+    }
     return costo;
   });
 mantenimientoSchema.virtual('precioMateriales')
-  .get(function() {
+  .get(function () {
     let precio = 0;
-    this.materiales.forEach(mat => {
-      precio += mat.precio * mat.cantidad;
-    });
+    if (this.materiales) {
+      this.materiales.forEach(mat => {
+        precio += mat.precio * mat.cantidad;
+      });
+    }
     return precio;
   });
 mantenimientoSchema.virtual('fInicial')
-  .get(function() {
+  .get(function () {
     let fecha = null;
     let fTemporal = new Date(2100, 1, 1);
     this.fechas.forEach(fec => {
@@ -101,7 +106,7 @@ mantenimientoSchema.virtual('fInicial')
     return fecha;
   });
 mantenimientoSchema.virtual('fFinal')
-  .get(function() {
+  .get(function () {
     let fecha2 = null;
     let fTemporal2 = new Date(2000, 1, 1);
     this.fechas.forEach(fec => {

@@ -14,6 +14,7 @@ var entradaSchema = new Schema({
   noFactura: { type: String, required: true },
   proveedor: { type: Schema.Types.ObjectId, ref: 'Proveedor' },
   fFactura: { type: Date },
+  fEntrada: { type: Date },
   detalles: [subSchemaDetalle],
   usuarioAlta: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   fAlta: { type: Date, default: Date.now },

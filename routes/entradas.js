@@ -73,6 +73,7 @@ app.post('/entrada/', mdAutenticacion.verificaToken, (req, res) => {
         noFactura: body.noFactura,
         proveedor: body.proveedor,
         fFactura: body.fFactura,
+        fEntrada: body.fEntrada,
         detalles: body.detalles,
         usuarioAlta: req.usuario._id
     });
@@ -118,6 +119,7 @@ app.put('/entrada/:id', mdAutenticacion.verificaToken, (req, res) => {
         entrada.noFactura = body.noFactura;
         entrada.proveedor = body.proveedor;
         entrada.fFactura = body.fFactura;
+        entrada.fEntrada = body.fEntrada;
         entrada.detalles = body.detalles;
         entrada.usuarioMod = req.usuario._id;
         entrada.fMod = new Date();

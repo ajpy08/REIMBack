@@ -122,7 +122,7 @@ exports.getGaps = function getGaps(BinaryArray, gaps) {
   return (gaps.length > 0) ? Math.max.apply(Math, gaps) : 0;
 }
 
-exports.asyncForEach = async() => {
+exports.asyncForEach = async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index]);
     // await callback(array[index], index, array);
