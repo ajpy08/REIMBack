@@ -1340,14 +1340,16 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
 
           m.reparaciones.forEach(r => {
             observaciones += r.reparacion + '; ';
-
-            if (r.reparacion.toLowerCase().includes('acondicionamiento basico') || r.reparacion.toLowerCase().includes('cambio de grado')) {
-              mantenimiento.tipoMantenimiento = 'ACONDICIONAMIENTO';
-              if (r.reparacion.toLowerCase().includes('cambio de grado')) {
-                mantenimiento.cambioGrado = true;
-              }
-            }
           });
+
+          if (observaciones.toLowerCase().includes('acondicionamiento') || observaciones.toLowerCase().includes('grado')) {
+            mantenimiento.tipoMantenimiento = 'ACONDICIONAMIENTO';
+            if (observaciones.toLowerCase().includes('cambio de grado')) {
+              mantenimiento.cambioGrado = true;
+            } else {
+              mantenimiento.cambioGrado = false;
+            }
+          }
 
           let fechas = [];
           let finalizado = false;
@@ -1473,7 +1475,7 @@ app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (r
               maniobra: man.maniobra,
               tipoMantenimiento: man.tipoMantenimiento,
               tipoLavado: man.tipoLavado,
-              // cambioGrado: man.cambioGrado,
+              cambioGrado: man.cambioGrado,
               observacionesGenerales: man.observacionesGenerales,
               // izquierdo: man.izquierdo,
               // derecho: man.derecho,
