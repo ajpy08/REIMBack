@@ -243,6 +243,10 @@ app.put('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
 
 });
 
+// ==========================================
+// Finalizar mantenimiento
+// ==========================================
+
 app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body;
@@ -270,7 +274,7 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
       if (err) {
         return res.status(500).json({
           ok: false,
-          mensaje: 'No se pudo determinar si hay algun Mantini  miento Pendiente de Finalizar',
+          mensaje: 'No se pudo determinar si hay algun Mantinimiento Pendiente de Finalizar',
           errors: err
         });
       }
@@ -293,6 +297,15 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
           mensaje: 'No se permite Finalizar, las fechas y horarios no se han asignado completamente.',
           errors: err
         });
+      }
+
+      if (!mant.materiales || mant.materiales.length == 0) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'No se permite Finalizar, Aún no se han cargado materiales.',
+          errors: err
+        });
+
       }
 
 
@@ -538,6 +551,7 @@ app.delete('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
       }
       res.status(200).json({
         ok: true,
+        mensaje: 'Mantenimiento eliminado con éxito',
         mantenimiento: elim
       });
     });
