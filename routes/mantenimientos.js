@@ -377,6 +377,44 @@ app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, r
     console.log("cantidad:" + body.cantidad);
     console.log("stock:" + stock);
 
+    let stock = 0;
+
+    let ok = false;
+
+
+
+    const entradas = await entradasController.consultaEntradas(req, res);
+    entradas.forEach(e => {
+      e.detalles.forEach(d => {
+        if (d.material._id == req.params.material) {
+          ok = true;
+          stock += d.cantidad;
+          nombreMaterial = d.material.descripcion;
+        }
+      });
+    });
+
+    const mermas = await mermasController.consultaMermas(req, res);
+    mermas.forEach(e => {
+      e.materiales.forEach(m => {
+        if (m.material._id == req.params.material) {
+          ok = true;
+          stock -= m.cantidad;
+        }
+      });
+    });
+
+    const mantenimientos = await mantenimientosController.getMantenimientos(req, res);
+    mantenimientos.forEach(e => {
+      e.materiales.forEach(m => {
+        if (m.material._id == req.params.material) {
+          ok = true;
+          stock -= m.cantidad;
+        }
+      });
+    });
+
+
     if (body.cantidad > stock) {
       return res.status(400).json({
         ok: false,

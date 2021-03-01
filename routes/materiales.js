@@ -80,134 +80,7 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async(req, r
   let nombreMaterial;
   let ok = false;
 
-  /* #region  X */
-  // let filtro = '{';
-  // if (material != 'undefined' && material != '')
-  //     filtro += '\"detalles.material\":' + '\"' + material + '\",';
 
-  // if (filtro != '{')
-  //     filtro = filtro.slice(0, -1);
-  // filtro = filtro + '}';
-  // const json = JSON.parse(filtro);
-
-  // // Busco Material en Entradas
-  // Entrada.find(json)
-  //     .populate('detalles.material', 'descripcion costo precio tipo minimo')
-  //     .sort({ fAlta: -1 })
-  //     .exec(
-  //         (err, entradas) => {
-  //             if (err) {
-  //                 return res.status(500).json({
-  //                     ok: false,
-  //                     mensaje: 'Error cargando entradas',
-  //                     errors: err
-  //                 });
-  //             }
-
-  //             if (entradas.length > 0) {
-  //                 entradas.forEach(e => {
-  //                     e.detalles.forEach(d => {
-  //                         if (d.material._id == req.params.id) {
-  //                             ok = true;
-  //                             stock += d.cantidad;
-  //                             nombreMaterial = d.material.descripcion;
-  //                         }
-  //                     });
-
-  //                 });
-  //             }
-
-  //             // // Busco Material en Mantenimientos
-  //             // let filtroMantenimientos = '{';
-  //             // if (material != 'undefined' && material != '') {
-  //             //     filtroMantenimientos += '\"materiales.material\":' + '\"' + material + '\",';
-  //             // }
-
-  //             // if (filtroMantenimientos != '{')
-  //             //     filtroMantenimientos = filtroMantenimientos.slice(0, -1);
-  //             // filtroMantenimientos = filtroMantenimientos + '}';
-  //             // const jsonMantenimientos = JSON.parse(filtroMantenimientos);
-
-
-  //             // Mantenimiento.find(jsonMantenimientos)
-  //             //     // .populate('materiales.material', 'descripcion')
-  //             //     .exec((err, mantenimientos) => {
-  //             //         if (err) {
-  //             //             return res.status(500).json({
-  //             //                 ok: false,
-  //             //                 mensaje: 'Error al buscar mantenimientos',
-  //             //                 errors: err
-  //             //             });
-  //             //         }
-  //             //         if (!mantenimientos) {
-  //             //             return res.status(400).json({
-  //             //                 ok: false,
-  //             //                 mensaje: 'El material con el id ' + material + ' no existe',
-  //             //                 errors: { message: 'No existe un material con ese ID' }
-  //             //             });
-  //             //         }
-
-  //             //         // if (mantenimientos.length > 0) {
-  //             //         mantenimientos.forEach(m => {
-  //             //             m.materiales.forEach(m => {
-  //             //                 if (m.material._id == req.params.id) {
-  //             //                     ok = true;
-  //             //                     stock -= m.cantidad;
-  //             //                 }
-  //             //             });
-
-  //             //         });
-  //             //         // }
-
-  //             // // Busco Material en Mermas
-  //             // let filtroMermas = '{';
-  //             // if (material != 'undefined' && material != '') {
-  //             //     filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
-  //             //     filtroMermas += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
-  //             // }
-
-  //             // if (filtroMermas != '{')
-  //             //     filtroMermas = filtroMermas.slice(0, -1);
-  //             // filtroMermas = filtroMermas + '}';
-  //             // const jsonMermas = JSON.parse(filtroMermas);
-
-  //             // Merma.find(jsonMermas)
-  //             //     // .populate('materiales.material', 'descripcion')
-  //             //     .exec((err, mermas) => {
-  //             //         if (err) {
-  //             //             return res.status(500).json({
-  //             //                 ok: false,
-  //             //                 mensaje: 'Error al buscar mermas',
-  //             //                 errors: err
-  //             //             });
-  //             //         }
-  //             //         if (!mermas) {
-  //             //             return res.status(400).json({
-  //             //                 ok: false,
-  //             //                 mensaje: 'El material con el id ' + material + ' no existe',
-  //             //                 errors: { message: 'No existe un material con ese ID' }
-  //             //             });
-  //             //         }
-
-  //             //         // if (mermas.length > 0) {
-  //             //         mermas.forEach(m => {
-  //             //             m.materiales.forEach(m => {
-  //             //                 if (m.material._id == req.params.id) {
-  //             //                     ok = true;
-  //             //                     stock -= m.cantidad;
-  //             //                 }
-  //             //             });
-  //             //         });
-  //             //         // }
-  //             //         res.status(200).json({
-  //             //             ok,
-  //             //             material: nombreMaterial,
-  //             //             stock: stock
-  //             //         });
-  //             //     });
-  //             // });
-  //         });
-  /* #endregion */
 
   const entradas = await entradasController.consultaEntradas(req, res);
   entradas.forEach(e => {
@@ -231,6 +104,8 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async(req, r
     });
   });
 
+
+
   const mantenimientos = await mantenimientosController.getMantenimientos(req, res);
   mantenimientos.forEach(e => {
     e.materiales.forEach(m => {
@@ -241,6 +116,8 @@ app.get('/material/stock/:material', mdAutenticacion.verificaToken, async(req, r
       }
     });
   });
+
+  console.log(stock);
 
   res.status(200).json({
     ok,
