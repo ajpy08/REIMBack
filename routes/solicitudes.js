@@ -191,8 +191,6 @@ app.get('/solicitud/:id/enviacorreo', mdAutenticacion.verificaToken,(req, res) =
                 correos += solicitud.agencia.correo;
               }
             }
-
-            console.log(correos);
             if (correos != null) {
               if (correos.endsWith(",")) {
                 correos = correos.substring(0, correos.length - 1);
@@ -611,40 +609,6 @@ app.put('/solicitud/:id/apruebacarga', mdAutenticacion.verificaToken, (req, res)
         errors: { message: 'No existe solicitud con ese ID' }
       });
     }
-
-
-    // solicitud.contenedores.forEach((element, index) => {
-    //   if (element.maniobra == null || element.maniobra == undefined || element.maniobra == '') {
-    //     var maniobra;
-    //     maniobra = new Maniobra({
-    //       solicitud: solicitud._id,
-    //       cargaDescarga: solicitud.tipo,
-    //       cliente: solicitud.cliente,
-    //       agencia: solicitud.agencia,
-    //       transportista: element.transportista,
-    //       correo: solicitud.correo,
-    //       correoFac: solicitud.correoFac,
-    //       tipo: element.tipo,
-    //       peso: element.peso,
-    //       grado: element.grado,
-    //       estatus: 'TRANSITO',
-    //       patio: element.patio,
-    //       usuarioAlta: req.usuario._id
-    //     });
-    //     solicitud.contenedores[index].maniobra = maniobra._id;
-    //     maniobra.save((err, maniobraGuardado) => {
-    //       if (err) {
-    //         console.log(err);
-    //       } else {
-    //         console.log(maniobraGuardado._id);
-
-    //       }
-    //     });
-    //   }
-    // });
-
-    // console.log(solicitud.contenedores);
-    // //solicitud.contenedores = body.contenedores;
     solicitud.estatus = "APROBADA";
     solicitud.fAprobacion = Date.now();
     solicitud.usuarioAprobo = req.usuario._id;

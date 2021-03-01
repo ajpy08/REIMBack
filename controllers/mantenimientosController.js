@@ -39,6 +39,7 @@ module.exports = {
 
     return Mantenimiento.find(json)
       .populate('usuarioAlta', 'nombre email')
+      .populate('materiales.material', 'tipo')
       .populate({
         path: 'maniobra',
         select: 'contenedor tipo peso fLlegada grado fAlta',

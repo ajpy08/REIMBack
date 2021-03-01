@@ -501,7 +501,6 @@ app.get('/pdfCFDI/:id', mdAutenticacion.verificaToken, (req, res) => {
             // data.forEach(function(dpt) {
 
             //     descuento = dpt.descuento.toFloat()
-            //     console.log(descuento)
             // });
             body.push(columns);
 

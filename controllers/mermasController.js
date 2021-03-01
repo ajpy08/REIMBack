@@ -19,7 +19,7 @@ module.exports = {
             .populate('usuarioAprobacion', 'nombre email')
             .populate('usuarioAlta', 'nombre email')
             .populate('usuarioMod', 'nombre email')
-            .populate('materiales.material', 'descripcion')
+            .populate('materiales.material', 'descripcion tipo fAlta ')
             .exec();
     },
     consultaMermaById: (req) => {

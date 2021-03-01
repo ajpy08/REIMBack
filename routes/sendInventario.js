@@ -42,7 +42,7 @@ module.exports = (datos, correoReceptor, asunto) => {
 
     smtpTransport.sendMail(data, (error, info) => {
         if (!error) {
-            console.log(info);
+            // console.log(info);
             //return res.json({ message: 'Email Enviado!' });
         } else {
             console.log(error);
