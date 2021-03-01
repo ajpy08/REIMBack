@@ -34,7 +34,6 @@ app.get('/:viaje?:buque?:finiarribo?:ffinarribo?', mdAutenticacion.verificaToken
     filtro = filtro.slice(0, -1);
   filtro = filtro + '}';
   var json = JSON.parse(filtro);
-  //  console.log(json);
   Viaje.find(json)
     .populate('buque', 'nombre')
     .populate('naviera', 'nombreComercial')
@@ -359,7 +358,6 @@ app.put('/viaje/:id/addcontenedor', mdAutenticacion.verificaToken, (req, res) =>
   }
   maniobra.save((err, maniobraGuardado) => {
     if (err) {
-      // console.log(err);
       return res.status(400).json({
         ok: false,
         mensaje: "Error al darde alta la maniobra maniobra",

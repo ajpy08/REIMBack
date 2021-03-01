@@ -101,8 +101,6 @@ app.post('/', (req, res, next) => {
 app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_o_MismoUsuario], (req, res) => {
     var id = req.params.id;
     var body = req.body;
-    // console.log(body);
-    // console.log(id);
     Usuario.findById(id, (err, usuario) => {
         if (err) {
             return res.status(500).json({

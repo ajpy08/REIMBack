@@ -59,7 +59,6 @@ app.get('/tipoContenedor/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.get('/tipoCont/:tipo', mdAutenticacion.verificaToken, (req, res) => {
   var t = req.params.tipo;
   var tipo = unescape(t);
-  // console.log(tipo)
 
   TipoContenedor.find({ tipo: tipo }).exec(
     (err, tipoContenedor) => {

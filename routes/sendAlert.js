@@ -29,8 +29,6 @@ module.exports = (nombreReceptor, correoReceptor, asunto, cuerpo, template, url,
 
     smtpTransport.use('compile', hbs(handlebarsOptions));
 
-    //console.log(correoReceptor);
-
     if (arch === true) {
         const pdf = `${archivos[1]}`;
         const xml = `${archivos[0]}`;
