@@ -361,8 +361,6 @@ app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, r
   controllerMaterial.stock(req, res, (req, res, stock) => {
     var id = req.params.id;
     var body = req.body.material;
-    console.log("cantidad:" + body.cantidad);
-    console.log("stock:" + stock);
 
     if (body.cantidad > stock) {
       return res.status(400).json({

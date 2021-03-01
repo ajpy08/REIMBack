@@ -76,7 +76,6 @@ app.post('/notas/', mdAutenticacion.verificaToken, (req, res) => {
     for (const cc of notas.conceptos) {
         for (const c of cc.cfdis) {
             CFDIS.findByIdAndUpdate(c.idCFDI, { $set: { 'notaDeCreditoRelacionada': notas._id } }).then(cfdi => {
-                console.log('ok agregado id nota a cfdi')
             }).catch(err => {
                 return res.status(400).json({
                     ok: false,

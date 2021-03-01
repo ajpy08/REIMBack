@@ -5,13 +5,14 @@ module.exports = {
         const noFactura = req.query.noFactura || '';
         const proveedor = req.query.proveedor || '';
         const material = req.query.material || '';
+        const tipo = req.query.tipo || '';
         let filtro = '{';
         if (noFactura != 'undefined' && noFactura != '')
             filtro += '\"noFactura\":' + '\"' + noFactura + '\",';
         if (proveedor != 'undefined' && proveedor != '')
             filtro += '\"proveedor\":' + '\"' + proveedor + '\",';
         if (material != 'undefined' && material != '')
-            filtro += '\"detalles.material\":' + '\"' + material + '\",';
+            filtro += '\"detalles.material\":' + '\"' + material + '\",';        
         if (filtro != '{')
             filtro = filtro.slice(0, -1);
         filtro = filtro + '}';
