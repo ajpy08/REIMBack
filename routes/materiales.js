@@ -4,6 +4,7 @@ var Material = require('../models/material');
 var app = express();
 const entradasController = require('../controllers/entradasController');
 const mermasController = require('../controllers/mermasController');
+const materialesController = require('../controllers/materialesController');
 const mantenimientosController = require('../controllers/mantenimientosController');
 
 // ==========================================
@@ -11,124 +12,99 @@ const mantenimientosController = require('../controllers/mantenimientosControlle
 // ==========================================
 
 app.get('/', mdAutenticacion.verificaToken, (req, res) => {
-  var descripcion = req.query.descripcion || '';
-  var activo = req.query.activo || '';
-  var tipo = req.query.tipo || '';
-
-  var filtro = '{';
-  if (descripcion != 'undefined' && descripcion != '')
-    filtro += '\"descripcion\":' + '\"' + descripcion + '\",';
-  if (activo != 'undefined' && activo != '')
-    filtro += '\"activo\":' + '\"' + activo + '\",';
-  if (tipo != 'undefined' && tipo != '')
-    filtro += '\"tipo\":' + '\"' + tipo + '\",';
-
-  if (filtro != '{')
-    filtro = filtro.slice(0, -1);
-  filtro = filtro + '}';
-  var json = JSON.parse(filtro);
-  Material.find(json)
-    .populate('usuarioAlta', 'nombre email')
-    .populate('usuarioMod', 'nombre email')
-    .populate('unidadMedida', 'descripcion abreviacion')
-    .sort({ fAlta: -1 })
-    .exec(
-      (err, materiales) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error cargando materiales',
-            errors: err
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          materiales: materiales,
-          totalRegistros: materiales.length
-        });
-      });
+  const resultMateriales = materialesController.getMateriales(req, res);
+  resultMateriales.then(materiales => {
+    res.status(200).json({
+      ok: true,
+      materiales,
+      totalRegistros: materiales.length
+    });
+  }).catch(error => {
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error cargando materiales',
+      errors: error
+    });
+  });
 });
 
 // ==========================================
 //  Obtener Material por ID
 // ==========================================
-app.get('/material/:id', mdAutenticacion.verificaToken, (req, res) => {
-  var id = req.params.id;
-  Material.findById(id)
-    .exec((err, material) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al buscar material',
-          errors: err
-        });
-      }
-      if (!material) {
-        return res.status(400).json({
-          ok: false,
-          mensaje: 'El material con el id ' + id + 'no existe',
-          errors: { message: 'No existe un material con ese ID' }
-        });
-      }
+app.get('/material/:idMaterial', mdAutenticacion.verificaToken, (req, res) => {
+  const getMaterial = materialesController.getMaterialById(req, res);
+  getMaterial.then(material => {
+    if (material) {
       res.status(200).json({
         ok: true,
-        material: material
+        material,
       });
+    } else {
+      return res.status(400).json({
+        ok: false,
+        mensaje: `El material con el id ${req.params.id} no existe`,
+        errors: { message: 'No existe una material con ese ID' }
+      });
+    }
+  }).catch(error => {
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error buscando material',
+      errors: error
     });
+  });
 });
 
 // ==========================================
 //  Obtener Stock de Material por ID
 // ==========================================
-app.get('/material/stock/:material', mdAutenticacion.verificaToken, async (req, res) => {
+app.get('/material/:idMaterial/stock', mdAutenticacion.verificaToken, async(req, res) => {
   let stock = 0;
   let nombreMaterial;
   let ok = false;
-
-
-
-  const entradas = await entradasController.consultaEntradas(req, res);
-  entradas.forEach(e => {
-    e.detalles.forEach(d => {
-      if (d.material._id == req.params.material) {
-        ok = true;
-        stock += d.cantidad;
-        nombreMaterial = d.material.descripcion;
-      }
+  const material = await materialesController.getMaterialById(req, res);
+  if (material && material.tipo === "M")
+    stock = 1000;
+  if (stock === 0) {
+    const entradas = await entradasController.consultaEntradas(req, res);
+    entradas.forEach(e => {
+      e.detalles.forEach(d => {
+        if (d.material._id == req.params.idMaterial) {
+          ok = true;
+          stock += d.cantidad;
+          nombreMaterial = d.material.descripcion;
+        }
+      });
     });
-  });
-
-  const mermas = await mermasController.consultaMermas(req, res);
-  mermas.forEach(e => {
-    e.materiales.forEach(m => {
-      if (m.material._id == req.params.material) {
-        ok = true;
-        stock -= m.cantidad;
-        // nombreMaterial = m.material.descripcion;
-      }
+    const mermas = await mermasController.consultaMermas(req, res);
+    mermas.forEach(e => {
+      e.materiales.forEach(m => {
+        if (m.material._id == req.params.idMaterial) {
+          ok = true;
+          stock -= m.cantidad;
+          // nombreMaterial = m.material.descripcion;
+        }
+      });
     });
-  });
-
-
-
-  const mantenimientos = await mantenimientosController.getMantenimientos(req, res);
-  mantenimientos.forEach(e => {
-    e.materiales.forEach(m => {
-      if (m.material._id == req.params.material) {
-        ok = true;
-        stock -= m.cantidad;
-        // nombreMaterial = m.material.descripcion;
-      }
+    const mantenimientos = await mantenimientosController.getMantenimientos(req, res);
+    mantenimientos.forEach(e => {
+      e.materiales.forEach(m => {
+        if (m.material._id == req.params.idMaterial) {
+          ok = true;
+          stock -= m.cantidad;
+          //nombreMaterial = m.material.descripcion;
+        }
+      });
     });
-  });
-
-  console.log(stock);
+  }
 
   res.status(200).json({
     ok,
     material: nombreMaterial,
     stock: stock
   });
+
+
 });
 
 // ==========================================================================
@@ -348,7 +324,7 @@ app.put('/material/:id/habilita_deshabilita', mdAutenticacion.verificaToken, (re
 // ============================================
 //  Borrar un Material por el id
 // ============================================
-app.delete('/material/:id', mdAutenticacion.verificaToken, async (req, res) => {
+app.delete('/material/:id', mdAutenticacion.verificaToken, async(req, res) => {
   var id = req.params.id;
 
   const entradas = await entradasController.consultaEntradas(req, res);

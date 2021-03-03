@@ -58,7 +58,7 @@ var mantenimientoSchema = new Schema({
 mantenimientoSchema.plugin(uniqueValidator, { message: '{PATH} debe ser unico' });
 
 mantenimientoSchema.virtual('observacionesCompleto')
-  .get(function () {
+  .get(function() {
     var completo = '';
     if (this.observacionesGenerales != '' && this.observacionesGenerales != undefined) completo += 'Generales: ' + this.observacionesGenerales + ';';
     if (this.izquierdo != '' && this.izquierdo != undefined) completo += 'Izquierdo: ' + this.izquierdo + ';';
@@ -74,7 +74,7 @@ mantenimientoSchema.virtual('observacionesCompleto')
   });
 
 mantenimientoSchema.virtual('costoMateriales')
-  .get(function () {
+  .get(function() {
     let costo = 0;
     if (this.materiales) {
       this.materiales.forEach(mat => {
@@ -84,7 +84,7 @@ mantenimientoSchema.virtual('costoMateriales')
     return costo;
   });
 mantenimientoSchema.virtual('precioMateriales')
-  .get(function () {
+  .get(function() {
     let precio = 0;
     if (this.materiales) {
       this.materiales.forEach(mat => {
@@ -94,27 +94,29 @@ mantenimientoSchema.virtual('precioMateriales')
     return precio;
   });
 mantenimientoSchema.virtual('fInicial')
-  .get(function () {
+  .get(function() {
     let fecha = null;
     let fTemporal = new Date(2100, 1, 1);
-    this.fechas.forEach(fec => {
-      if (fec.fIni && fec.fIni <= fTemporal) {
-        fecha = fec.fIni;
-        fTemporal = fec.fIni;
-      }
-    });
+    if (this.fechas)
+      this.fechas.forEach(fec => {
+        if (fec.fIni && fec.fIni <= fTemporal) {
+          fecha = fec.fIni;
+          fTemporal = fec.fIni;
+        }
+      });
     return fecha;
   });
 mantenimientoSchema.virtual('fFinal')
-  .get(function () {
+  .get(function() {
     let fecha2 = null;
     let fTemporal2 = new Date(2000, 1, 1);
-    this.fechas.forEach(fec => {
-      if (fec.fFin && fec.fFin > fTemporal2) {
-        fecha2 = fec.fFin;
-        fTemporal2 = fec.fFin;
-      }
-    });
+    if (this.fechas)
+      this.fechas.forEach(fec => {
+        if (fec.fFin && fec.fFin > fTemporal2) {
+          fecha2 = fec.fFin;
+          fTemporal2 = fec.fFin;
+        }
+      });
     return fecha2;
   });
 
