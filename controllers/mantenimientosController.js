@@ -8,7 +8,7 @@ module.exports = {
       .exec();
   },
   getMantenimientos: (req, res) => {
-    const material = req.params.material;
+    const material = req.params.idMaterial;
     const tipoMantenimiento = req.query.tipoMantenimiento || '';
     const maniobra = req.query.maniobra || '';
     const finalizado = req.query.finalizado || '';

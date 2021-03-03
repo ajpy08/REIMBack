@@ -8,7 +8,9 @@ var Mantenimiento = require('../models/mantenimiento');
 var Maniobra = require('../models/maniobra');
 var variasBucket = require('../public/variasBucket');
 const mantenimientosController = require('../controllers/mantenimientosController');
-var Entrada = require('../models/entrada');
+const materialesController = require('../controllers/materialesController');
+const mermasController = require('../controllers/mermasController');
+const entradasController = require('../controllers/entradasController')
 
 
 var entorno = require('../config/config').config();
@@ -18,8 +20,8 @@ var AWS = require('aws-sdk/global');
 var fileUpload = require('express-fileupload');
 var uuid = require('uuid/v1');
 var s3Zip = require('s3-zip');
+const { json } = require('body-parser');
 
-var controllerMaterial = require('../controllers/material');
 
 app.use(fileUpload());
 
@@ -90,7 +92,7 @@ app.get('/xmaniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
 // Obtener mantenimientos x TIPO
 // =======================================
 app.get('/xtipo/:tipo', mdAutenticacion.verificaToken, (req, res) => {
-  //app.get('/xtipo/:tipo', (req, res) => {
+
   var tipo = req.params.tipo;
   Mantenimiento.find({ tipoMantenimiento: tipo })
     .populate('usuario', 'nombre email')
@@ -367,103 +369,98 @@ app.put('/mantenimiento/:id/finaliza', mdAutenticacion.verificaToken, (req, res)
 });
 
 
-app.put('/mantenimiento/:id/addMaterial', mdAutenticacion.verificaToken, (req, res) => {
-  //REvisar primero si se puede agregar por el stock
-  //REchazarlo o darlo de alta en el array
+//Agregar Material al Mantenimiento
 
-  controllerMaterial.stock(req, res, (req, res, stock) => {
-    var id = req.params.id;
-    var body = req.body.material;
+app.put('/mantenimiento/:id/addMaterial/:idMaterial', mdAutenticacion.verificaToken, async(req, res) => {
 
-    let stock = 0;
-
-    let ok = false;
-
-
-
+  let stock = 0;
+  const material = await materialesController.getMaterialById(req, res);
+  if (material && material.tipo === "M")
+    stock = 1000;
+  if (stock === 0) {
     const entradas = await entradasController.consultaEntradas(req, res);
     entradas.forEach(e => {
       e.detalles.forEach(d => {
-        if (d.material._id == req.params.material) {
+        if (d.material._id == req.params.idMaterial) {
           ok = true;
           stock += d.cantidad;
-          nombreMaterial = d.material.descripcion;
         }
       });
     });
-
     const mermas = await mermasController.consultaMermas(req, res);
     mermas.forEach(e => {
       e.materiales.forEach(m => {
-        if (m.material._id == req.params.material) {
+        if (m.material._id == req.params.idMaterial) {
           ok = true;
           stock -= m.cantidad;
         }
       });
     });
-
     const mantenimientos = await mantenimientosController.getMantenimientos(req, res);
     mantenimientos.forEach(e => {
       e.materiales.forEach(m => {
-        if (m.material._id == req.params.material) {
+        if (m.material._id == req.params.idMaterial) {
           ok = true;
           stock -= m.cantidad;
+          //nombreMaterial = m.material.descripcion;
         }
       });
     });
+  }
+  var id = req.params.id;
+  var body = req.body.material;
 
 
-    if (body.cantidad > stock) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'No se cuenta con suficiente stock para este material',
-        errors: { message: 'No se cuenta con suficiente stock para este material' }
-      });
-    } else {
-      Mantenimiento.findOneAndUpdate({ _id: id }, {
-        $push: {
-          materiales: {
-            material: body.material,
-            descripcion: body.descripcion,
-            cantidad: body.cantidad,
-            costo: body.costo,
-            precio: body.precio,
-            unidadMedida: body.unidadMedida,
-            usuarioAlta: req.usuario._id
-          }
+  if (body.cantidad > stock) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'No se cuenta con suficiente stock para este material',
+      errors: { message: 'No se cuenta con suficiente stock para este material' }
+    });
+  } else {
+    Mantenimiento.findOneAndUpdate({ _id: id }, {
+      $push: {
+        materiales: {
+          material: body.material,
+          descripcion: body.descripcion,
+          cantidad: body.cantidad,
+          costo: body.costo,
+          precio: body.precio,
+          unidadMedida: body.unidadMedida,
+          usuarioAlta: req.usuario._id
         }
-      }, (err, mantenimiento) => {
-        console.log(err);
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            mensaje: 'Error al buscar el mantenimiento',
-            errors: err
-          });
-        }
-        if (!mantenimiento) {
-          return res.status(400).json({
-            ok: false,
-            mensaje: 'El mantenimiento con el id ' + id + ' no existe',
-            errors: { message: 'No existe mantenimiento con ese ID' }
-          });
-        }
-        res.status(200).json({
-          ok: true,
-          mensaje: 'Material agregado con éxito',
-          materiales: mantenimiento.materiales
+      }
+    }, (err, mantenimiento) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar el mantenimiento',
+          errors: err
         });
-
+      }
+      if (!mantenimiento) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El mantenimiento con el id ' + id + ' no existe',
+          errors: { message: 'No existe mantenimiento con ese ID' }
+        });
+      }
+      console.log(mantenimiento.materiales);
+      res.status(200).json({
+        ok: true,
+        mensaje: 'Material agregado con éxito',
+        materiales: mantenimiento.materiales
       });
-    }
-  });
+
+    });
+  }
+
+
 });
 
 app.put('/mantenimiento/:id/editMaterial/:idMateria', mdAutenticacion.verificaToken, (req, res) => {
   var id = req.params.id;
   var body = req.body.material;
-
-
 
   Mantenimiento.findOneAndUpdate({
     _id: id,
@@ -506,6 +503,26 @@ app.put('/mantenimiento/:id/editMaterial/:idMateria', mdAutenticacion.verificaTo
   });
 });
 
+//Lista de materiales del Mantenimientos
+
+app.get('/mantenimiento/:idMantenimiento/materiales', mdAutenticacion.verificaToken, (req, res) => {
+  var id = req.params.idMantenimiento;
+  Mantenimiento.findById({ _id: id }, { materiales: 1 })
+    .exec((err, mantenimiento) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al consultar el Mantenimiento',
+          errors: err
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        materiales: mantenimiento.materiales,
+        total: mantenimiento.materiales ? mantenimiento.materiales.length : 0
+      });
+    });
+});
 
 // ==========================================
 // Remover material del mantenimiento
@@ -537,6 +554,8 @@ app.delete('/mantenimiento/:id/removeMaterial/:idMaterial', mdAutenticacion.veri
 
   });
 });
+
+
 
 // ==========================================
 // Remover Mantenimiento
