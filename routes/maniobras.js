@@ -1311,202 +1311,202 @@ app.get('/Lavado/Reparacion', mdAutenticacion.verificaToken, (req, res) => {
 // ==========================================
 // Migracion de Maniobras
 // ==========================================
-app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (req, res) => {
+// app.get('/migracion/maniobras/mantenimientos', mdAutenticacion.verificaToken, (req, res) => {
 
-  const token = req.query.token;
+//   const token = req.query.token;
 
-  let mantenimientosLavado = [];
-  let mantenimientosReparacion = [];
+//   let mantenimientosLavado = [];
+//   let mantenimientosReparacion = [];
 
-  Maniobra.find()
-    // .limit(58)
-    .sort({ fAlta: -1 })
-    .exec((err, maniobras) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al cargar maniobras',
-          errors: err
-        });
-      }
+//   Maniobra.find()
+//     // .limit(58)
+//     .sort({ fAlta: -1 })
+//     .exec((err, maniobras) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error al cargar maniobras',
+//           errors: err
+//         });
+//       }
 
-      maniobras.forEach(m => {
-        /* #region  REPARACIONES */
+//       maniobras.forEach(m => {
+//         /* #region  REPARACIONES */
 
-        if (m.reparaciones && m.reparaciones.length > 0) {
-          let observaciones = '';
-          let mantenimiento = new Mantenimiento();
-          mantenimiento.tipoMantenimiento = 'REPARACION';
+//         if (m.reparaciones && m.reparaciones.length > 0) {
+//           let observaciones = '';
+//           let mantenimiento = new Mantenimiento();
+//           mantenimiento.tipoMantenimiento = 'REPARACION';
 
-          m.reparaciones.forEach(r => {
-            observaciones += r.reparacion + '; ';
-          });
+//           m.reparaciones.forEach(r => {
+//             observaciones += r.reparacion + '; ';
+//           });
 
-          if (observaciones.toLowerCase().includes('acondicionamiento') || observaciones.toLowerCase().includes('grado')) {
-            mantenimiento.tipoMantenimiento = 'ACONDICIONAMIENTO';
-            if (observaciones.toLowerCase().includes('cambio de grado')) {
-              mantenimiento.cambioGrado = true;
-            } else {
-              mantenimiento.cambioGrado = false;
-            }
-          }
+//           if (observaciones.toLowerCase().includes('acondicionamiento') || observaciones.toLowerCase().includes('grado')) {
+//             mantenimiento.tipoMantenimiento = 'ACONDICIONAMIENTO';
+//             if (observaciones.toLowerCase().includes('cambio de grado')) {
+//               mantenimiento.cambioGrado = true;
+//             } else {
+//               mantenimiento.cambioGrado = false;
+//             }
+//           }
 
-          let fechas = [];
-          let finalizado = false;
+//           let fechas = [];
+//           let finalizado = false;
 
-          let fecha = {};
+//           let fecha = {};
 
-          fecha.fIni = m.fIniReparacion;
-          fecha.hIni = m.hIniReparacion;
-          fecha.fFin = m.fFinReparacion;
-          fecha.hFin = m.hFinReparacion;
-
-
-          const f = new Date();
-          f.setDate(fecha.fFin);
-          f.setHours(fecha.hFin);
-          if (fecha.fFin && fecha.hFin && moment.isDate(f)) {
-            finalizado = true;
-          }
-
-          if (fecha.fIni) {
-            fechas.push(fecha);
-          }
-
-          mantenimiento.materiales = undefined;
-
-          mantenimiento.maniobra = m._id;
-
-          mantenimiento.observacionesGenerales = observaciones.substring(0, observaciones.length - 2);
-          mantenimiento.fechas = fechas;
-          mantenimiento.finalizado = finalizado;
-          finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
-          mantenimiento.migrado = true;
-
-          mantenimientosReparacion.push(mantenimiento);
-
-        }
-        /* #endregion */
-
-        /* #region  LAVADO */
-        if (m.lavado) {
-          let mantenimiento = new Mantenimiento();
-          mantenimiento.tipoMantenimiento = 'LAVADO';
-
-          if (m.lavado == 'E') {
-            mantenimiento.tipoLavado = 'ESPECIAL';
-          } else if (m.lavado == 'B') {
-            mantenimiento.tipoLavado = 'BASICO';
-          }
-
-          let fechas = [];
-          let finalizado = false;
-
-          let fecha = {};
-
-          fecha.fIni = m.fIniLavado;
-          fecha.hIni = m.hIniLavado;
-          fecha.fFin = m.fIniLavado;
-          fecha.hFin = m.hFinReparacion;
+//           fecha.fIni = m.fIniReparacion;
+//           fecha.hIni = m.hIniReparacion;
+//           fecha.fFin = m.fFinReparacion;
+//           fecha.hFin = m.hFinReparacion;
 
 
-          const f = new Date();
-          f.setDate(fecha.fFin);
-          f.setHours(fecha.hFin);
-          if (fecha.fFin && fecha.hFin && moment.isDate(f)) {
-            finalizado = true;
-          }
+//           const f = new Date();
+//           f.setDate(fecha.fFin);
+//           f.setHours(fecha.hFin);
+//           if (fecha.fFin && fecha.hFin && moment.isDate(f)) {
+//             finalizado = true;
+//           }
 
-          if (fecha.fIni) {
-            fechas.push(fecha);
-          }
+//           if (fecha.fIni) {
+//             fechas.push(fecha);
+//           }
 
-          mantenimiento.materiales = undefined;
+//           mantenimiento.materiales = undefined;
 
-          mantenimiento.maniobra = m._id;
+//           mantenimiento.maniobra = m._id;
 
-          mantenimiento.observacionesGenerales = m.lavadoObservacion;
-          mantenimiento.fechas = fechas;
-          mantenimiento.finalizado = finalizado;
-          finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
-          mantenimiento.migrado = true;
+//           mantenimiento.observacionesGenerales = observaciones.substring(0, observaciones.length - 2);
+//           mantenimiento.fechas = fechas;
+//           mantenimiento.finalizado = finalizado;
+//           finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
+//           mantenimiento.migrado = true;
 
-          mantenimientosLavado.push(mantenimiento);
+//           mantenimientosReparacion.push(mantenimiento);
 
-        }
-        /* #endregion */
-      });
+//         }
+//         /* #endregion */
 
-      if (mantenimientosLavado.length > 0) {
-        const start = async () => {
-          await varias.asyncForEach(mantenimientosLavado, async (man) => {
-            let mantenimiento = new Mantenimiento({
-              maniobra: man.maniobra,
-              tipoMantenimiento: man.tipoMantenimiento,
-              tipoLavado: man.tipoLavado,
-              // cambioGrado: man.cambioGrado,
-              observacionesGenerales: man.observacionesGenerales,
-              // izquierdo: man.izquierdo,
-              // derecho: man.derecho,
-              // frente: man.frente,
-              // posterior: man.posterior,
-              // piso: man.piso,
-              // techo: man.techo,
-              // interior: man.interior,
-              // puerta: man.puerta,
-              fechas: man.fechas,
-              materiales: man.materiales,
-              finalizado: man.finalizado,
-              fFinalizado: man.fFinalizado,
-              migrado: man.migrado,
-              // usuarioAlta: req.usuario._id
-            });
-            const manL = await mantenimiento.save();
-          });
-        };
-        start();
+//         /* #region  LAVADO */
+//         if (m.lavado) {
+//           let mantenimiento = new Mantenimiento();
+//           mantenimiento.tipoMantenimiento = 'LAVADO';
 
-      }
+//           if (m.lavado == 'E') {
+//             mantenimiento.tipoLavado = 'ESPECIAL';
+//           } else if (m.lavado == 'B') {
+//             mantenimiento.tipoLavado = 'BASICO';
+//           }
 
-      if (mantenimientosReparacion.length > 0) {
-        const start = async () => {
-          await varias.asyncForEach(mantenimientosReparacion, async (man) => {
-            let mantenimiento = new Mantenimiento({
-              maniobra: man.maniobra,
-              tipoMantenimiento: man.tipoMantenimiento,
-              tipoLavado: man.tipoLavado,
-              cambioGrado: man.cambioGrado,
-              observacionesGenerales: man.observacionesGenerales,
-              // izquierdo: man.izquierdo,
-              // derecho: man.derecho,
-              // frente: man.frente,
-              // posterior: man.posterior,
-              // piso: man.piso,
-              // techo: man.techo,
-              // interior: man.interior,
-              // puerta: man.puerta,
-              fechas: man.fechas,
-              materiales: man.materiales,
-              finalizado: man.finalizado,
-              fFinalizado: man.fFinalizado,
-              migrado: man.migrado,
-              // usuarioAlta: req.usuario._id
-            });
-            const manR = await mantenimiento.save();
-          });
-        };
-        start();
+//           let fechas = [];
+//           let finalizado = false;
 
-      }
+//           let fecha = {};
 
-      res.status(200).json({
-        ok: true,
-        mantenimientosLavado: mantenimientosLavado,
-        mantenimientosReparacion: mantenimientosReparacion,
-        totalMantenimientosLavado: mantenimientosLavado.length,
-        totalMantenimientosReparacion: mantenimientosReparacion.length
-      });
-    });
-});
+//           fecha.fIni = m.fIniLavado;
+//           fecha.hIni = m.hIniLavado;
+//           fecha.fFin = m.fIniLavado;
+//           fecha.hFin = m.hFinLavado;
+
+
+//           const f = new Date();
+//           f.setDate(fecha.fFin);
+//           f.setHours(fecha.hFin);
+//           if (fecha.fFin && fecha.hFin && moment.isDate(f)) {
+//             finalizado = true;
+//           }
+
+//           if (fecha.fIni) {
+//             fechas.push(fecha);
+//           }
+
+//           mantenimiento.materiales = undefined;
+
+//           mantenimiento.maniobra = m._id;
+
+//           mantenimiento.observacionesGenerales = m.lavadoObservacion;
+//           mantenimiento.fechas = fechas;
+//           mantenimiento.finalizado = finalizado;
+//           finalizado ? mantenimiento.fFinalizado = fecha.fFin : undefined;
+//           mantenimiento.migrado = true;
+
+//           mantenimientosLavado.push(mantenimiento);
+
+//         }
+//         /* #endregion */
+//       });
+
+//       if (mantenimientosLavado.length > 0) {
+//         const start = async () => {
+//           await varias.asyncForEach(mantenimientosLavado, async (man) => {
+//             let mantenimiento = new Mantenimiento({
+//               maniobra: man.maniobra,
+//               tipoMantenimiento: man.tipoMantenimiento,
+//               tipoLavado: man.tipoLavado,
+//               // cambioGrado: man.cambioGrado,
+//               observacionesGenerales: man.observacionesGenerales,
+//               // izquierdo: man.izquierdo,
+//               // derecho: man.derecho,
+//               // frente: man.frente,
+//               // posterior: man.posterior,
+//               // piso: man.piso,
+//               // techo: man.techo,
+//               // interior: man.interior,
+//               // puerta: man.puerta,
+//               fechas: man.fechas,
+//               materiales: man.materiales,
+//               finalizado: man.finalizado,
+//               fFinalizado: man.fFinalizado,
+//               migrado: man.migrado,
+//               // usuarioAlta: req.usuario._id
+//             });
+//             const manL = await mantenimiento.save();
+//           });
+//         };
+//         start();
+
+//       }
+
+//       if (mantenimientosReparacion.length > 0) {
+//         const start = async () => {
+//           await varias.asyncForEach(mantenimientosReparacion, async (man) => {
+//             let mantenimiento = new Mantenimiento({
+//               maniobra: man.maniobra,
+//               tipoMantenimiento: man.tipoMantenimiento,
+//               tipoLavado: man.tipoLavado,
+//               cambioGrado: man.cambioGrado,
+//               observacionesGenerales: man.observacionesGenerales,
+//               // izquierdo: man.izquierdo,
+//               // derecho: man.derecho,
+//               // frente: man.frente,
+//               // posterior: man.posterior,
+//               // piso: man.piso,
+//               // techo: man.techo,
+//               // interior: man.interior,
+//               // puerta: man.puerta,
+//               fechas: man.fechas,
+//               materiales: man.materiales,
+//               finalizado: man.finalizado,
+//               fFinalizado: man.fFinalizado,
+//               migrado: man.migrado,
+//               // usuarioAlta: req.usuario._id
+//             });
+//             const manR = await mantenimiento.save();
+//           });
+//         };
+//         start();
+
+//       }
+
+//       res.status(200).json({
+//         ok: true,
+//         mantenimientosLavado: mantenimientosLavado,
+//         mantenimientosReparacion: mantenimientosReparacion,
+//         totalMantenimientosLavado: mantenimientosLavado.length,
+//         totalMantenimientosReparacion: mantenimientosReparacion.length
+//       });
+//     });
+// });
 
 module.exports = app;
