@@ -902,38 +902,38 @@ app.get('/mantenimiento/:id/getfotoszip/:AD', (req, res, netx) => {
 
 // Migrar fotos de maniobras a mantenimientos (BUCKET)
 // ==========================================
-app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
+// app.get('/migracion/fotos', mdAutenticacion.verificaToken, (req, res, next) => {
 
-  // Mantenimiento.find({maniobra: '5fcbc717461c4f05583690cd'})
-  Mantenimiento.find()
-    .sort({ fAlta: -1 })
-    .exec((err, mantenimientos) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          mensaje: 'Error al cargar mantenimientos',
-          errors: err
-        });
-      }
+//   // Mantenimiento.find({maniobra: '5fcbc717461c4f05583690cd'})
+//   Mantenimiento.find()
+//     .sort({ fAlta: -1 })
+//     .exec((err, mantenimientos) => {
+//       if (err) {
+//         return res.status(500).json({
+//           ok: false,
+//           mensaje: 'Error al cargar mantenimientos',
+//           errors: err
+//         });
+//       }
 
-      mantenimientos.forEach(async(man) => {
-        var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
-        var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
-        var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
-        variasBucket.ListaArchivosBucket(ruta).then(data => {
-          data.forEach(d => {
-            const rutaBase = d.Key.substring(0, d.Key.lastIndexOf('/') + 1);
-            const nombreArchivo = d.Key.substring(d.Key.lastIndexOf('/') + 1, d.Key.length);
-            variasBucket.CopiarArchivoBucket(rutaBase, nombreArchivo, rutaDestino);
-          });
-        });
-      });
-      res.status(200).json({
-        ok: true,
-        mantenimientos,
-        total: mantenimientos.length
-      });
-    });
-});
+//       mantenimientos.forEach(async(man) => {
+//         var LR = man.tipoMantenimiento == 'LAVADO' ? 'fotos_lavado' : 'fotos_reparacion'
+//         var ruta = 'maniobras/' + man.maniobra + '/' + LR + '/';
+//         var rutaDestino = 'mantenimientos/' + man._id + '/fotos_despues/';
+//         variasBucket.ListaArchivosBucket(ruta).then(data => {
+//           data.forEach(d => {
+//             const rutaBase = d.Key.substring(0, d.Key.lastIndexOf('/') + 1);
+//             const nombreArchivo = d.Key.substring(d.Key.lastIndexOf('/') + 1, d.Key.length);
+//             variasBucket.CopiarArchivoBucket(rutaBase, nombreArchivo, rutaDestino);
+//           });
+//         });
+//       });
+//       res.status(200).json({
+//         ok: true,
+//         mantenimientos,
+//         total: mantenimientos.length
+//       });
+//     });
+// });
 
 module.exports = app;
