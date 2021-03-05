@@ -34,6 +34,7 @@
     "node-xml-stream": "^1.0.2",
     "nodemailer": "^4.7.0",
     "nodemailer-express-handlebars": "^3.0.0",
+    "nodemon": "^2.0.7",
     "pdfmake": "^0.1.65",
     "qrcode": "^1.4.4",
     "s3-zip": "^3.1.3",
