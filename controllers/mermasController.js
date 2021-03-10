@@ -1,5 +1,6 @@
 const Merma = require('../models/merma');
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 module.exports = {
   consultaMermas: (req) => {
@@ -7,7 +8,33 @@ module.exports = {
     let filtroMermas = '{';
     if (material != undefined && material != '') {
       filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
-      filtroMermas += '\"fAprobacion\":{\"$exists\":' + '\"' + true + '\"}' + '}';
+    }
+
+    if (filtroMermas != '{')
+      filtroMermas = filtroMermas.slice(0, -1);
+    filtroMermas = filtroMermas + '}';
+    const jsonMermas = JSON.parse(filtroMermas);
+
+    return Merma.find(jsonMermas)
+      .populate('usuarioAprobacion', 'nombre email')
+      .populate('usuarioAlta', 'nombre email')
+      .populate('usuarioMod', 'nombre email')
+      .populate('materiales.material', 'descripcion tipo fAlta ')
+      .exec();
+  },
+  consultaMermasAprobadas: (req) => {
+    const material = req.params.idMaterial;
+    const fInicial = req.query.fInicial || '';
+    const fFinal = req.query.fFinal || '';
+    let filtroMermas = '{';
+    filtroMermas += '\"fAprobacion\":{\"$exists\":' + '\"true\"},';
+    if (material != undefined && material != '') {
+      filtroMermas += '\"materiales.material\":' + '\"' + material + '\",';
+    }
+    if (fInicial != '' && fFinal != '') {
+      fIni = moment(fInicial, 'DD-MM-YYYY', true).startOf('day').format();
+      fFin = moment(fFinal, 'DD-MM-YYYY', true).endOf('day').format();
+      filtroMermas += '\"fAprobacion\":{\"$gte\":' + '\"' + fIni + '\"' + ', \"$lte\":' + '\"' + fFin + '\"' + '},';
     }
 
     if (filtroMermas != '{')
