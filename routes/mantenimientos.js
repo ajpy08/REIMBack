@@ -584,9 +584,12 @@ app.delete('/mantenimiento/:id', async(req, res) => {
             let losdemasFinalizados = true;
             let estatus = "DISPONIBLE";
             const mantenimientos = await mantenimientosController.getMantenimientos({ query: { maniobra: mantenimiento.maniobra } }, res);
+            
             mantenimientos.filter(m => !m._id.equals(mantenimiento._id)).forEach(m => {
                 losdemasFinalizados = m.finalizado && losdemasFinalizados;
             });
+            
+            
             if (!losdemasFinalizados) estatus = "LAVADO_REPARACION";
             const updteManiobra = await maniobrasController.updateEstatus(mantenimiento.maniobra, estatus);
         }

@@ -13,6 +13,8 @@ var uuid = require('uuid/v1');
 app.use(fileUpload());
 var varias = require('../public/varias');
 
+const maniobrasController = require('../controllers/maniobrasController');
+
 // =======================================
 // Obtener Maniobras G E N E R A L
 // =======================================
@@ -104,7 +106,9 @@ app.get('', mdAutenticacion.verificaToken, (req, res) => {
     })
     .populate('naviera', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
-    .sort({ fAlta: -1 })
+    .sort({
+      fAlta: -1
+    })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -141,7 +145,9 @@ app.get('/maniobra/:id', mdAutenticacion.verificaToken, (req, res) => {
         return res.status(400).json({
           ok: false,
           mensaje: 'La maniobra con el id ' + id + 'no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
+          errors: {
+            message: 'No existe maniobra con ese ID'
+          }
         });
       }
       res.status(200).json({
@@ -173,7 +179,9 @@ app.get('/maniobra/:id/enviacorreo', mdAutenticacion.verificaToken, (req, res) =
         return res.status(400).json({
           ok: false,
           mensaje: 'La maniobra con el id ' + id + ' no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
+          errors: {
+            message: 'No existe maniobra con ese ID'
+          }
         });
       } else {
         if (maniobra.solicitud.estatus === 'APROBADA') {
@@ -210,11 +218,15 @@ app.get('/maniobra/:id/enviacorreo', mdAutenticacion.verificaToken, (req, res) =
           var error = '';
           if (maniobra.solicitud.correo === '' || maniobra.solicitud.correo === undefined) {
             error += 'Solicitud - '
-          } else { correos += maniobra.solicitud.correo + ','; }
+          } else {
+            correos += maniobra.solicitud.correo + ',';
+          }
 
           if (maniobra.transportista.correo === '' || maniobra.transportista.correo === undefined) {
             error += 'Transportista - '
-          } else { correos += maniobra.transportista.correo + ','; }
+          } else {
+            correos += maniobra.transportista.correo + ',';
+          }
 
           // if (maniobra.agencia.correo === '' || maniobra.agencia.correo === undefined) {
           //   error += 'Agencia - '
@@ -342,7 +354,9 @@ app.get('/inventarioLR/', mdAutenticacion.verificaToken, (req, res) => {
     })
     .populate('naviera', 'rfc razonSocial')
     .populate('usuarioAlta', 'nombre email')
-    .sort({ contenedor: 1 })
+    .sort({
+      contenedor: 1
+    })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -408,7 +422,9 @@ app.get('/maniobra/:id/includes', mdAutenticacion.verificaToken, (req, res) => {
         return res.status(400).json({
           ok: false,
           mensaje: 'La maniobra con el id ' + id + 'no existe',
-          errors: { message: 'No existe maniobra con ese ID' }
+          errors: {
+            message: 'No existe maniobra con ese ID'
+          }
         });
       }
       res.status(200).json({
@@ -717,12 +733,20 @@ app.get('/LR', mdAutenticacion.verificaToken, (req, res) => {
 app.get('/xviaje/:idviaje/importacion', mdAutenticacion.verificaToken, (req, res) => {
   //Maniobra.find({ "estatus": "APROBADO",maniobras: contenedor })
   var idViaje = req.params.idviaje;
-  Maniobra.find({ "viaje": idViaje, "peso": { $ne: 'VACIO' }, "estatus": 'APROBACION' })
+  Maniobra.find({
+    "viaje": idViaje,
+    "peso": {
+      $ne: 'VACIO'
+    },
+    "estatus": 'APROBACION'
+  })
     .populate('cliente', 'rfc razonSocial nombreComercial')
     .populate('agencia', 'rfc razonSocial')
     .populate('transportista', 'rfc razonSocial nombreComercial')
     .populate('usuarioAlta', 'nombre email')
-    .sort({ contenedor: 1 })
+    .sort({
+      contenedor: 1
+    })
     .exec((err, maniobras) => {
       if (err) {
         return res.status(500).json({
@@ -755,7 +779,9 @@ app.put('/maniobra/:id/addimg/:LR', (req, res) => {
     return res.status(400).json({
       ok: false,
       mensaje: 'No selecciono nada',
-      errors: { message: 'Debe de seleccionar una imagen' }
+      errors: {
+        message: 'Debe de seleccionar una imagen'
+      }
     });
   }
 
@@ -813,14 +839,18 @@ app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, r
     return res.status(400).json({
       ok: false,
       mensaje: 'Se debe declarar la Fecha de Llegada',
-      errors: { message: 'Se debe declarar la Fecha de Llegada' }
+      errors: {
+        message: 'Se debe declarar la Fecha de Llegada'
+      }
     });
   }
   if (body.hLlegada === undefined || body.hLlegada === '') {
     return res.status(400).json({
       ok: false,
       mensaje: 'Se debe declarar la Hora de Llegada',
-      errors: { message: 'Se debe declarar la Hora de Llegada' }
+      errors: {
+        message: 'Se debe declarar la Hora de Llegada'
+      }
     });
   }
   Maniobra.findById(id, (err, maniobra) => {
@@ -835,7 +865,9 @@ app.put('/maniobra/:id/registra_llegada', mdAutenticacion.verificaToken, (req, r
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
+        errors: {
+          message: 'No existe una maniobra con ese ID'
+        }
       });
     }
 
@@ -887,7 +919,10 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
   var body = req.body;
 
 
-  Mantenimiento.find({ maniobra: id, finalizado: false })
+  Mantenimiento.find({
+    maniobra: id,
+    finalizado: false
+  })
     .exec((err, mantenimientos) => {
       if (err) {
         return res.status(500).json({
@@ -900,7 +935,9 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
           return res.status(400).json({
             ok: false,
             mensaje: 'Si no hay lavados o reparaciones pendientes, DEBE ASIGNAR EL GRADO DEL CONTENEDOR',
-            errors: { message: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR' }
+            errors: {
+              message: 'Si no hay lavado y reparación, DEBE ASIGNAR EL GRADO DEL CONTENEDOR'
+            }
           });
         } else {
 
@@ -916,7 +953,9 @@ app.put('/maniobra/:id/registra_descarga', mdAutenticacion.verificaToken, (req, 
               return res.status(400).json({
                 ok: false,
                 mensaje: 'La maniobra con el id ' + id + ' no existe',
-                errors: { message: 'No existe una maniobra con ese ID' }
+                errors: {
+                  message: 'No existe una maniobra con ese ID'
+                }
               });
             }
             maniobra.historial = body.historial;
@@ -965,7 +1004,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'No se puede asignar hora de Inicio de lavado si no ha asignado Fecha de Inicio',
-        errors: { message: 'No se puede asignar hora de Inicio de lavado si no ha asignado Fecha de Inicio' }
+        errors: {
+          message: 'No se puede asignar hora de Inicio de lavado si no ha asignado Fecha de Inicio'
+        }
       });
     }
 
@@ -973,7 +1014,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'No se puede asignar hora de finalización de lavado si no ha asignado Fecha de Inicio',
-        errors: { message: 'No se puede asignar hora de finalización de lavado si no ha asignado Fecha de Inicio' }
+        errors: {
+          message: 'No se puede asignar hora de finalización de lavado si no ha asignado Fecha de Inicio'
+        }
       });
     }
   }
@@ -983,7 +1026,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Inicio',
-        errors: { message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Inicio' }
+        errors: {
+          message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Inicio'
+        }
       });
     }
 
@@ -991,7 +1036,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'No se puede asignar Fecha de Finalización reparación si no ha asignado Hora de Inicio',
-        errors: { message: 'No se puede asignar Fecha de Finalización reparación si no ha asignado Hora de Inicio' }
+        errors: {
+          message: 'No se puede asignar Fecha de Finalización reparación si no ha asignado Hora de Inicio'
+        }
       });
     }
 
@@ -999,7 +1046,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'No se puede asignar Hora de Finalización reparación si no ha asignado Fecha de Finalización',
-        errors: { message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Finalización' }
+        errors: {
+          message: 'No se puede asignar hora de Inicio de reparación si no ha asignado Fecha de Finalización'
+        }
       });
     }
   }
@@ -1016,7 +1065,9 @@ app.put('/maniobra/:id/registra_fin_lav_rep', mdAutenticacion.verificaToken, (re
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
+        errors: {
+          message: 'No existe una maniobra con ese ID'
+        }
       });
     }
 
@@ -1095,9 +1146,12 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
     return res.status(400).json({
       ok: false,
       mensaje: 'Debe asignar un contenedor de la lista de disponibles',
-      errors: { message: 'Debe asignar un contenedor de la lista de disponibles' }
+      errors: {
+        message: 'Debe asignar un contenedor de la lista de disponibles'
+      }
     });
   }
+
   Maniobra.findById(id, (err, maniobra) => {
     if (err) {
       return res.status(500).json({
@@ -1110,7 +1164,9 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
+        errors: {
+          message: 'No existe una maniobra con ese ID'
+        }
       });
     }
     if (body.maniobraAsociada != maniobra.maniobraAsociada) {
@@ -1145,7 +1201,9 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
         });
       }
       if (cambiaManiobraAsociada === true) {
-        Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada) }, {
+        Maniobra.updateOne({
+          '_id': new mongoose.Types.ObjectId(maniobra.maniobraAsociada)
+        }, {
           $set: {
             'estatus': 'CARGADO',
             'maniobraAsociada': maniobra._id
@@ -1156,7 +1214,9 @@ app.put('/maniobra/:id/carga_contenedor', mdAutenticacion.verificaToken, (req, r
           }
         });
         if (maniobraAsociadaTemporal !== '' && maniobraAsociadaTemporal !== undefined && maniobraAsociadaTemporal !== null) {
-          Maniobra.updateOne({ '_id': new mongoose.Types.ObjectId(maniobraAsociadaTemporal) }, {
+          Maniobra.updateOne({
+            '_id': new mongoose.Types.ObjectId(maniobraAsociadaTemporal)
+          }, {
             $set: {
               'estatus': 'DISPONIBLE',
               'maniobraAsociada': null
@@ -1195,7 +1255,9 @@ app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, r
       return res.status(400).json({
         ok: false,
         mensaje: 'La maniobra con el id ' + id + ' no existe',
-        errors: { message: 'No existe una maniobra con ese ID' }
+        errors: {
+          message: 'No existe una maniobra con ese ID'
+        }
       });
     }
     maniobra.descargaAutorizada = body.descargaAutorizada;
@@ -1216,6 +1278,35 @@ app.put('/maniobra/:id/aprueba_descarga', mdAutenticacion.verificaToken, (req, r
     });
   });
 });
+
+
+// =======================================
+// Cambio de Grado..
+// =======================================
+app.put('/maniobra/:id/cambio_grado', mdAutenticacion.verificaToken, (req, res) => {
+  const cambiaGradoManiobra = maniobrasController.updateGrado(req.params.id, req.body.grado);
+  cambiaGradoManiobra.then(update => {
+    if (update.nModified == 1) {
+      return res.status(200).json({
+        ok: true,
+        mensaje: 'Grado actualizado con éxito.',
+      });
+    } else {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'No se realizo ningun cambio.',
+        errors: 'No se realizo ningun cambio'
+      });
+    }
+  }).catch(error => {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Error al actualizar el gradooo.',
+      errors: error
+    });
+  });
+});
+
 
 // ============================================
 // Obtener Maniobras que tuvieron lavado  (de alguna naviera o de todas las navieras)
