@@ -8,9 +8,7 @@ module.exports = {
       .exec();
   },
   getMantenimientos: (req, res) => {
-
     const material = req.params ? req.params.idMaterial || '' : '';
-
     const tipoMantenimiento = req.query.tipoMantenimiento || '';
     const maniobra = req.query.maniobra || '';
     const finalizado = req.query.finalizado || '';
@@ -38,7 +36,6 @@ module.exports = {
     filtro = filtro + '}';
     const json = JSON.parse(filtro);
     // Busco Material en Mantenimientos
-
     return Mantenimiento.find(json)
       .populate('usuarioAlta', 'nombre email')
       .populate('materiales.material', 'tipo')
@@ -71,7 +68,7 @@ module.exports = {
       .exec();
   },
 
-  insertMaterial: (req) => {
+  insertMantenimiento: (req) => {
     var body = req.body.mantenimiento;
     var mantenimiento = new Mantenimiento({
       folio: body.folio,
@@ -92,7 +89,7 @@ module.exports = {
     });
 
     return mantenimiento.save();
-},
+  },
   getMantenimientosConMaterial: (req, res) => {
     const material = req.query.idMaterial;
     const tipoMantenimiento = req.query.tipoMantenimiento || '';
