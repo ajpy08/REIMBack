@@ -25,6 +25,27 @@ app.get('/', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 // ==========================================
+//  Obtener todas las Mermas Aprobadas
+// ==========================================
+
+app.get('/aprobadas/', mdAutenticacion.verificaToken, (req, res) => {
+    const resultMermas = mermasController.consultaMermasAprobadas(req, res);
+    resultMermas.then(mermas => {
+        res.status(200).json({
+            ok: true,
+            mermas,
+            totalRegistros: mermas.length
+        });
+    }).catch(error => {
+        return res.status(500).json({
+            ok: false,
+            mensaje: 'Error cargando mermas',
+            errors: error
+        });
+    });
+});
+
+// ==========================================
 //  Obtener Merma por ID
 // ==========================================
 app.get('/merma/:id', mdAutenticacion.verificaToken, (req, res) => {

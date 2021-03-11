@@ -27,6 +27,29 @@ const { json } = require('body-parser');
 
 app.use(fileUpload());
 
+// =======================================
+// Obtener todos los Mantenimientos
+// =======================================
+
+app.get('', mdAutenticacion.verificaToken, (req, res) => {
+  const mantenimientos = mantenimientosController.getMantenimientos(req, res);
+  mantenimientos.then(mantenimientos => {
+
+    res.status(200).json({
+      ok: true,
+      mantenimientos,
+      totalRegistros: mantenimientos.length
+    });
+  }).catch(error => {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error cargando mantenimientos',
+      errors: error
+    });
+  });
+});
+
 
 // =======================================
 // Obtener unico Mantenimiento por ID
@@ -52,6 +75,25 @@ app.get('/mantenimiento/:id', mdAutenticacion.verificaToken, (req, res) => {
             mensaje: 'Error al cargar el mantenimiento',
             errors: error
         });
+// =======================================
+// Obtener mantenimientos con Material
+// =======================================
+app.get('/:idMaterial/con-material', mdAutenticacion.verificaToken, (req, res) => {
+  const mantenimientos = mantenimientosController.getMantenimientosConMaterial(req, res);
+  mantenimientos.then(mantenimientos => {
+
+    res.status(200).json({
+      ok: true,
+      mantenimientos,
+      totalRegistros: mantenimientos.length
+    });
+  }).catch(error => {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error cargando mantenimientos',
+      errors: error
+
     });
 });
 
