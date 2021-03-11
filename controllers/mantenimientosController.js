@@ -8,7 +8,9 @@ module.exports = {
       .exec();
   },
   getMantenimientos: (req, res) => {
-    const material = req.query.idMaterial;
+
+    const material = req.params ? req.params.idMaterial || '' : '';
+
     const tipoMantenimiento = req.query.tipoMantenimiento || '';
     const maniobra = req.query.maniobra || '';
     const finalizado = req.query.finalizado || '';
@@ -68,6 +70,29 @@ module.exports = {
       })
       .exec();
   },
+
+  insertMaterial: (req) => {
+    var body = req.body.mantenimiento;
+    var mantenimiento = new Mantenimiento({
+      folio: body.folio,
+      maniobra: body.maniobra,
+      tipoMantenimiento: body.tipoMantenimiento,
+      tipoLavado: body.tipoMantenimiento === "LAVADO" ? body.tipoLavado : undefined,
+      cambioGrado: body.tipoMantenimiento === "ACONDICIONAMIENTO" ? body.cambioGrado : undefined,
+      observacionesGenerales: body.observacionesGenerales,
+      izquierdo: body.izquierdo,
+      derecho: body.derecho,
+      frente: body.frente,
+      puerta: body.puerta,
+      piso: body.piso,
+      techo: body.techo,
+      interior: body.interior,
+      fechas: body.fechas,
+      usuarioAlta: req.usuario._id
+    });
+
+    return mantenimiento.save();
+},
   getMantenimientosConMaterial: (req, res) => {
     const material = req.query.idMaterial;
     const tipoMantenimiento = req.query.tipoMantenimiento || '';

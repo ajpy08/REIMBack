@@ -11,9 +11,9 @@ exports.ListaArchivosBucket = (ruta) => {
     };
 
     s3.listObjects(params, (err, data) => {
-      if(err)throw err;
+      if (err) throw err;
       resolve(data.Contents);
-     });
+    });
   });
 };
 
@@ -35,7 +35,7 @@ exports.SubirArchivoBucket = function SubirArchivoBucket(archivo, rutaDestino, n
         ContentType: archivo.mimetype
       };
     }
-    s3.upload(params, function (err, data) {
+    s3.upload(params, function(err, data) {
       if (err) {
         console.log("Error", err);
       }
@@ -55,7 +55,7 @@ exports.CopiarArchivoBucket = (rutaTmp, nameTmp, rutaDestino) => {
       CopySource: entorno.BUCKET + '/' + rutaTmp + nameTmp,
       Key: rutaDestino + nameTmp
     };
-    s3.copyObject(params, function (err, data) {
+    s3.copyObject(params, function(err, data) {
       if (err) {
         console.log(err, err.stack); // an error occurred
       } else {
@@ -86,7 +86,7 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
       CopySource: entorno.BUCKET + '/' + rutaTmp + nameTmp,
       Key: rutaDestino + nameTmp
     };
-    s3.copyObject(params, function (err, data) {
+    s3.copyObject(params, function(err, data) {
       if (err) {
         console.log(err, err.stack); // an error occurred
       } else {
@@ -96,7 +96,7 @@ exports.MoverArchivoBucket = function MoverArchivoBucket(rutaTmp, nameTmp, rutaD
           Bucket: entorno.BUCKET,
           Key: rutaTmp + nameTmp
         };
-        s3.deleteObject(paramsDelete, function (err, data) {
+        s3.deleteObject(paramsDelete, function(err, data) {
           if (err) {
             console.log("Error", err);
           }
@@ -117,7 +117,7 @@ exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
       Bucket: entorno.BUCKET,
       Key: ruta + name
     };
-    s3.deleteObject(paramsDelete, function (err, data) {
+    s3.deleteObject(paramsDelete, function(err, data) {
       if (err) {
         console.log("Error", err);
       }
@@ -128,6 +128,11 @@ exports.BorrarArchivoBucket = function BorrarArchivoBucket(ruta, name) {
   }
 };
 
+
+
+
+
+
 exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
   return new Promise((resolve, reject) => {
     if (key != null && key != undefined && key != '') {
@@ -136,7 +141,8 @@ exports.BorrarArchivoBucketKey = function BorrarArchivoBucketKey(key) {
         Bucket: entorno.BUCKET,
         Key: key
       };
-      s3.deleteObject(paramsDelete, function (err, data) {
+      console.log(paramsDelete);
+      s3.deleteObject(paramsDelete, function(err, data) {
         if (err) {
           console.log("Error", err);
         }
