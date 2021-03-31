@@ -442,9 +442,9 @@ app.get('/facturacion-vacios', mdAutenticacion.verificaToken, (req, res) => {
   var viaje = req.query.viaje || '';
   var peso = req.query.peso || '';
   var lavado = req.query.lavado || '';
-  var reparacion = req.query.reparacion || '';
   var sinFactura = req.query.sinFactura || '';
   var descargados = req.query.descargados || '';
+  var reparacion = req.query.reparacion || '';
   var yaLavados = req.query.yaLavados || '';
 
   var filtro = '{';
@@ -464,11 +464,11 @@ app.get('/facturacion-vacios', mdAutenticacion.verificaToken, (req, res) => {
     filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
   }
 
-  if (reparacion === 'true') {
-    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
-  } else {
-    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
-  }
+  // if (reparacion === 'true') {
+  //   filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  // } else {
+  //   filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+  // }
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
@@ -482,11 +482,11 @@ app.get('/facturacion-vacios', mdAutenticacion.verificaToken, (req, res) => {
     filtro += '\"hDescarga\"' + ': {\"$exists\"' + ': false},';
   }
 
-  if (yaLavados === 'true') {
-    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
-  } else {
-    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
-  }
+  // if (yaLavados === 'true') {
+  //   filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
+  // } else {
+  //   filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
+  // }
 
   if (filtro != '{')
     filtro = filtro.slice(0, -1);
@@ -560,14 +560,14 @@ app.get('/facturacion-maniobras', mdAutenticacion.verificaToken, (req, res) => {
     filtro += '\"lavado\"' + ': {\"$in\": [\"E\", \"B\"]},';
   }
 
-  if (reparacion === 'true') {
-    // filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
-    filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
-  } else {
-    if (reparacion === 'false') {
-      filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
-    }
-  }
+  // if (reparacion === 'true') {
+  //   // filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  //   filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': true, \"$not\": {\"$size\": 0}},';
+  // } else {
+  //   if (reparacion === 'false') {
+  //     filtro += '\"reparaciones.0\"' + ': {\"$exists\"' + ': false, \"$not\": {\"$size\": 0}},';
+  //   }
+  // }
 
   if (sinFactura === 'true') {
     filtro += '\"facturaManiobra\"' + ': {\"$exists\"' + ': false},';
@@ -585,13 +585,13 @@ app.get('/facturacion-maniobras', mdAutenticacion.verificaToken, (req, res) => {
     }
   }
 
-  if (yaLavados === 'true') {
-    filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
-  } else {
-    if (yaLavados === 'false') {
-      filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
-    }
-  }
+  // if (yaLavados === 'true') {
+  //   filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': true},';
+  // } else {
+  //   if (yaLavados === 'false') {
+  //     filtro += '\"hFinLavado\"' + ': {\"$exists\"' + ': false},';
+  //   }
+  // }
 
   if (filtro != '{')
     filtro = filtro.slice(0, -1);

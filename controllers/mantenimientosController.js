@@ -161,162 +161,162 @@ module.exports = {
       })
       .exec();
   },
-  getMantenimientosManiobra: (req, res) => {
+  // getMantenimientosManiobra: (req, res) => {
 
-    // Filtro mantenimientos
-    const material = req.query.idMaterial;
-    const tipoMantenimiento = req.query.tipoMantenimiento || '';
-    const maniobra = req.query.maniobra || '';
-    const finalizado = req.query.finalizado || '';
+  //   // Filtro mantenimientos
+  //   const material = req.query.idMaterial;
+  //   const tipoMantenimiento = req.query.tipoMantenimiento || '';
+  //   const maniobra = req.query.maniobra || '';
+  //   const finalizado = req.query.finalizado || '';
 
-    let filtro = '{';
+  //   let filtro = '{';
 
-    filtro += '\"maniobra\":{\"$exists\":' + '\"true\"' + '},';
+  //   filtro += '\"maniobra\":{\"$exists\":' + '\"true\"' + '},';
 
-    if (material != undefined && material != '') {
-      filtro += '\"materiales.material\":' + '\"' + material + '\",';
-    }
-    if (tipoMantenimiento != 'undefined' && tipoMantenimiento != '')
-      filtro += '\"tipoMantenimiento\":' + '\"' + tipoMantenimiento + '\",';
-    if (maniobra != 'undefined' && maniobra != '')
-      filtro += '\"maniobra\":' + '\"' + maniobra + '\",';
-    if (finalizado != 'undefined' && finalizado != '')
-      if (finalizado !== "TODOS")
-        if (finalizado === "FINALIZADOS") filtro += '\"finalizado\":' + '\"true\",';
-        else filtro += '\"finalizado\":' + '\"false\",';
+  //   if (material != undefined && material != '') {
+  //     filtro += '\"materiales.material\":' + '\"' + material + '\",';
+  //   }
+  //   if (tipoMantenimiento != 'undefined' && tipoMantenimiento != '')
+  //     filtro += '\"tipoMantenimiento\":' + '\"' + tipoMantenimiento + '\",';
+  //   if (maniobra != 'undefined' && maniobra != '')
+  //     filtro += '\"maniobra\":' + '\"' + maniobra + '\",';
+  //   if (finalizado != 'undefined' && finalizado != '')
+  //     if (finalizado !== "TODOS")
+  //       if (finalizado === "FINALIZADOS") filtro += '\"finalizado\":' + '\"true\",';
+  //       else filtro += '\"finalizado\":' + '\"false\",';
 
-    if (filtro != '{')
-      filtro = filtro.slice(0, -1);
-    filtro = filtro + '}';
-    const json = JSON.parse(filtro);
+  //   if (filtro != '{')
+  //     filtro = filtro.slice(0, -1);
+  //   filtro = filtro + '}';
+  //   const json = JSON.parse(filtro);
 
-    // Filtro de maniobras
-    const cargaDescarga = req.query.cargaDescarga || '';
-    const viaje = req.query.viaje || '';
-    const peso = req.query.peso || '';
-    const sinFactura = req.query.sinFactura || '';
-    const descargados = req.query.descargados || '';
+  //   // Filtro de maniobras
+  //   const cargaDescarga = req.query.cargaDescarga || '';
+  //   const viaje = req.query.viaje || '';
+  //   const peso = req.query.peso || '';
+  //   const sinFactura = req.query.sinFactura || '';
+  //   const descargados = req.query.descargados || '';
 
-    // if (viaje != 'undefined' && viaje != '')
-    //   filtro2 += '\"maniobra.viaje\":' + '\"' + viaje + '\",';
+  //   // if (viaje != 'undefined' && viaje != '')
+  //   //   filtro2 += '\"maniobra.viaje\":' + '\"' + viaje + '\",';
 
-    // // peso = peso.replace(/,/g, '\",\"');
+  //   // // peso = peso.replace(/,/g, '\",\"');
 
-    // if (peso != 'undefined' && peso != '')
-    //   filtro2 += '\"maniobra.peso\":' + '\"' + peso + '\",';
+  //   // if (peso != 'undefined' && peso != '')
+  //   //   filtro2 += '\"maniobra.peso\":' + '\"' + peso + '\",';
 
-    // if (sinFactura !== '') {
-    //   if (sinFactura === 'true') {
-    //     filtro2 += '\"maniobra.facturaManiobra\"' + ': {\"$exists\"' + ': false},';
-    //   } else {
-    //     filtro2 += '\"maniobra.facturaManiobra\"' + ': {\"$exists\"' + ': true},';
-    //   }
-    // }
+  //   // if (sinFactura !== '') {
+  //   //   if (sinFactura === 'true') {
+  //   //     filtro2 += '\"maniobra.facturaManiobra\"' + ': {\"$exists\"' + ': false},';
+  //   //   } else {
+  //   //     filtro2 += '\"maniobra.facturaManiobra\"' + ': {\"$exists\"' + ': true},';
+  //   //   }
+  //   // }
 
-    // if (descargados !== '') {
-    //   if (descargados === 'true') {
-    //     filtro2 += '\"maniobra.hDescarga\"' + ': {\"$exists\"' + ': true},';
-    //   } else {
-    //     filtro2 += '\"maniobra.hDescarga\"' + ': {\"$exists\"' + ': false},';
-    //   }
-    // }
+  //   // if (descargados !== '') {
+  //   //   if (descargados === 'true') {
+  //   //     filtro2 += '\"maniobra.hDescarga\"' + ': {\"$exists\"' + ': true},';
+  //   //   } else {
+  //   //     filtro2 += '\"maniobra.hDescarga\"' + ': {\"$exists\"' + ': false},';
+  //   //   }
+  //   // }
 
-    //Sirve para el populate de abajo
-    let filtro2 = '{';
+  //   //Sirve para el populate de abajo
+  //   let filtro2 = '{';
 
-    if (cargaDescarga != 'undefined' && cargaDescarga != '') {
-      filtro2 += '\"cargaDescarga\":' + '\"' + cargaDescarga + '\",';
-    } 
+  //   if (cargaDescarga != 'undefined' && cargaDescarga != '') {
+  //     filtro2 += '\"cargaDescarga\":' + '\"' + cargaDescarga + '\",';
+  //   } 
 
-    //Sirve para el populate de abajo
-    if (filtro2 != '{')
-      filtro2 = filtro2.slice(0, -1);
-    filtro2 = filtro2 + '}';
-    const json2 = JSON.parse(filtro2);
+  //   //Sirve para el populate de abajo
+  //   if (filtro2 != '{')
+  //     filtro2 = filtro2.slice(0, -1);
+  //   filtro2 = filtro2 + '}';
+  //   const json2 = JSON.parse(filtro2);
 
-    return Mantenimiento.find(json)
-      .populate('usuarioAlta', 'nombre email')
-      .populate('materiales.material', 'tipo')
-      .populate({
-        path: 'maniobra',
-        select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-        match: json2
-        // populate: {
-        //   path: 'viaje',
-        //   select: 'viaje',
+  //   return Mantenimiento.find(json)
+  //     .populate('usuarioAlta', 'nombre email')
+  //     .populate('materiales.material', 'tipo')
+  //     .populate({
+  //       path: 'maniobra',
+  //       select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //       match: json2
+  //       // populate: {
+  //       //   path: 'viaje',
+  //       //   select: 'viaje',
 
-        //   // populate: {
-        //   //   path: 'buque',
-        //   //   select: 'nombre'
-        //   // }
-        // }
-      })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'viaje',
-      //     select: 'viaje',
+  //       //   // populate: {
+  //       //   //   path: 'buque',
+  //       //   //   select: 'nombre'
+  //       //   // }
+  //       // }
+  //     })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'viaje',
+  //     //     select: 'viaje',
 
-      //     populate: {
-      //       path: 'naviera',
-      //       select: 'nombreComercial'
-      //     }
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'transportista',
-      //     select: 'rfc razonSocial nombreComercial',
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'operador',
-      //     select: 'nombre'
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'camion',
-      //     select: 'placa noEconomico',
+  //     //     populate: {
+  //     //       path: 'naviera',
+  //     //       select: 'nombreComercial'
+  //     //     }
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'transportista',
+  //     //     select: 'rfc razonSocial nombreComercial',
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'operador',
+  //     //     select: 'nombre'
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'camion',
+  //     //     select: 'placa noEconomico',
 
-      //     populate: {
-      //       path: 'solicitud',
-      //       select: 'viaje blBooking'
-      //     }
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'solicitud',
-      //     select: 'viaje blBooking'
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'cliente',
-      //     select: 'rfc razonSocial nombreComercial',
-      //   },
-      // })
-      // .populate({
-      //   path: 'maniobra',
-      //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
-      //   populate: {
-      //     path: 'agencia',
-      //     select: 'rfc razonSocial nombreComercial',
-      //   },
-      // })
-      .exec();
-  }
+  //     //     populate: {
+  //     //       path: 'solicitud',
+  //     //       select: 'viaje blBooking'
+  //     //     }
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'solicitud',
+  //     //     select: 'viaje blBooking'
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'cliente',
+  //     //     select: 'rfc razonSocial nombreComercial',
+  //     //   },
+  //     // })
+  //     // .populate({
+  //     //   path: 'maniobra',
+  //     //   select: 'contenedor cargaDescarga tipo peso fLlegada grado facturaManiobra estatus hDescarga fAlta',
+  //     //   populate: {
+  //     //     path: 'agencia',
+  //     //     select: 'rfc razonSocial nombreComercial',
+  //     //   },
+  //     // })
+  //     .exec();
+  // }
 }

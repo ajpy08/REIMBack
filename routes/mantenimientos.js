@@ -94,27 +94,27 @@ app.get('/:idMaterial/con-material', mdAutenticacion.verificaToken, (req, res) =
 	});
 });
 
-// =======================================
-// Obtener mantenimientos con filtros de maniobra
-// =======================================
-app.get('/maniobra/vacios', mdAutenticacion.verificaToken, (req, res) => {
-	const mantenimientos = mantenimientosController.getMantenimientosManiobra(req, res);
-	mantenimientos.then(mantenimientos => {
-		res.status(200).json({
-			ok: true,
-			mantenimientos,
-			totalRegistros: mantenimientos.length
-		});
-	}).catch(error => {
-		console.log(error);
-		return res.status(500).json({
-			ok: false,
-			mensaje: 'Error cargando mantenimientos',
-			errors: error
+// // =======================================
+// // Obtener mantenimientos con filtros de maniobra
+// // =======================================
+// app.get('/maniobra/vacios', mdAutenticacion.verificaToken, (req, res) => {
+// 	const mantenimientos = mantenimientosController.getMantenimientosManiobra(req, res);
+// 	mantenimientos.then(mantenimientos => {
+// 		res.status(200).json({
+// 			ok: true,
+// 			mantenimientos,
+// 			totalRegistros: mantenimientos.length
+// 		});
+// 	}).catch(error => {
+// 		console.log(error);
+// 		return res.status(500).json({
+// 			ok: false,
+// 			mensaje: 'Error cargando mantenimientos',
+// 			errors: error
 
-		});
-	});
-});
+// 		});
+// 	});
+// });
 
 // =======================================
 // Obtener lista de mantenimientos
