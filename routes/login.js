@@ -364,6 +364,14 @@ function obtenerMenu(ROLE) {
     menu[0].submenu.unshift({ titulo: 'Maniobras Diario', url: '/maniobras_diario' });
     menu[0].submenu.unshift({ titulo: 'Maniobras Patio', url: '/maniobras' });
     menu[0].submenu.unshift({ titulo: 'Reportes', url: '/reportes' });
+
+    menu[6].submenu.unshift({ titulo: 'Reporte de Movimientos', url: '/reporte-movimientos' });
+    menu[6].submenu.unshift({ titulo: 'Faltante de Materiales', url: '/faltante-material' });
+    menu[6].submenu.unshift({ titulo: 'Inventario de Materiales', url: '/inventario-material' });
+    menu[6].submenu.unshift({ titulo: 'Mermas', url: '/mermas' });
+    menu[6].submenu.unshift({ titulo: 'Entradas Material', url: '/entradas' });
+    menu[6].submenu.unshift({ titulo: 'Catálogo de Materiales', url: '/materiales' });
+    menu[6].submenu.unshift({ titulo: 'Catálogo de Proveedores', url: '/proveedores' });
     return menu;
   }
 
